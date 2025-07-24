@@ -61,7 +61,30 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Cores temáticas Naruto para rankings
+				ninja: {
+					kage: 'hsl(var(--kage-gold))',
+					sannin: 'hsl(var(--sannin-purple))',
+					anbu: 'hsl(var(--anbu-red))',
+					jounin: 'hsl(var(--jounin-blue))',
+					chunin: 'hsl(var(--chunin-green))',
+					genin: 'hsl(var(--genin-gray))'
 				}
+			},
+			backgroundImage: {
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-card': 'var(--gradient-card)',
+				'gradient-kage': 'var(--gradient-kage)'
+			},
+			boxShadow: {
+				'ninja': 'var(--shadow-ninja)',
+				'chakra': 'var(--shadow-chakra)',
+				'card': 'var(--shadow-card)'
+			},
+			fontFamily: {
+				'ninja': ['Orbitron', 'sans-serif'],
+				'body': ['Inter', 'sans-serif']
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
