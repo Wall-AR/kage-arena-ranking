@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,17 +9,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Target, Flame, Shield, User, Settings, Star, Swords } from "lucide-react";
+import { Trophy, Target, Flame, Shield, User, Settings, Star, Swords, Users } from "lucide-react";
 import Navigation from "@/components/ui/navigation";
+import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { SkillsRadarChart } from "@/components/profile/SkillsRadarChart";
+import { EvaluationRequest } from "@/components/profile/EvaluationRequest";
+import { usePlayerProfile } from "@/hooks/usePlayerProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 // Perfil do Jogador - Kage Arena
 // Criado por Wall - Sistema completo de perfil com gráfico radar e configurações
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { toast } = useToast();
 
-  // Mock data - futuramente virá do backend
-  const player = {
+  // Mock data para desenvolvimento - será substituído pelos dados reais
+  const mockPlayer = {
     id: 1,
     name: "Wall",
     rank: "Kage",
@@ -58,16 +66,74 @@ const Profile = () => {
     ]
   };
 
+  // Hook para buscar dados do jogador
+  const { data: playerData, isLoading } = usePlayerProfile(currentUser?.id);
+  
+  // Transformar dados do Supabase para formato esperado
+  const transformPlayerData = (data: any) => {
+    if (!data) return mockPlayer;
+    
+    const latestEvaluation = data.evaluations?.[0];
+    const winRate = data.wins + data.losses > 0 ? (data.wins / (data.wins + data.losses)) * 100 : 0;
+    
+    return {
+      ...data,
+      winRate: parseFloat(winRate.toFixed(1)),
+      winStreak: data.win_streak || 0,
+      ninjaPhrase: data.ninja_phrase || "Esse é o meu jeito ninja de ser!",
+      isRanked: data.is_ranked || false,
+      favoriteCharacters: Array.isArray(data.favorite_characters) ? data.favorite_characters : ["Naruto Uzumaki", "Sasuke Uchiha"],
+      achievements: data.is_ranked ? ["champion", "veteran"] : [],
+      recentMatches: [],
+      avatar: data.avatar_url,
+      evaluation: latestEvaluation ? {
+        pin: latestEvaluation.pin_score || 0,
+        defense: latestEvaluation.defense_score || 0, 
+        aerial: latestEvaluation.aerial_score || 0,
+        kunai: latestEvaluation.kunai_score || 0,
+        timing: latestEvaluation.timing_score || 0,
+        resource: latestEvaluation.resource_score || 0,
+        dash: latestEvaluation.dash_score || 0,
+        general: latestEvaluation.general_score || 0,
+        tips: latestEvaluation.tips || "",
+        evaluatedBy: latestEvaluation.evaluator?.name || "",
+        evaluatedAt: latestEvaluation.evaluated_at || ""
+      } : null,
+      tutor: latestEvaluation?.evaluator ? {
+        name: latestEvaluation.evaluator.name || "",
+        avatar: latestEvaluation.evaluator.avatar_url || "",
+        phrase: latestEvaluation.evaluator.ninja_phrase || ""
+      } : null
+    };
+  };
+  
+  // Usar dados reais se disponível, senão usar mock
+  const player = transformPlayerData(playerData);
+
+  useEffect(() => {
+    // Verificar usuário logado
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUser(user);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setCurrentUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Gráfico Radar - 8 habilidades
   const skills = [
-    { name: "Pin", value: player.evaluation.pin, angle: 0 },
-    { name: "Kawarime", value: player.evaluation.defense, angle: 45 },
-    { name: "Jogo Aéreo", value: player.evaluation.aerial, angle: 90 },
-    { name: "Kunai", value: player.evaluation.kunai, angle: 135 },
-    { name: "Timing", value: player.evaluation.timing, angle: 180 },
-    { name: "Recursos", value: player.evaluation.resource, angle: 225 },
-    { name: "Dash", value: player.evaluation.dash, angle: 270 },
-    { name: "Malícia", value: player.evaluation.general, angle: 315 }
+    { name: "Pin", value: player.evaluation?.pin || 0, angle: 0 },
+    { name: "Kawarime", value: player.evaluation?.defense || 0, angle: 45 },
+    { name: "Jogo Aéreo", value: player.evaluation?.aerial || 0, angle: 90 },
+    { name: "Kunai", value: player.evaluation?.kunai || 0, angle: 135 },
+    { name: "Timing", value: player.evaluation?.timing || 0, angle: 180 },
+    { name: "Recursos", value: player.evaluation?.resource || 0, angle: 225 },
+    { name: "Dash", value: player.evaluation?.dash || 0, angle: 270 },
+    { name: "Malícia", value: player.evaluation?.general || 0, angle: 315 }
   ];
 
   const getRankColor = (rank: string) => {
@@ -94,68 +160,45 @@ const Profile = () => {
 
   const rankColor = getRankColor(player.rank);
 
+  const handleRequestEvaluation = () => {
+    if (!currentUser) {
+      toast({
+        title: "Login necessário",
+        description: "Você precisa estar logado para solicitar uma avaliação.",
+        variant: "destructive"
+      });
+      return;
+    }
+    // A lógica está no componente EvaluationRequest
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Carregando perfil...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       
       <div className="container mx-auto px-4 py-8">
         {/* Header do Perfil */}
-        <div className="bg-gradient-card rounded-xl p-8 border border-border/50 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <Avatar className={cn(
-                "w-24 h-24 ring-4 transition-all duration-300",
-                `ring-${rankColor}/60`
-              )}>
-                <AvatarImage src={player.avatar} alt={player.name} />
-                <AvatarFallback className={cn(
-                  "text-2xl font-bold",
-                  `bg-${rankColor}/20 text-${rankColor}`
-                )}>
-                  {player.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-
-              <div>
-                <h1 className="font-ninja text-3xl font-bold text-foreground mb-2">
-                  {player.name}
-                </h1>
-                <Badge variant="secondary" className={cn(
-                  "text-lg px-4 py-2 font-bold mb-3",
-                  `bg-${rankColor}/20 text-${rankColor} border-${rankColor}/30`
-                )}>
-                  {player.rank}
-                </Badge>
-                <p className="text-muted-foreground italic">
-                  "{player.ninjaPhrase}"
-                </p>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <div className="text-4xl font-ninja font-bold text-accent mb-1">
-                {player.points}
-              </div>
-              <div className="text-sm text-muted-foreground">pontos</div>
-            </div>
-          </div>
-
-          {/* Conquistas */}
-          <div className="flex items-center space-x-2 mt-6">
-            <span className="text-sm text-muted-foreground mr-2">Conquistas:</span>
-            {player.achievements.map((achievement, index) => {
-              const Icon = getAchievementIcon(achievement);
-              return (
-                <div key={index} className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center",
-                  `bg-${rankColor}/20 text-${rankColor}`
-                )}>
-                  <Icon className="w-4 h-4" />
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <ProfileHeader 
+          player={player} 
+          rankColor={rankColor}
+          onRequestEvaluation={handleRequestEvaluation}
+        />
 
         {/* Abas do Perfil */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -205,130 +248,90 @@ const Profile = () => {
               </Card>
 
               {/* Gráfico Radar de Habilidades */}
-              <Card>
+              <Card className="overflow-hidden">
                 <CardHeader>
-                  <CardTitle>Habilidades Avaliadas</CardTitle>
+                  <CardTitle className="flex items-center">
+                    <Target className="w-5 h-5 mr-2 text-accent" />
+                    Habilidades Avaliadas
+                  </CardTitle>
                   <CardDescription>Gráfico radar das 8 habilidades principais</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="relative w-full h-64 flex items-center justify-center">
-                    <svg width="240" height="240" className="transform -rotate-90">
-                      {/* Grid do radar */}
-                      {[2, 4, 6, 8, 10].map((level) => (
-                        <circle
-                          key={level}
-                          cx="120"
-                          cy="120"
-                          r={level * 10}
-                          fill="none"
-                          stroke="hsl(var(--border))"
-                          strokeWidth="1"
-                          opacity="0.3"
-                        />
-                      ))}
-                      
-                      {/* Linhas dos eixos */}
-                      {skills.map((skill, index) => {
-                        const angle = (skill.angle * Math.PI) / 180;
-                        const x = 120 + Math.cos(angle) * 100;
-                        const y = 120 + Math.sin(angle) * 100;
-                        return (
-                          <line
-                            key={index}
-                            x1="120"
-                            y1="120"
-                            x2={x}
-                            y2={y}
-                            stroke="hsl(var(--border))"
-                            strokeWidth="1"
-                            opacity="0.3"
-                          />
-                        );
-                      })}
-
-                      {/* Polígono das habilidades */}
-                      <polygon
-                        points={skills.map(skill => {
-                          const angle = (skill.angle * Math.PI) / 180;
-                          const radius = (skill.value / 10) * 100;
-                          const x = 120 + Math.cos(angle) * radius;
-                          const y = 120 + Math.sin(angle) * radius;
-                          return `${x},${y}`;
-                        }).join(' ')}
-                        fill={`hsl(var(--${rankColor}) / 0.3)`}
-                        stroke={`hsl(var(--${rankColor}))`}
-                        strokeWidth="2"
-                      />
-
-                      {/* Pontos das habilidades */}
-                      {skills.map((skill, index) => {
-                        const angle = (skill.angle * Math.PI) / 180;
-                        const radius = (skill.value / 10) * 100;
-                        const x = 120 + Math.cos(angle) * radius;
-                        const y = 120 + Math.sin(angle) * radius;
-                        return (
-                          <circle
-                            key={index}
-                            cx={x}
-                            cy={y}
-                            r="4"
-                            fill={`hsl(var(--${rankColor}))`}
-                          />
-                        );
-                      })}
-                    </svg>
-
-                    {/* Labels das habilidades */}
-                    {skills.map((skill, index) => {
-                      const angle = (skill.angle * Math.PI) / 180;
-                      const x = 120 + Math.cos(angle) * 130;
-                      const y = 120 + Math.sin(angle) * 130;
-                      
-                      return (
-                        <div
-                          key={index}
-                          className="absolute text-xs font-semibold text-center"
-                          style={{
-                            left: `${x - 25}px`,
-                            top: `${y - 10}px`,
-                            width: '50px'
-                          }}
-                        >
-                          {skill.name}
-                          <div className="text-accent font-bold">{skill.value.toFixed(1)}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  {player.isRanked ? (
+                    <SkillsRadarChart 
+                      skills={skills} 
+                      rankColor={rankColor}
+                      className="transition-all duration-500"
+                    />
+                  ) : (
+                    <div className="relative h-64 flex items-center justify-center">
+                      <div className="text-center text-muted-foreground">
+                        <Shield className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                        <p className="font-semibold">Habilidades Ocultas</p>
+                        <p className="text-sm">Solicite uma avaliação para revelar suas habilidades</p>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
 
             {/* Avaliação e Tutor */}
-            {player.tutor && (
-              <Card>
+            {player.isRanked && player.tutor && (
+              <Card className="border-accent/20 bg-gradient-to-br from-card to-accent/5">
                 <CardHeader>
-                  <CardTitle>Avaliação e Tutoria</CardTitle>
+                  <CardTitle className="flex items-center">
+                    <Users className="w-5 h-5 mr-2 text-accent" />
+                    Avaliação e Tutoria
+                  </CardTitle>
                   <CardDescription>Resultado da avaliação oficial e informações do tutor</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="bg-muted/30 rounded-lg p-4">
+                  <div className="bg-muted/30 rounded-lg p-4 border border-accent/10">
                     <p className="text-sm leading-relaxed mb-4">
                       {player.evaluation.tips}
                     </p>
                     
                     <div className="flex items-center space-x-3 pt-4 border-t border-border">
-                      <Avatar className="w-10 h-10">
+                      <Avatar className="w-10 h-10 ring-2 ring-accent/30">
                         <AvatarImage src={player.tutor.avatar} alt={player.tutor.name} />
-                        <AvatarFallback>{player.tutor.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="bg-accent/20 text-accent">{player.tutor.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-semibold text-sm">{player.tutor.name}</div>
+                        <div className="font-semibold text-sm text-accent">{player.tutor.name}</div>
                         <div className="text-xs text-muted-foreground italic">
                           "{player.tutor.phrase}"
                         </div>
                       </div>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Solicitar Avaliação para não rankeados */}
+            {!player.isRanked && currentUser && (
+              <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Star className="w-5 h-5 mr-2 text-primary" />
+                    Ingressar no Ranking
+                  </CardTitle>
+                  <CardDescription>
+                    Solicite uma avaliação para ingressar no ranking oficial e revelar seu verdadeiro potencial ninja
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-4">
+                    <EvaluationRequest 
+                      playerId={playerData?.id || ""}
+                      onRequestSent={() => {
+                        toast({
+                          title: "Solicitação enviada!",
+                          description: "Os moderadores foram notificados e entrarão em contato em breve.",
+                        });
+                      }}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -355,15 +358,19 @@ const Profile = () => {
                 <CardHeader>
                   <CardTitle>Personagens Favoritos</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  {player.favoriteCharacters.map((character, index) => (
+                 <CardContent className="space-y-3">
+                  {player.favoriteCharacters?.map((character, index) => (
                     <div key={index} className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-sm font-bold">
-                        {character.charAt(0)}
+                        {typeof character === 'string' ? character.charAt(0) : '?'}
                       </div>
-                      <span className="text-sm">{character}</span>
+                      <span className="text-sm">{typeof character === 'string' ? character : 'Personagem'}</span>
                     </div>
-                  ))}
+                  )) || (
+                    <div className="text-center text-muted-foreground py-4">
+                      <p>Nenhum personagem favorito definido</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -388,24 +395,29 @@ const Profile = () => {
               <CardHeader>
                 <CardTitle>Partidas Recentes</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {player.recentMatches.map((match, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Badge variant={match.result === "win" ? "default" : "destructive"}>
-                          {match.result === "win" ? "Vitória" : "Derrota"}
-                        </Badge>
-                        <span className="font-medium">vs {match.opponent}</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold">{match.score}</div>
-                        <div className="text-sm text-muted-foreground">{match.date}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
+               <CardContent>
+                 <div className="space-y-3">
+                   {player.recentMatches?.length > 0 ? player.recentMatches.map((match, index) => (
+                     <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                       <div className="flex items-center space-x-3">
+                         <Badge variant={match.result === "win" ? "default" : "destructive"}>
+                           {match.result === "win" ? "Vitória" : "Derrota"}
+                         </Badge>
+                         <span className="font-medium">vs {match.opponent}</span>
+                       </div>
+                       <div className="text-right">
+                         <div className="font-bold">{match.score}</div>
+                         <div className="text-sm text-muted-foreground">{match.date}</div>
+                       </div>
+                     </div>
+                   )) : (
+                     <div className="text-center text-muted-foreground py-8">
+                       <p>Nenhuma partida registrada ainda</p>
+                       <p className="text-sm mt-2">Suas partidas aparecerão aqui quando você começar a jogar</p>
+                     </div>
+                   )}
+                 </div>
+               </CardContent>
             </Card>
           </TabsContent>
 
@@ -500,27 +512,27 @@ const Profile = () => {
                 </CardContent>
               </Card>
 
-              {!player.isRanked && (
-                <Card>
+              {!player.isRanked && currentUser && (
+                <Card className="border-primary/20">
                   <CardHeader>
-                    <CardTitle>Solicitar Avaliação</CardTitle>
+                    <CardTitle className="flex items-center">
+                      <Star className="w-5 h-5 mr-2 text-primary" />
+                      Solicitar Avaliação
+                    </CardTitle>
                     <CardDescription>
                       Solicite uma avaliação para ingressar no ranking oficial
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="request">Mensagem para os avaliadores</Label>
-                      <Textarea 
-                        id="request"
-                        placeholder="Conte um pouco sobre sua experiência e por que quer ser avaliado..."
-                        rows={4}
-                      />
-                    </div>
-                    <Button className="w-full">
-                      <Star className="w-4 h-4 mr-2" />
-                      Solicitar Avaliação
-                    </Button>
+                  <CardContent>
+                    <EvaluationRequest 
+                      playerId={playerData?.id || ""}
+                      onRequestSent={() => {
+                        toast({
+                          title: "Solicitação enviada!",
+                          description: "Os moderadores foram notificados.",
+                        });
+                      }}
+                    />
                   </CardContent>
                 </Card>
               )}
