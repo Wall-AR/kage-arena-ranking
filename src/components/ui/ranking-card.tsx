@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Swords, User, MessageCircle, Shield, Flame, Trophy, Target } from "lucide-react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface RankingCardProps {
@@ -188,8 +189,15 @@ const RankingCard = ({ player }: RankingCardProps) => {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-secondary/30 hover:border-secondary hover:bg-secondary/10">
-                    <User className="w-4 h-4" />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-secondary/30 hover:border-secondary hover:bg-secondary/10"
+                    asChild
+                  >
+                    <Link to="/profile">
+                      <User className="w-4 h-4" />
+                    </Link>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

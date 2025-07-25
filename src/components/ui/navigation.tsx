@@ -98,19 +98,21 @@ const Navigation = ({ currentPage }: NavigationProps) => {
           )}
 
           {/* Avatar e Info do Usuário */}
-          <div className="flex items-center space-x-3 border-l border-border pl-4">
-            <div className="text-right hidden sm:block">
-              <div className="font-medium text-sm text-foreground">{currentUser.name}</div>
-              <div className="text-xs text-ninja-kage font-semibold">{currentUser.rank}</div>
+          <Link to="/profile">
+            <div className="flex items-center space-x-3 border-l border-border pl-4 cursor-pointer hover:bg-muted/30 rounded-lg p-2 transition-all duration-200">
+              <div className="text-right hidden sm:block">
+                <div className="font-medium text-sm text-foreground">{currentUser.name}</div>
+                <div className="text-xs text-ninja-kage font-semibold">{currentUser.rank}</div>
+              </div>
+              
+              <Avatar className="w-10 h-10 ring-2 ring-ninja-kage/30 hover:ring-ninja-kage/60 transition-all duration-200">
+                <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
+                <AvatarFallback className="bg-gradient-kage text-background font-bold">
+                  {currentUser.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
             </div>
-            
-            <Avatar className="w-10 h-10 ring-2 ring-ninja-kage/30">
-              <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-              <AvatarFallback className="bg-gradient-kage text-background font-bold">
-                {currentUser.name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          </Link>
         </div>
       </div>
     </nav>
