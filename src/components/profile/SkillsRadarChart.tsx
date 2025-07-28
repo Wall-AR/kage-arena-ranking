@@ -14,15 +14,15 @@ interface SkillsRadarChartProps {
 
 export const SkillsRadarChart = ({ skills, rankColor, className }: SkillsRadarChartProps) => {
   return (
-    <div className={cn("relative w-full h-64 flex items-center justify-center", className)}>
-      <svg width="240" height="240" className="transform -rotate-90">
+    <div className={cn("relative w-full h-80 flex items-center justify-center", className)}>
+      <svg width="280" height="280" viewBox="0 0 280 280" className="transform -rotate-90">
         {/* Grid do radar */}
         {[2, 4, 6, 8, 10].map((level) => (
           <circle
             key={level}
-            cx="120"
-            cy="120"
-            r={level * 10}
+            cx="140"
+            cy="140"
+            r={level * 12}
             fill="none"
             stroke="hsl(var(--border))"
             strokeWidth="1"
@@ -33,13 +33,13 @@ export const SkillsRadarChart = ({ skills, rankColor, className }: SkillsRadarCh
         {/* Linhas dos eixos */}
         {skills.map((skill, index) => {
           const angle = (skill.angle * Math.PI) / 180;
-          const x = 120 + Math.cos(angle) * 100;
-          const y = 120 + Math.sin(angle) * 100;
+          const x = 140 + Math.cos(angle) * 120;
+          const y = 140 + Math.sin(angle) * 120;
           return (
             <line
               key={index}
-              x1="120"
-              y1="120"
+              x1="140"
+              y1="140"
               x2={x}
               y2={y}
               stroke="hsl(var(--border))"
@@ -53,9 +53,9 @@ export const SkillsRadarChart = ({ skills, rankColor, className }: SkillsRadarCh
         <polygon
           points={skills.map(skill => {
             const angle = (skill.angle * Math.PI) / 180;
-            const radius = (skill.value / 10) * 100;
-            const x = 120 + Math.cos(angle) * radius;
-            const y = 120 + Math.sin(angle) * radius;
+            const radius = (skill.value / 10) * 120;
+            const x = 140 + Math.cos(angle) * radius;
+            const y = 140 + Math.sin(angle) * radius;
             return `${x},${y}`;
           }).join(' ')}
           fill={`hsl(var(--${rankColor}) / 0.3)`}
@@ -67,9 +67,9 @@ export const SkillsRadarChart = ({ skills, rankColor, className }: SkillsRadarCh
         {/* Pontos das habilidades */}
         {skills.map((skill, index) => {
           const angle = (skill.angle * Math.PI) / 180;
-          const radius = (skill.value / 10) * 100;
-          const x = 120 + Math.cos(angle) * radius;
-          const y = 120 + Math.sin(angle) * radius;
+          const radius = (skill.value / 10) * 120;
+          const x = 140 + Math.cos(angle) * radius;
+          const y = 140 + Math.sin(angle) * radius;
           return (
             <circle
               key={index}
@@ -86,8 +86,8 @@ export const SkillsRadarChart = ({ skills, rankColor, className }: SkillsRadarCh
       {/* Labels das habilidades */}
       {skills.map((skill, index) => {
         const angle = (skill.angle * Math.PI) / 180;
-        const x = 120 + Math.cos(angle) * 130;
-        const y = 120 + Math.sin(angle) * 130;
+        const x = 140 + Math.cos(angle) * 150;
+        const y = 140 + Math.sin(angle) * 150;
         
         return (
           <div

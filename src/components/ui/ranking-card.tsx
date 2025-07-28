@@ -195,7 +195,7 @@ const RankingCard = ({ player }: RankingCardProps) => {
                     className="border-secondary/30 hover:border-secondary hover:bg-secondary/10"
                     asChild
                   >
-                    <Link to="/profile">
+                    <Link to={`/profile/${player.id}`}>
                       <User className="w-4 h-4" />
                     </Link>
                   </Button>
