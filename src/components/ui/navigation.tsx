@@ -5,6 +5,7 @@ import { Bell, Trophy, Swords, Users, BookOpen, MessageCircle, User, Settings, L
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 
 interface NavigationProps {
   currentPage?: string;
@@ -16,7 +17,9 @@ const Navigation = ({ currentPage }: NavigationProps) => {
   const location = useLocation();
   const currentPath = currentPage || location.pathname;
   const { user, signOut } = useAuth();
-  const navItems = [
+  const { data: currentPlayer } = usePlayerProfile(user?.id);
+  
+  const baseNavItems = [
     { id: "home", label: "Home", icon: Trophy, href: "/" },
     { id: "ranking", label: "Ranking", icon: Trophy, href: "/ranking" },
     { id: "challenges", label: "Desafios", icon: Swords, href: "/challenges" },
@@ -25,12 +28,17 @@ const Navigation = ({ currentPage }: NavigationProps) => {
     { id: "forum", label: "Fórum", icon: MessageCircle, href: "/forum" },
   ];
 
+  // Adicionar "Avaliações" apenas para moderadores
+  const navItems = currentPlayer?.is_moderator 
+    ? [...baseNavItems, { id: "evaluations", label: "Avaliações", icon: Settings, href: "/evaluations" }]
+    : baseNavItems;
+
   // Dados do usuário logado
-  const currentUser = user ? {
-    name: user.user_metadata?.name || "Ninja",
-    rank: "Kage",
-    avatar: "/placeholder.svg",
-    isModerator: true,
+  const currentUser = user && currentPlayer ? {
+    name: currentPlayer.name || user.user_metadata?.name || "Ninja",
+    rank: currentPlayer.rank || "Unranked",
+    avatar: currentPlayer.avatar_url || "/placeholder.svg",
+    isModerator: currentPlayer.is_moderator,
     notifications: 3
   } : null;
 
