@@ -34,11 +34,11 @@ const Navigation = ({ currentPage }: NavigationProps) => {
     : baseNavItems;
 
   // Dados do usuário logado
-  const currentUser = user && currentPlayer ? {
-    name: currentPlayer.name || user.user_metadata?.name || "Ninja",
-    rank: currentPlayer.rank || "Unranked",
-    avatar: currentPlayer.avatar_url || "/placeholder.svg",
-    isModerator: currentPlayer.is_moderator,
+  const currentUser = user ? {
+    name: currentPlayer?.name || user.user_metadata?.name || "Ninja",
+    rank: currentPlayer?.rank || "Unranked",
+    avatar: currentPlayer?.avatar_url || "/placeholder.svg",
+    isModerator: currentPlayer?.is_moderator || false,
     notifications: 3
   } : null;
 
