@@ -18,6 +18,7 @@ import Navigation from "@/components/ui/navigation";
 import { SkillsRadarChart } from "@/components/profile/SkillsRadarChart";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { EvaluationRequest } from "@/components/profile/EvaluationRequest";
+import StudentsTab from "@/components/profile/StudentsTab";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { cn } from "@/lib/utils";
 
@@ -166,10 +167,11 @@ export default function Profile() {
 
         {/* Conteúdo Principal */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={`grid w-full ${isOwnProfile && playerData?.is_moderator ? 'grid-cols-5' : 'grid-cols-4'}`}>
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="stats">Estatísticas</TabsTrigger>
             <TabsTrigger value="history">Histórico</TabsTrigger>
+            {isOwnProfile && playerData?.is_moderator && <TabsTrigger value="students">Alunos</TabsTrigger>}
             {isOwnProfile && <TabsTrigger value="settings">Configurações</TabsTrigger>}
           </TabsList>
 
@@ -374,6 +376,13 @@ export default function Profile() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Aba: Alunos (apenas para moderadores) */}
+          {isOwnProfile && playerData?.is_moderator && (
+            <TabsContent value="students" className="space-y-6">
+              <StudentsTab evaluatorId={playerData.id} />
+            </TabsContent>
+          )}
 
           {/* Aba: Configurações (apenas para próprio perfil) */}
           {isOwnProfile && (

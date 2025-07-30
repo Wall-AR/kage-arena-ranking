@@ -53,6 +53,45 @@ export const useEvaluations = () => {
     }
   });
 
+  const { data: acceptedEvaluations = [], isLoading: loadingAccepted } = useQuery({
+    queryKey: ['accepted-evaluations'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      
+      const { data: currentPlayer } = await supabase
+        .from('players')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (!currentPlayer) return [];
+
+      const { data, error } = await supabase
+        .from('evaluations')
+        .select(`
+          *,
+          players!evaluations_player_id_fkey(
+            id,
+            name,
+            avatar_url,
+            rank,
+            points,
+            wins,
+            losses,
+            win_streak,
+            is_ranked
+          )
+        `)
+        .eq('status', 'accepted')
+        .eq('evaluator_id', currentPlayer.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
   const acceptEvaluationMutation = useMutation({
     mutationFn: async ({ evaluationId, evaluatorId }: { evaluationId: string; evaluatorId: string }) => {
       // Atualizar a avaliação
@@ -97,7 +136,9 @@ export const useEvaluations = () => {
 
   return {
     pendingEvaluations,
+    acceptedEvaluations,
     loading,
+    loadingAccepted,
     acceptEvaluation,
     isAccepting: acceptEvaluationMutation.isPending
   };

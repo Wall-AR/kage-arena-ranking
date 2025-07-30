@@ -7,14 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/ui/navigation";
-import { Clock, User, MessageSquare } from "lucide-react";
+import { Clock, User, MessageSquare, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import PostEvaluationResults from "@/components/evaluations/PostEvaluationResults";
 
 export default function Evaluations() {
   const { user } = useAuth();
   const { data: currentPlayer } = usePlayerProfile(user?.id);
-  const { pendingEvaluations, acceptEvaluation, loading } = useEvaluations();
+  const { pendingEvaluations, acceptedEvaluations, acceptEvaluation, loading, loadingAccepted } = useEvaluations();
   const [accepting, setAccepting] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -65,126 +67,227 @@ export default function Evaluations() {
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              Pedidos de Avaliação
+              Gerenciamento de Avaliações
             </h1>
             <p className="text-muted-foreground">
-              Gerencie os pedidos de avaliação dos jogadores
+              Gerencie pedidos pendentes e avaliações em andamento
             </p>
           </div>
 
-          {loading ? (
-            <div className="grid gap-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="h-4 bg-muted rounded w-3/4 mb-4"></div>
-                    <div className="h-3 bg-muted rounded w-1/2"></div>
+          <Tabs defaultValue="pending" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="pending" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Pendentes ({pendingEvaluations.length})
+              </TabsTrigger>
+              <TabsTrigger value="accepted" className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Aceitas ({acceptedEvaluations.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="pending" className="mt-6">
+              {loading ? (
+                <div className="grid gap-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardContent className="p-6">
+                        <div className="h-4 bg-muted rounded w-3/4 mb-4"></div>
+                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : pendingEvaluations.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      Nenhum pedido pendente
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Não há pedidos de avaliação aguardando aprovação no momento.
+                    </p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          ) : pendingEvaluations.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Nenhum pedido pendente
-                </h3>
-                <p className="text-muted-foreground">
-                  Não há pedidos de avaliação aguardando aprovação no momento.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {pendingEvaluations.map((evaluation) => (
-                <Card key={evaluation.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={evaluation.players?.avatar_url} />
-                          <AvatarFallback>
-                            <User className="h-5 w-5" />
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <CardTitle className="text-lg">
-                            {evaluation.players?.name}
-                          </CardTitle>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            <span>
-                              {new Date(evaluation.created_at).toLocaleDateString('pt-BR')}
+              ) : (
+                <div className="grid gap-4">
+                  {pendingEvaluations.map((evaluation) => (
+                    <Card key={evaluation.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={evaluation.players?.avatar_url} />
+                              <AvatarFallback>
+                                <User className="h-5 w-5" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <CardTitle className="text-lg">
+                                {evaluation.players?.name}
+                              </CardTitle>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="h-4 w-4" />
+                                <span>
+                                  {new Date(evaluation.created_at).toLocaleDateString('pt-BR')}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant="secondary">
+                              {evaluation.players?.rank || 'Unranked'}
+                            </Badge>
+                            <div className="text-sm text-muted-foreground mt-1">
+                              {evaluation.players?.points} pontos
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent className="pt-0">
+                        {evaluation.request_message && (
+                          <>
+                            <Separator className="mb-4" />
+                            <div className="bg-muted/50 rounded-lg p-4 mb-4">
+                              <h4 className="font-medium text-foreground mb-2">
+                                Mensagem do jogador:
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                "{evaluation.request_message}"
+                              </p>
+                            </div>
+                          </>
+                        )}
+                        
+                        <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Vitórias:</span>
+                            <span className="font-medium ml-2">
+                              {evaluation.players?.wins || 0}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Derrotas:</span>
+                            <span className="font-medium ml-2">
+                              {evaluation.players?.losses || 0}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Sequência:</span>
+                            <span className="font-medium ml-2">
+                              {evaluation.players?.win_streak || 0}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Rankeado:</span>
+                            <span className="font-medium ml-2">
+                              {evaluation.players?.is_ranked ? 'Sim' : 'Não'}
                             </span>
                           </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant="secondary">
-                          {evaluation.players?.rank || 'Unranked'}
-                        </Badge>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {evaluation.players?.points} pontos
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0">
-                    {evaluation.request_message && (
-                      <>
-                        <Separator className="mb-4" />
-                        <div className="bg-muted/50 rounded-lg p-4 mb-4">
-                          <h4 className="font-medium text-foreground mb-2">
-                            Mensagem do jogador:
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            "{evaluation.request_message}"
-                          </p>
-                        </div>
-                      </>
-                    )}
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Vitórias:</span>
-                        <span className="font-medium ml-2">
-                          {evaluation.players?.wins || 0}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Derrotas:</span>
-                        <span className="font-medium ml-2">
-                          {evaluation.players?.losses || 0}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Sequência:</span>
-                        <span className="font-medium ml-2">
-                          {evaluation.players?.win_streak || 0}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Rankeado:</span>
-                        <span className="font-medium ml-2">
-                          {evaluation.players?.is_ranked ? 'Sim' : 'Não'}
-                        </span>
-                      </div>
-                    </div>
 
-                    <Button
-                      onClick={() => handleAcceptEvaluation(evaluation.id)}
-                      disabled={accepting === evaluation.id}
-                      className="w-full"
-                    >
-                      {accepting === evaluation.id ? "Aceitando..." : "Aceitar Avaliação"}
-                    </Button>
+                        <Button
+                          onClick={() => handleAcceptEvaluation(evaluation.id)}
+                          disabled={accepting === evaluation.id}
+                          className="w-full"
+                        >
+                          {accepting === evaluation.id ? "Aceitando..." : "Aceitar Avaliação"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="accepted" className="mt-6">
+              {loadingAccepted ? (
+                <div className="grid gap-4">
+                  {[...Array(2)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardContent className="p-6">
+                        <div className="h-4 bg-muted rounded w-3/4 mb-4"></div>
+                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : acceptedEvaluations.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <CheckCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      Nenhuma avaliação aceita
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Você ainda não aceitou nenhuma avaliação para completar.
+                    </p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          )}
+              ) : (
+                <div className="grid gap-4">
+                  {acceptedEvaluations.map((evaluation) => (
+                    <Card key={evaluation.id} className="hover:shadow-md transition-shadow border-green-200">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={evaluation.players?.avatar_url} />
+                              <AvatarFallback>
+                                <User className="h-5 w-5" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <CardTitle className="text-lg">
+                                {evaluation.players?.name}
+                              </CardTitle>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Aceita em {new Date(evaluation.created_at).toLocaleDateString('pt-BR')}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant="outline" className="border-green-500 text-green-700">
+                              Em Avaliação
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent className="pt-0">
+                        {evaluation.request_message && (
+                          <>
+                            <Separator className="mb-4" />
+                            <div className="bg-muted/50 rounded-lg p-4 mb-4">
+                              <h4 className="font-medium text-foreground mb-2">
+                                Mensagem do jogador:
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                "{evaluation.request_message}"
+                              </p>
+                            </div>
+                          </>
+                        )}
+
+                        <div className="flex justify-end">
+                          <PostEvaluationResults 
+                            evaluation={evaluation} 
+                            onResultsPosted={() => {
+                              // Recarregar dados após postar resultados
+                              window.location.reload();
+                            }} 
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
