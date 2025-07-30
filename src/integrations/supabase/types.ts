@@ -71,6 +71,83 @@ export type Database = {
           },
         ]
       }
+      evaluation_results: {
+        Row: {
+          aerial_score: number | null
+          created_at: string
+          dash_score: number | null
+          defense_score: number | null
+          evaluation_id: string
+          evaluation_summary: string
+          evaluator_id: string
+          general_score: number | null
+          id: string
+          initial_points: number
+          initial_rank: string
+          kunai_score: number | null
+          pin_score: number | null
+          player_id: string
+          resource_score: number | null
+          timing_score: number | null
+          tip_1: string
+          tip_2: string
+          tip_3: string
+          updated_at: string
+        }
+        Insert: {
+          aerial_score?: number | null
+          created_at?: string
+          dash_score?: number | null
+          defense_score?: number | null
+          evaluation_id: string
+          evaluation_summary: string
+          evaluator_id: string
+          general_score?: number | null
+          id?: string
+          initial_points: number
+          initial_rank: string
+          kunai_score?: number | null
+          pin_score?: number | null
+          player_id: string
+          resource_score?: number | null
+          timing_score?: number | null
+          tip_1: string
+          tip_2: string
+          tip_3: string
+          updated_at?: string
+        }
+        Update: {
+          aerial_score?: number | null
+          created_at?: string
+          dash_score?: number | null
+          defense_score?: number | null
+          evaluation_id?: string
+          evaluation_summary?: string
+          evaluator_id?: string
+          general_score?: number | null
+          id?: string
+          initial_points?: number
+          initial_rank?: string
+          kunai_score?: number | null
+          pin_score?: number | null
+          player_id?: string
+          resource_score?: number | null
+          timing_score?: number | null
+          tip_1?: string
+          tip_2?: string
+          tip_3?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_results_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evaluations: {
         Row: {
           aerial_score: number | null
@@ -220,18 +297,25 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          current_points: number | null
           favorite_characters: Json | null
           id: string
           immunity_until: string | null
           is_moderator: boolean | null
           is_ranked: boolean | null
+          kage_title: string | null
           last_match_date: string | null
+          last_promotion_attempt: string | null
           losses: number | null
           name: string
           ninja_phrase: string | null
           points: number | null
           privacy_settings: Json | null
+          promotion_series_active: boolean | null
+          promotion_series_losses: number | null
+          promotion_series_wins: number | null
           rank: string | null
+          rank_level: string | null
           tutor_id: string | null
           updated_at: string
           user_id: string | null
@@ -241,18 +325,25 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          current_points?: number | null
           favorite_characters?: Json | null
           id?: string
           immunity_until?: string | null
           is_moderator?: boolean | null
           is_ranked?: boolean | null
+          kage_title?: string | null
           last_match_date?: string | null
+          last_promotion_attempt?: string | null
           losses?: number | null
           name: string
           ninja_phrase?: string | null
           points?: number | null
           privacy_settings?: Json | null
+          promotion_series_active?: boolean | null
+          promotion_series_losses?: number | null
+          promotion_series_wins?: number | null
           rank?: string | null
+          rank_level?: string | null
           tutor_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -262,18 +353,25 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          current_points?: number | null
           favorite_characters?: Json | null
           id?: string
           immunity_until?: string | null
           is_moderator?: boolean | null
           is_ranked?: boolean | null
+          kage_title?: string | null
           last_match_date?: string | null
+          last_promotion_attempt?: string | null
           losses?: number | null
           name?: string
           ninja_phrase?: string | null
           points?: number | null
           privacy_settings?: Json | null
+          promotion_series_active?: boolean | null
+          promotion_series_losses?: number | null
+          promotion_series_wins?: number | null
           rank?: string | null
+          rank_level?: string | null
           tutor_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -289,6 +387,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ranking_changes: {
+        Row: {
+          change_reason: string
+          created_at: string
+          evaluation_id: string | null
+          id: string
+          match_id: string | null
+          new_points: number | null
+          new_rank: string | null
+          old_points: number | null
+          old_rank: string | null
+          player_id: string
+        }
+        Insert: {
+          change_reason: string
+          created_at?: string
+          evaluation_id?: string | null
+          id?: string
+          match_id?: string | null
+          new_points?: number | null
+          new_rank?: string | null
+          old_points?: number | null
+          old_rank?: string | null
+          player_id: string
+        }
+        Update: {
+          change_reason?: string
+          created_at?: string
+          evaluation_id?: string | null
+          id?: string
+          match_id?: string | null
+          new_points?: number | null
+          new_rank?: string | null
+          old_points?: number | null
+          old_rank?: string | null
+          player_id?: string
+        }
+        Relationships: []
       }
       tournament_participants: {
         Row: {
@@ -403,7 +540,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_initial_points_for_rank: {
+        Args: { rank_name: string }
+        Returns: number
+      }
+      update_kage_titles: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
