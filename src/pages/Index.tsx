@@ -4,12 +4,32 @@ import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/ui/navigation";
 import RankingCard from "@/components/ui/ranking-card";
 import heroImage from "@/assets/hero-naruto-sasuke.jpg";
-import { Trophy, Swords, Users, Target, TrendingUp, Flame } from "lucide-react";
+import { Trophy, Swords, Users, Target, TrendingUp, Flame, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 // Homepage do Kage Arena - Portal de Ranking Naruto Ultimate Ninja 5
 // Criado por Wall - Página principal com hero section e overview do ranking
 const Index = () => {
+  const { user, loading } = useAuth();
+  
+  // Buscar players reais do Supabase
+  const { data: realPlayers } = useQuery({
+    queryKey: ['top-players'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .eq('is_ranked', true)
+        .order('current_points', { ascending: false })
+        .limit(3);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
   // Dados mockados dos top 3 Kages - futuramente virá da API
   const topKages = [
     {
@@ -121,14 +141,47 @@ const Index = () => {
               Desafie os melhores ninjas, suba no ranking e conquiste o título supremo de Hokage.
             </p>
             
+            {/* Status de Conectividade */}
+            {!loading && (
+              <div className="mt-4">
+                {user ? (
+                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                    🟢 Conectado como {user.user_metadata?.name || user.email}
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                    🔑 <Link to="/auth" className="underline">Faça login para acessar</Link>
+                  </Badge>
+                )}
+              </div>
+            )}
+            
             {/* Botões de Ação */}
             <div className="flex flex-col md:flex-row gap-4 justify-center items-center pt-6">
-              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 shadow-ninja px-8 py-4 text-lg">
-                <Link to="/ranking">
-                  <Swords className="w-6 h-6 mr-2" />
-                  ENTRAR NA ARENA
-                </Link>
-              </Button>
+              {user ? (
+                <>
+                  <Button asChild size="lg" className="bg-primary hover:bg-primary/90 shadow-ninja px-8 py-4 text-lg">
+                    <Link to="/ranking">
+                      <Swords className="w-6 h-6 mr-2" />
+                      ENTRAR NA ARENA
+                    </Link>
+                  </Button>
+                  
+                  <Button asChild variant="outline" size="lg" className="border-accent text-accent hover:bg-accent/10 px-8 py-4 text-lg">
+                    <Link to="/profile">
+                      <User className="w-6 h-6 mr-2" />
+                      MEU PERFIL
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <Button asChild size="lg" className="bg-primary hover:bg-primary/90 shadow-ninja px-8 py-4 text-lg">
+                  <Link to="/auth">
+                    <Target className="w-6 h-6 mr-2" />
+                    FAZER LOGIN
+                  </Link>
+                </Button>
+              )}
               
               <Button asChild variant="outline" size="lg" className="border-accent text-accent hover:bg-accent/10 px-8 py-4 text-lg">
                 <Link to="/challenges">

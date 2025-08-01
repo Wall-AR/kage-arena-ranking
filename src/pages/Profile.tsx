@@ -291,7 +291,7 @@ export default function Profile() {
                 <CardContent>
                   <div className="text-center py-4">
                     <EvaluationRequest 
-                      playerId={player.id}
+                      playerId={playerData?.id || ""}
                       onRequestSent={() => {
                         toast({
                           title: "Solicitação enviada!",

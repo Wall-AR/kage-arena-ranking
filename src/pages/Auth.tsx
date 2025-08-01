@@ -49,25 +49,7 @@ export default function Auth() {
 
       if (error) throw error;
 
-      // Criar perfil do jogador
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('players')
-          .insert({
-            user_id: data.user.id,
-            name: name,
-            rank: 'Unranked',
-            points: 1000,
-            wins: 0,
-            losses: 0,
-            is_ranked: false,
-            is_moderator: false
-          });
-
-        if (profileError) {
-          console.error('Erro ao criar perfil:', profileError);
-        }
-      }
+      // O perfil será criado automaticamente pelo trigger
 
       toast({
         title: "Cadastro realizado!",
