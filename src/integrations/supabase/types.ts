@@ -166,7 +166,11 @@ export type Database = {
           request_message: string | null
           resource_score: number | null
           status: string | null
+          summary: string | null
           timing_score: number | null
+          tip_1: string | null
+          tip_2: string | null
+          tip_3: string | null
           tips: string | null
           updated_at: string
         }
@@ -187,7 +191,11 @@ export type Database = {
           request_message?: string | null
           resource_score?: number | null
           status?: string | null
+          summary?: string | null
           timing_score?: number | null
+          tip_1?: string | null
+          tip_2?: string | null
+          tip_3?: string | null
           tips?: string | null
           updated_at?: string
         }
@@ -208,7 +216,11 @@ export type Database = {
           request_message?: string | null
           resource_score?: number | null
           status?: string | null
+          summary?: string | null
           timing_score?: number | null
+          tip_1?: string | null
+          tip_2?: string | null
+          tip_3?: string | null
           tips?: string | null
           updated_at?: string
         }
@@ -301,6 +313,7 @@ export type Database = {
           favorite_characters: Json | null
           id: string
           immunity_until: string | null
+          is_admin: boolean | null
           is_moderator: boolean | null
           is_ranked: boolean | null
           kage_title: string | null
@@ -316,6 +329,7 @@ export type Database = {
           promotion_series_wins: number | null
           rank: string | null
           rank_level: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
           tutor_id: string | null
           updated_at: string
           user_id: string | null
@@ -329,6 +343,7 @@ export type Database = {
           favorite_characters?: Json | null
           id?: string
           immunity_until?: string | null
+          is_admin?: boolean | null
           is_moderator?: boolean | null
           is_ranked?: boolean | null
           kage_title?: string | null
@@ -344,6 +359,7 @@ export type Database = {
           promotion_series_wins?: number | null
           rank?: string | null
           rank_level?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           tutor_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -357,6 +373,7 @@ export type Database = {
           favorite_characters?: Json | null
           id?: string
           immunity_until?: string | null
+          is_admin?: boolean | null
           is_moderator?: boolean | null
           is_ranked?: boolean | null
           kage_title?: string | null
@@ -372,6 +389,7 @@ export type Database = {
           promotion_series_wins?: number | null
           rank?: string | null
           rank_level?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           tutor_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -544,13 +562,21 @@ export type Database = {
         Args: { rank_name: string }
         Returns: number
       }
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
+      is_moderator: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       update_kage_titles: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "moderator" | "player"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -677,6 +703,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "moderator", "player"],
+    },
   },
 } as const
