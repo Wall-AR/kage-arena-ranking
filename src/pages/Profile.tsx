@@ -167,11 +167,11 @@ export default function Profile() {
 
         {/* Conteúdo Principal */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${isOwnProfile && playerData?.is_moderator ? 'grid-cols-5' : 'grid-cols-4'}`}>
+          <TabsList className={`grid w-full ${isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) ? 'grid-cols-5' : 'grid-cols-4'}`}>
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="stats">Estatísticas</TabsTrigger>
             <TabsTrigger value="history">Histórico</TabsTrigger>
-            {isOwnProfile && playerData?.is_moderator && <TabsTrigger value="students">Alunos</TabsTrigger>}
+            {isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) && <TabsTrigger value="students">Alunos</TabsTrigger>}
             {isOwnProfile && <TabsTrigger value="settings">Configurações</TabsTrigger>}
           </TabsList>
 
@@ -378,7 +378,7 @@ export default function Profile() {
           </TabsContent>
 
           {/* Aba: Alunos (apenas para moderadores) */}
-          {isOwnProfile && playerData?.is_moderator && (
+          {isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) && (
             <TabsContent value="students" className="space-y-6">
               <StudentsTab evaluatorId={playerData.id} />
             </TabsContent>

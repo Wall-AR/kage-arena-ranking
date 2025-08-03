@@ -12,6 +12,7 @@ import Forum from "./pages/Forum";
 import Training from "./pages/Training";
 import Auth from "./pages/Auth";
 import Evaluations from "./pages/Evaluations";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/forum" element={<Forum />} />
           <Route path="/training" element={<Training />} />
           <Route path="/evaluations" element={<Evaluations />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/auth" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

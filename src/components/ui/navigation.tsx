@@ -28,10 +28,16 @@ const Navigation = ({ currentPage }: NavigationProps) => {
     { id: "forum", label: "Fórum", icon: MessageCircle, href: "/forum" },
   ];
 
-  // Adicionar "Avaliações" apenas para moderadores
-  const navItems = currentPlayer?.is_moderator 
-    ? [...baseNavItems, { id: "evaluations", label: "Avaliações", icon: Settings, href: "/evaluations" }]
-    : baseNavItems;
+  // Adicionar "Avaliações" para moderadores e "Admin" para admins
+  let navItems = [...baseNavItems];
+  
+  if (currentPlayer?.is_moderator || currentPlayer?.is_admin) {
+    navItems.push({ id: "evaluations", label: "Avaliações", icon: Settings, href: "/evaluations" });
+  }
+  
+  if (currentPlayer?.is_admin) {
+    navItems.push({ id: "admin", label: "Admin", icon: Settings, href: "/admin" });
+  }
 
   // Dados do usuário logado
   const currentUser = user ? {
