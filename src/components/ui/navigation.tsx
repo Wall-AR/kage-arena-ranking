@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
+import { NotificationsDropdown } from "@/components/ui/notifications-dropdown";
 
 interface NavigationProps {
   currentPage?: string;
@@ -95,17 +96,7 @@ const Navigation = ({ currentPage }: NavigationProps) => {
           {currentUser && (
             <>
               {/* Notificações */}
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="w-5 h-5" />
-                {currentUser.notifications > 0 && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-1 -right-1 w-5 h-5 text-xs flex items-center justify-center p-0"
-                  >
-                    {currentUser.notifications}
-                  </Badge>
-                )}
-              </Button>
+              <NotificationsDropdown />
 
               {/* Botão Moderador (se aplicável) */}
               {currentUser.isModerator && (

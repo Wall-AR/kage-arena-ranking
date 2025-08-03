@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 interface RankingCardProps {
   player: {
-    id: number;
+    id: number | string;
     name: string;
     rank: string;
     position: number;

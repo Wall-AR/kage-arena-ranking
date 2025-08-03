@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/ui/navigation";
 import RankingCard from "@/components/ui/ranking-card";
 import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRankedPlayers } from "@/hooks/usePlayers";
 
 // Página de Ranking - Kage Arena
 // Criado por Wall - Ranking completo com filtros e paginação
@@ -14,88 +15,8 @@ const Ranking = () => {
   const [selectedRank, setSelectedRank] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   
-  // Mock de dados completos do ranking (13 jogadores conforme especificação)
-  const allPlayers = [
-    {
-      id: 1, name: "Wall", rank: "Kage", position: 1, points: 2450,
-      wins: 45, losses: 8, winRate: 84.9, lastMatch: "14/01/2025",
-      favoriteCharacters: ["Naruto", "Sasuke", "Kakashi"],
-      achievements: ["champion", "undefeated", "veteran"],
-      isImmune: true, avatar: "/placeholder.svg"
-    },
-    {
-      id: 2, name: "ShadowNinja", rank: "Kage", position: 2, points: 2200,
-      wins: 38, losses: 12, winRate: 76.0, lastMatch: "13/01/2025",
-      favoriteCharacters: ["Itachi", "Sasuke", "Orochimaru"],
-      achievements: ["streak", "veteran"], avatar: "/placeholder.svg"
-    },
-    {
-      id: 3, name: "FireLord", rank: "Kage", position: 3, points: 2150,
-      wins: 42, losses: 18, winRate: 70.0, lastMatch: "12/01/2025",
-      favoriteCharacters: ["Jiraiya", "Naruto", "Gaara"],
-      achievements: ["champion"], avatar: "/placeholder.svg"
-    },
-    {
-      id: 4, name: "ThunderGod", rank: "Sannin", position: 4, points: 1980,
-      wins: 35, losses: 15, winRate: 70.0, lastMatch: "11/01/2025",
-      favoriteCharacters: ["Sasuke", "Itachi", "Kakashi"],
-      achievements: ["streak"], avatar: "/placeholder.svg"
-    },
-    {
-      id: 5, name: "WindMaster", rank: "Sannin", position: 5, points: 1850,
-      wins: 32, losses: 18, winRate: 64.0, lastMatch: "10/01/2025",
-      favoriteCharacters: ["Temari", "Gaara", "Shikamaru"],
-      achievements: ["veteran"], avatar: "/placeholder.svg"
-    },
-    {
-      id: 6, name: "BloodRaven", rank: "Anbu", position: 6, points: 1720,
-      wins: 28, losses: 22, winRate: 56.0, lastMatch: "09/01/2025",
-      favoriteCharacters: ["Itachi", "Orochimaru", "Sasuke"],
-      achievements: [], avatar: "/placeholder.svg"
-    },
-    {
-      id: 7, name: "LeafStorm", rank: "Anbu", position: 7, points: 1650,
-      wins: 25, losses: 20, winRate: 55.6, lastMatch: "08/01/2025",
-      favoriteCharacters: ["Rock Lee", "Might Guy", "Naruto"],
-      achievements: [], avatar: "/placeholder.svg"
-    },
-    {
-      id: 8, name: "SandViper", rank: "Jounin", position: 8, points: 1580,
-      wins: 22, losses: 18, winRate: 55.0, lastMatch: "07/01/2025",
-      favoriteCharacters: ["Gaara", "Temari", "Kankuro"],
-      achievements: [], avatar: "/placeholder.svg"
-    },
-    {
-      id: 9, name: "MistWalker", rank: "Jounin", position: 9, points: 1520,
-      wins: 20, losses: 16, winRate: 55.6, lastMatch: "06/01/2025",
-      favoriteCharacters: ["Kisame", "Jiraiya", "Naruto"],
-      achievements: [], avatar: "/placeholder.svg"
-    },
-    {
-      id: 10, name: "StoneFist", rank: "Chunin", position: 10, points: 1450,
-      wins: 18, losses: 15, winRate: 54.5, lastMatch: "05/01/2025",
-      favoriteCharacters: ["Rock Lee", "Choji", "Naruto"],
-      achievements: [], avatar: "/placeholder.svg"
-    },
-    {
-      id: 11, name: "NightBlade", rank: "Chunin", position: 11, points: 1380,
-      wins: 16, losses: 14, winRate: 53.3, lastMatch: "04/01/2025",
-      favoriteCharacters: ["Sasuke", "Kakashi", "Shikamaru"],
-      achievements: [], avatar: "/placeholder.svg"
-    },
-    {
-      id: 12, name: "FlameRider", rank: "Genin", position: 12, points: 1320,
-      wins: 14, losses: 13, winRate: 51.9, lastMatch: "03/01/2025",
-      favoriteCharacters: ["Naruto", "Jiraiya", "Sasuke"],
-      achievements: [], avatar: "/placeholder.svg"
-    },
-    {
-      id: 13, name: "CloudWatcher", rank: "Genin", position: 13, points: 1280,
-      wins: 12, losses: 12, winRate: 50.0, lastMatch: "02/01/2025",
-      favoriteCharacters: ["Hinata", "Neji", "Shino"],
-      achievements: [], avatar: "/placeholder.svg"
-    }
-  ];
+  // Buscar todos os players rankeados
+  const { data: allPlayers = [] } = useRankedPlayers();
 
   // Filtros de busca e categoria
   const filteredPlayers = allPlayers.filter(player => {

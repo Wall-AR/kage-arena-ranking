@@ -77,7 +77,7 @@ const Forum = () => {
     },
     {
       id: 4,
-      title: "Análise: Wall vs ShadowNinja - Final do Copa Hokage",
+      title: "Análise: Últimas partidas do ranking",
       author: "AnalystPro",
       authorRank: "Jounin",
       category: "matches",
@@ -344,7 +344,7 @@ const Forum = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {["Wall", "ShadowNinja", "FireMaster", "WindBlade", "EarthShaker", "WaterFlow"].map((user, index) => (
+              {["Wall", "Jogador1", "Jogador2", "Jogador3", "Jogador4", "Jogador5"].map((user, index) => (
                 <Badge key={index} variant="secondary" className="flex items-center space-x-1">
                   <div className="w-2 h-2 bg-ninja-chunin rounded-full"></div>
                   <span>{user}</span>

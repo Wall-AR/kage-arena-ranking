@@ -12,41 +12,9 @@ import { Swords, Clock, CheckCircle, XCircle, Target, Calendar, Trophy } from "l
 const Challenges = () => {
   const [activeTab, setActiveTab] = useState("pending");
 
-  // Mock de desafios pendentes
-  const pendingChallenges = [
-    {
-      id: 1,
-      challenger: { name: "ThunderGod", rank: "Sannin", avatar: "/placeholder.svg" },
-      challenged: "Wall", // Usuário atual
-      matchType: "FT5",
-      createdAt: "13/01/2025",
-      expiresAt: "16/01/2025",
-      status: "pending"
-    },
-    {
-      id: 2,
-      challenger: "Wall", // Usuário atual
-      challenged: { name: "ShadowNinja", rank: "Kage", avatar: "/placeholder.svg" },
-      matchType: "FT7",
-      createdAt: "12/01/2025",
-      expiresAt: "15/01/2025",
-      status: "waiting_response"
-    }
-  ];
-
-  // Mock de desafios aceitos (aguardando partida)
-  const acceptedChallenges = [
-    {
-      id: 3,
-      challenger: { name: "FireLord", rank: "Kage", avatar: "/placeholder.svg" },
-      challenged: "Wall",
-      matchType: "FT5",
-      acceptedAt: "11/01/2025",
-      scheduledFor: "14/01/2025 20:00",
-      status: "accepted",
-      checkedIn: { challenger: true, challenged: false }
-    }
-  ];
+  // Desafios virão do banco de dados real
+  const pendingChallenges: any[] = [];
+  const acceptedChallenges: any[] = [];
 
   // Mock de histórico de desafios
   const challengeHistory = [

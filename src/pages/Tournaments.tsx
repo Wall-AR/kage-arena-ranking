@@ -68,7 +68,7 @@ const Tournaments = () => {
       description: "Celebração especial de início de ano",
       type: "single_elimination",
       participants: 32,
-      winner: "ShadowNinja",
+      winner: "Campeão",
       completedAt: "2025-01-15",
       prize: "Título de Campeão + 1000 pontos"
     }
@@ -78,7 +78,7 @@ const Tournaments = () => {
     {
       round: "Quartas de Final",
       matches: [
-        { player1: "Wall", player2: "ShadowNinja", winner: "Wall", score: "3-1" },
+        { player1: "Jogador1", player2: "Jogador2", winner: "Jogador1", score: "3-1" },
         { player1: "FireStyle", player2: "IceKing", winner: "FireStyle", score: "3-0" },
         { player1: "LightningBolt", player2: "EarthShaker", winner: "LightningBolt", score: "3-2" },
         { player1: "WindMaster", player2: "WaterFlow", winner: "WindMaster", score: "3-1" }

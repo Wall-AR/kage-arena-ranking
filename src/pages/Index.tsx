@@ -7,75 +7,15 @@ import heroImage from "@/assets/hero-naruto-sasuke.jpg";
 import { Trophy, Swords, Users, Target, TrendingUp, Flame, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useTopPlayers } from "@/hooks/usePlayers";
 
 // Homepage do Kage Arena - Portal de Ranking Naruto Ultimate Ninja 5
 // Criado por Wall - Página principal com hero section e overview do ranking
 const Index = () => {
   const { user, loading } = useAuth();
   
-  // Buscar players reais do Supabase
-  const { data: realPlayers } = useQuery({
-    queryKey: ['top-players'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('players')
-        .select('*')
-        .eq('is_ranked', true)
-        .order('current_points', { ascending: false })
-        .limit(3);
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-  // Dados mockados dos top 3 Kages - futuramente virá da API
-  const topKages = [
-    {
-      id: 1,
-      name: "Wall",
-      rank: "Kage",
-      position: 1,
-      points: 2450,
-      wins: 45,
-      losses: 8,
-      winRate: 84.9,
-      lastMatch: "14/01/2025",
-      favoriteCharacters: ["Naruto", "Sasuke", "Kakashi"],
-      achievements: ["champion", "undefeated", "veteran"],
-      isImmune: true,
-      avatar: "/placeholder.svg"
-    },
-    {
-      id: 2,
-      name: "ShadowNinja",
-      rank: "Kage",
-      position: 2,
-      points: 2200,
-      wins: 38,
-      losses: 12,
-      winRate: 76.0,
-      lastMatch: "13/01/2025",
-      favoriteCharacters: ["Itachi", "Sasuke", "Orochimaru"],
-      achievements: ["streak", "veteran"],
-      avatar: "/placeholder.svg"
-    },
-    {
-      id: 3,
-      name: "FireLord",
-      rank: "Kage", 
-      position: 3,
-      points: 2150,
-      wins: 42,
-      losses: 18,
-      winRate: 70.0,
-      lastMatch: "12/01/2025",
-      favoriteCharacters: ["Jiraiya", "Naruto", "Gaara"],
-      achievements: ["champion"],
-      avatar: "/placeholder.svg"
-    }
-  ];
+  // Buscar top 3 players
+  const { data: topKages = [] } = useTopPlayers(3);
 
   // Estatísticas gerais mockadas
   const stats = [

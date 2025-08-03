@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
+import { useUpdatePlayerRole } from "@/hooks/usePlayers";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,45 +58,19 @@ export default function Admin() {
     }
   };
 
-  const updatePlayerRole = async (playerId: string, role: 'admin' | 'moderator' | 'player') => {
+  const updatePlayerRoleMutation = useUpdatePlayerRole();
+
+  const updatePlayerRole = (playerId: string, role: 'admin' | 'moderator' | 'player') => {
     setActionLoading(playerId);
-    try {
-      const updates: any = { role };
-      
-      if (role === 'admin') {
-        updates.is_admin = true;
-        updates.is_moderator = true;
-      } else if (role === 'moderator') {
-        updates.is_admin = false;
-        updates.is_moderator = true;
-      } else {
-        updates.is_admin = false;
-        updates.is_moderator = false;
+    updatePlayerRoleMutation.mutate(
+      { playerId, role },
+      {
+        onSettled: () => {
+          setActionLoading(null);
+          fetchPlayers();
+        }
       }
-
-      const { error } = await supabase
-        .from('players')
-        .update(updates)
-        .eq('id', playerId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Cargo atualizado!",
-        description: `Jogador agora é ${role === 'admin' ? 'Administrador' : role === 'moderator' ? 'Avaliador' : 'Jogador'}.`,
-      });
-
-      fetchPlayers();
-    } catch (error) {
-      console.error('Error updating player role:', error);
-      toast({
-        title: "Erro ao atualizar cargo",
-        description: "Tente novamente em alguns instantes.",
-        variant: "destructive"
-      });
-    } finally {
-      setActionLoading(null);
-    }
+    );
   };
 
   const getRoleIcon = (role: string, isAdmin: boolean, isModerator: boolean) => {
