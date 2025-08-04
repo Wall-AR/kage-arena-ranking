@@ -6,37 +6,33 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/ui/navigation";
 import { Swords, Clock, CheckCircle, XCircle, Target, Calendar, Trophy } from "lucide-react";
+import { useChallenges } from "@/hooks/useChallenges";
+import { useAuth } from "@/hooks/useAuth";
+import { CreateChallengeDialog } from "@/components/challenges/CreateChallengeDialog";
+import { ReportMatchDialog } from "@/components/challenges/ReportMatchDialog";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 // Página de Desafios - Kage Arena
 // Criado por Wall - Sistema completo de desafios entre jogadores
 const Challenges = () => {
   const [activeTab, setActiveTab] = useState("pending");
-
-  // Desafios virão do banco de dados real
-  const pendingChallenges: any[] = [];
-  const acceptedChallenges: any[] = [];
-
-  // Mock de histórico de desafios
-  const challengeHistory = [
-    {
-      id: 4,
-      challenger: { name: "Wall", rank: "Kage", avatar: "/placeholder.svg" },
-      challenged: { name: "WindMaster", rank: "Sannin", avatar: "/placeholder.svg" },
-      matchType: "FT7",
-      result: { winner: "Wall", score: "7-3" },
-      completedAt: "10/01/2025",
-      status: "completed"
-    },
-    {
-      id: 5,
-      challenger: { name: "BloodRaven", rank: "Anbu", avatar: "/placeholder.svg" },
-      challenged: "Wall",
-      matchType: "FT5",
-      result: { winner: "Wall", score: "5-2" },
-      completedAt: "08/01/2025",
-      status: "completed"
-    }
-  ];
+  const { currentPlayer } = useAuth();
+  
+  const {
+    pendingChallenges,
+    acceptedChallenges,
+    challengeHistory,
+    loadingPending,
+    loadingAccepted,
+    loadingHistory,
+    acceptChallenge,
+    rejectChallenge,
+    checkIn,
+    isAccepting,
+    isRejecting,
+    isCheckingIn
+  } = useChallenges();
 
   const getMatchTypeLabel = (type: string) => {
     const types = {
@@ -87,10 +83,12 @@ const Challenges = () => {
           
           {/* Botão para Criar Novo Desafio */}
           <div className="text-center">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 shadow-ninja px-8 py-3">
-              <Target className="w-5 h-5 mr-2" />
-              CRIAR NOVO DESAFIO
-            </Button>
+            <CreateChallengeDialog>
+              <Button size="lg" className="bg-primary hover:bg-primary/90 shadow-ninja px-8 py-3">
+                <Target className="w-5 h-5 mr-2" />
+                CRIAR NOVO DESAFIO
+              </Button>
+            </CreateChallengeDialog>
           </div>
         </div>
       </section>
@@ -116,93 +114,125 @@ const Challenges = () => {
 
             {/* Desafios Pendentes */}
             <TabsContent value="pending" className="space-y-4">
-              {pendingChallenges.length > 0 ? (
-                pendingChallenges.map((challenge) => (
-                  <Card key={challenge.id} className="bg-gradient-card border-border/50 hover:border-primary/30 transition-all duration-300">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          {typeof challenge.challenger === 'object' ? (
-                            <>
-                              <Avatar className="w-12 h-12">
-                                <AvatarImage src={challenge.challenger.avatar} />
-                                <AvatarFallback>{challenge.challenger.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <CardTitle className="text-lg">{challenge.challenger.name}</CardTitle>
-                                <Badge variant="secondary" className="text-xs">{challenge.challenger.rank}</Badge>
-                              </div>
-                            </>
-                          ) : (
-                            <div className="text-foreground font-semibold">Você desafiou</div>
-                          )}
+              {loadingPending ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Carregando desafios...</p>
+                </div>
+              ) : pendingChallenges.length > 0 ? (
+                pendingChallenges.map((challenge) => {
+                  const isChallenger = challenge.challenger_id === currentPlayer?.id;
+                  const opponent = isChallenger ? challenge.challenged : challenge.challenger;
+                  
+                  return (
+                    <Card key={challenge.id} className="bg-gradient-card border-border/50 hover:border-primary/30 transition-all duration-300">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            {!isChallenger ? (
+                              <>
+                                <Avatar className="w-12 h-12">
+                                  <AvatarImage src={challenge.challenger.avatar_url || ""} />
+                                  <AvatarFallback>{challenge.challenger.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <CardTitle className="text-lg">{challenge.challenger.name}</CardTitle>
+                                  <Badge variant="secondary" className="text-xs">{challenge.challenger.rank}</Badge>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="text-foreground font-semibold">Você desafiou</div>
+                            )}
+                            
+                            <Swords className="w-6 h-6 text-primary mx-4" />
+                            
+                            {isChallenger ? (
+                              <>
+                                <Avatar className="w-12 h-12">
+                                  <AvatarImage src={challenge.challenged.avatar_url || ""} />
+                                  <AvatarFallback>{challenge.challenged.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <CardTitle className="text-lg">{challenge.challenged.name}</CardTitle>
+                                  <Badge variant="secondary" className="text-xs">{challenge.challenged.rank}</Badge>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="text-foreground font-semibold">Você foi desafiado</div>
+                            )}
+                          </div>
                           
-                          <Swords className="w-6 h-6 text-primary mx-4" />
-                          
-                          {typeof challenge.challenged === 'object' ? (
-                            <>
-                              <Avatar className="w-12 h-12">
-                                <AvatarImage src={challenge.challenged.avatar} />
-                                <AvatarFallback>{challenge.challenged.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <CardTitle className="text-lg">{challenge.challenged.name}</CardTitle>
-                                <Badge variant="secondary" className="text-xs">{challenge.challenged.rank}</Badge>
+                          <Badge className={getStatusColor(challenge.status)}>
+                            {getStatusLabel(challenge.status)}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Trophy className="w-4 h-4 mr-2" />
+                              Formato: {getMatchTypeLabel(challenge.match_type)}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Calendar className="w-4 h-4 mr-2" />
+                              Criado em: {format(new Date(challenge.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Clock className="w-4 h-4 mr-2" />
+                              Expira em: {format(new Date(challenge.expires_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            </div>
+                            {challenge.message && (
+                              <div className="text-sm p-2 bg-muted rounded italic">
+                                "{challenge.message}"
                               </div>
-                            </>
-                          ) : (
-                            <div className="text-foreground font-semibold">Você foi desafiado</div>
-                          )}
-                        </div>
-                        
-                        <Badge className={getStatusColor(challenge.status)}>
-                          {getStatusLabel(challenge.status)}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Trophy className="w-4 h-4 mr-2" />
-                            Formato: {getMatchTypeLabel(challenge.matchType)}
+                            )}
                           </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            Criado em: {challenge.createdAt}
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Clock className="w-4 h-4 mr-2" />
-                            Expira em: {challenge.expiresAt}
-                          </div>
-                        </div>
-                        
-                        <div className="flex space-x-2">
-                          {typeof challenge.challenged === 'string' ? (
-                            // Usuário foi desafiado - pode aceitar ou recusar
-                            <>
-                              <Button variant="outline" size="sm" className="border-red-500/30 text-red-500 hover:bg-red-500/10">
+                          
+                          <div className="flex space-x-2">
+                            {!isChallenger ? (
+                              // Usuário foi desafiado - pode aceitar ou recusar
+                              <>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="border-red-500/30 text-red-500 hover:bg-red-500/10"
+                                  onClick={() => rejectChallenge(challenge.id)}
+                                  disabled={isRejecting}
+                                >
+                                  <XCircle className="w-4 h-4 mr-2" />
+                                  Recusar
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700"
+                                  onClick={() => acceptChallenge(challenge.id)}
+                                  disabled={isAccepting}
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-2" />
+                                  Aceitar
+                                </Button>
+                              </>
+                            ) : (
+                              // Usuário criou o desafio - pode cancelar
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="border-red-500/30 text-red-500 hover:bg-red-500/10"
+                                onClick={() => rejectChallenge(challenge.id)}
+                                disabled={isRejecting}
+                              >
                                 <XCircle className="w-4 h-4 mr-2" />
-                                Recusar
+                                Cancelar
                               </Button>
-                              <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Aceitar
-                              </Button>
-                            </>
-                          ) : (
-                            // Usuário criou o desafio - pode cancelar
-                            <Button variant="outline" size="sm" className="border-red-500/30 text-red-500 hover:bg-red-500/10">
-                              <XCircle className="w-4 h-4 mr-2" />
-                              Cancelar
-                            </Button>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                      </CardContent>
+                    </Card>
+                  );
+                })
               ) : (
                 <div className="text-center py-12">
                   <Clock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
@@ -214,72 +244,99 @@ const Challenges = () => {
 
             {/* Desafios Aceitos */}
             <TabsContent value="accepted" className="space-y-4">
-              {acceptedChallenges.length > 0 ? (
-                acceptedChallenges.map((challenge) => (
-                  <Card key={challenge.id} className="bg-gradient-card border-green-500/30 hover:border-green-500/60 transition-all duration-300">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <Avatar className="w-12 h-12">
-                            <AvatarImage src={challenge.challenger.avatar} />
-                            <AvatarFallback>{challenge.challenger.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <CardTitle className="text-lg">{challenge.challenger.name}</CardTitle>
-                            <Badge variant="secondary" className="text-xs">{challenge.challenger.rank}</Badge>
+              {loadingAccepted ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Carregando desafios aceitos...</p>
+                </div>
+              ) : acceptedChallenges.length > 0 ? (
+                acceptedChallenges.map((challenge) => {
+                  const isChallenger = challenge.challenger_id === currentPlayer?.id;
+                  const hasUserCheckedIn = challenge.checked_in_at !== null;
+                  const bothCheckedIn = hasUserCheckedIn; // Simplificado para demo
+                  
+                  return (
+                    <Card key={challenge.id} className="bg-gradient-card border-green-500/30 hover:border-green-500/60 transition-all duration-300">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <Avatar className="w-12 h-12">
+                              <AvatarImage src={challenge.challenger.avatar_url || ""} />
+                              <AvatarFallback>{challenge.challenger.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <CardTitle className="text-lg">{challenge.challenger.name}</CardTitle>
+                              <Badge variant="secondary" className="text-xs">{challenge.challenger.rank}</Badge>
+                            </div>
+                            
+                            <Swords className="w-6 h-6 text-primary mx-4" />
+                            
+                            <Avatar className="w-12 h-12">
+                              <AvatarImage src={challenge.challenged.avatar_url || ""} />
+                              <AvatarFallback>{challenge.challenged.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <CardTitle className="text-lg">{challenge.challenged.name}</CardTitle>
+                              <Badge variant="secondary" className="text-xs">{challenge.challenged.rank}</Badge>
+                            </div>
                           </div>
                           
-                          <Swords className="w-6 h-6 text-primary mx-4" />
-                          
-                          <div className="text-foreground font-semibold">Você</div>
+                          <Badge className={getStatusColor(challenge.status)}>
+                            {getStatusLabel(challenge.status)}
+                          </Badge>
                         </div>
-                        
-                        <Badge className={getStatusColor(challenge.status)}>
-                          {getStatusLabel(challenge.status)}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Trophy className="w-4 h-4 mr-2" />
-                            Formato: {getMatchTypeLabel(challenge.matchType)}
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            Agendado para: {challenge.scheduledFor}
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <span className="mr-2">Check-in:</span>
-                            <Badge variant={challenge.checkedIn.challenger ? "default" : "secondary"} className="mr-2 text-xs">
-                              {challenge.challenger.name}: {challenge.checkedIn.challenger ? "✓" : "○"}
-                            </Badge>
-                            <Badge variant={challenge.checkedIn.challenged ? "default" : "secondary"} className="text-xs">
-                              Você: {challenge.checkedIn.challenged ? "✓" : "○"}
-                            </Badge>
-                          </div>
-                        </div>
-                        
-                        <div className="flex space-x-2">
-                          {!challenge.checkedIn.challenged && (
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                              <CheckCircle className="w-4 h-4 mr-2" />
-                              Check-in
-                            </Button>
-                          )}
-                          {challenge.checkedIn.challenger && challenge.checkedIn.challenged && (
-                            <Button size="sm" className="bg-primary hover:bg-primary/90">
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center text-sm text-muted-foreground">
                               <Trophy className="w-4 h-4 mr-2" />
-                              Reportar Resultado
-                            </Button>
-                          )}
+                              Formato: {getMatchTypeLabel(challenge.match_type)}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Calendar className="w-4 h-4 mr-2" />
+                              Aceito em: {format(new Date(challenge.accepted_at!), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <span className="mr-2">Status:</span>
+                              <Badge variant={hasUserCheckedIn ? "default" : "secondary"} className="text-xs">
+                                {hasUserCheckedIn ? "✓ Check-in realizado" : "○ Aguardando check-in"}
+                              </Badge>
+                            </div>
+                            {challenge.message && (
+                              <div className="text-sm p-2 bg-muted rounded italic">
+                                "{challenge.message}"
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex space-x-2">
+                            {!hasUserCheckedIn && (
+                              <Button 
+                                size="sm" 
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={() => checkIn(challenge.id)}
+                                disabled={isCheckingIn}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Check-in
+                              </Button>
+                            )}
+                            {hasUserCheckedIn && (
+                              <ReportMatchDialog challenge={challenge}>
+                                <Button size="sm" className="bg-primary hover:bg-primary/90">
+                                  <Trophy className="w-4 h-4 mr-2" />
+                                  Reportar Resultado
+                                </Button>
+                              </ReportMatchDialog>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                      </CardContent>
+                    </Card>
+                  );
+                })
               ) : (
                 <div className="text-center py-12">
                   <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
@@ -291,14 +348,19 @@ const Challenges = () => {
 
             {/* Histórico de Desafios */}
             <TabsContent value="history" className="space-y-4">
-              {challengeHistory.length > 0 ? (
+              {loadingHistory ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Carregando histórico...</p>
+                </div>
+              ) : challengeHistory.length > 0 ? (
                 challengeHistory.map((challenge) => (
                   <Card key={challenge.id} className="bg-gradient-card border-border/50 hover:border-secondary/30 transition-all duration-300">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                           <Avatar className="w-12 h-12">
-                            <AvatarImage src={challenge.challenger.avatar} />
+                            <AvatarImage src={challenge.challenger.avatar_url || ""} />
                             <AvatarFallback>{challenge.challenger.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div>
@@ -309,23 +371,18 @@ const Challenges = () => {
                           <Swords className="w-6 h-6 text-muted-foreground mx-4" />
                           
                           <Avatar className="w-12 h-12">
-                            <AvatarImage src={typeof challenge.challenged === 'object' ? challenge.challenged.avatar : "/placeholder.svg"} />
-                            <AvatarFallback>
-                              {typeof challenge.challenged === 'object' ? challenge.challenged.name.charAt(0) : 'W'}
-                            </AvatarFallback>
+                            <AvatarImage src={challenge.challenged.avatar_url || ""} />
+                            <AvatarFallback>{challenge.challenged.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <CardTitle className="text-lg">
-                              {typeof challenge.challenged === 'object' ? challenge.challenged.name : 'Wall'}
-                            </CardTitle>
-                            <Badge variant="secondary" className="text-xs">
-                              {typeof challenge.challenged === 'object' ? challenge.challenged.rank : 'Kage'}
-                            </Badge>
+                            <CardTitle className="text-lg">{challenge.challenged.name}</CardTitle>
+                            <Badge variant="secondary" className="text-xs">{challenge.challenged.rank}</Badge>
                           </div>
                         </div>
                         
                         <Badge className={getStatusColor(challenge.status)}>
-                          Concluído
+                          {challenge.status === 'completed' ? 'Concluído' : 
+                           challenge.status === 'expired' ? 'Expirado' : 'Cancelado'}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -335,22 +392,26 @@ const Challenges = () => {
                         <div className="space-y-2">
                           <div className="flex items-center text-sm text-muted-foreground">
                             <Trophy className="w-4 h-4 mr-2" />
-                            Formato: {getMatchTypeLabel(challenge.matchType)}
+                            Formato: {getMatchTypeLabel(challenge.match_type)}
                           </div>
                           <div className="flex items-center text-sm text-muted-foreground">
                             <Calendar className="w-4 h-4 mr-2" />
-                            Concluído em: {challenge.completedAt}
+                            Data: {format(new Date(challenge.created_at), "dd/MM/yyyy", { locale: ptBR })}
                           </div>
+                          {challenge.message && (
+                            <div className="text-sm p-2 bg-muted rounded italic">
+                              "{challenge.message}"
+                            </div>
+                          )}
                         </div>
                         
-                        <div className="text-right">
-                          <div className="font-semibold text-lg text-foreground">
-                            Vencedor: <span className="text-ninja-kage">{challenge.result.winner}</span>
+                        {challenge.status === 'completed' && (
+                          <div className="text-right">
+                            <div className="text-sm text-muted-foreground">
+                              Partida concluída
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            Placar: {challenge.result.score}
-                          </div>
-                        </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
