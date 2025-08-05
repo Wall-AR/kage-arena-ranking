@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,23 +10,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trophy, Target, Star, Users, TrendingUp, Calendar, Shield, User, Save, Flame } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy, Target, Star, Users, TrendingUp, Calendar, Shield, Flame, Crown, Sword, Zap, Eye, User } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navigation from "@/components/ui/navigation";
 import { SkillsRadarChart } from "@/components/profile/SkillsRadarChart";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { EvaluationRequest } from "@/components/profile/EvaluationRequest";
 import StudentsTab from "@/components/profile/StudentsTab";
+import { AvatarUpload } from "@/components/profile/AvatarUpload";
+import { CharacterSelector } from "@/components/profile/CharacterSelector";
+import { MatchHistory } from "@/components/profile/MatchHistory";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
+import { useProfileUpdate } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [editedName, setEditedName] = useState("");
+  const [editedNinjaPhrase, setEditedNinjaPhrase] = useState("");
+  const [editedCharacters, setEditedCharacters] = useState<string[]>([]);
+  const [editedPrivacySettings, setEditedPrivacySettings] = useState<any>({});
+  
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const { playerId } = useParams();
   const navigate = useNavigate();
+  const { updateProfile, isUpdating } = useProfileUpdate();
 
   // Usar playerId da URL ou ID do usuário logado
   const targetUserId = playerId || user?.id;
@@ -58,14 +67,24 @@ export default function Profile() {
     avatar: playerData.avatar_url || "/placeholder.svg",
     lastMatch: playerData.last_match_date || "Nunca",
     privacySettings: playerData.privacy_settings || { evaluation_visibility: "all" },
-    // Pegar primeira avaliação se existir
+    // Pegar última avaliação se existir
     evaluation: playerData.evaluations && playerData.evaluations.length > 0 
-      ? playerData.evaluations[0] 
+      ? playerData.evaluations[playerData.evaluations.length - 1] 
       : null,
     tutor: playerData.evaluations && playerData.evaluations.length > 0 && playerData.evaluations[0].evaluator
       ? playerData.evaluations[0].evaluator
       : null
   } : null;
+
+  // Inicializar valores de edição quando playerData carrega
+  useEffect(() => {
+    if (processedPlayerData && isOwnProfile) {
+      setEditedName(processedPlayerData.name || "");
+      setEditedNinjaPhrase(processedPlayerData.ninjaPhrase || "");
+      setEditedCharacters((processedPlayerData.favoriteCharacters || []).map(char => String(char)));
+      setEditedPrivacySettings(processedPlayerData.privacySettings || {});
+    }
+  }, [processedPlayerData, isOwnProfile]);
 
   // Fallback para dados mock se não houver dados do DB
   const player = processedPlayerData || {
@@ -135,6 +154,28 @@ export default function Profile() {
       return;
     }
     // A lógica está no componente EvaluationRequest
+  };
+
+  const handleSaveProfile = () => {
+    if (!playerData?.id) return;
+
+    updateProfile({
+      playerId: playerData.id,
+      updates: {
+        name: editedName,
+        ninja_phrase: editedNinjaPhrase,
+        favorite_characters: editedCharacters,
+        privacy_settings: editedPrivacySettings
+      }
+    });
+  };
+
+  const handleAvatarUpdate = (newAvatarUrl: string) => {
+    // Avatar é atualizado automaticamente pelo componente AvatarUpload
+    toast({
+      title: "Avatar atualizado!",
+      description: "Sua foto de perfil foi alterada com sucesso.",
+    });
   };
 
   if (loading || isLoading) {
@@ -367,12 +408,12 @@ export default function Profile() {
                   <Calendar className="w-5 h-5 mr-2" />
                   Partidas Recentes
                 </CardTitle>
+                <CardDescription>
+                  Histórico das últimas 10 partidas disputadas
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <div className="text-2xl font-bold text-muted-foreground">Nenhuma partida</div>
-                  <p className="text-sm text-muted-foreground">Histórico de partidas aparecerá aqui</p>
-                </div>
+                <MatchHistory playerId={playerData?.id || ""} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -394,13 +435,28 @@ export default function Profile() {
                     <CardTitle>Configurações do Perfil</CardTitle>
                     <CardDescription>Personalize suas informações públicas</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-6">
+                    {/* Upload de Avatar */}
+                    <div className="space-y-4">
+                      <Label>Avatar do Perfil</Label>
+                      {user && playerData && (
+                        <AvatarUpload
+                          currentAvatar={player.avatar}
+                          playerName={player.name}
+                          userId={user.id}
+                          playerId={playerData.id}
+                          onAvatarUpdate={handleAvatarUpdate}
+                        />
+                      )}
+                    </div>
+                    
                     <div className="space-y-2">
-                      <Label htmlFor="avatar">URL do Avatar</Label>
-                      <Input 
-                        id="avatar" 
-                        placeholder="https://exemplo.com/avatar.jpg"
-                        defaultValue={player.avatar || ""}
+                      <Label htmlFor="name">Nome</Label>
+                      <Input
+                        id="name" 
+                        placeholder="Seu nome ninja"
+                        value={editedName}
+                        onChange={(e) => setEditedName(e.target.value)}
                       />
                     </div>
                     
@@ -409,25 +465,17 @@ export default function Profile() {
                       <Textarea 
                         id="phrase" 
                         placeholder="Sua frase ninja..."
-                        defaultValue={player.ninjaPhrase || ""}
+                        value={editedNinjaPhrase}
+                        onChange={(e) => setEditedNinjaPhrase(e.target.value)}
                         rows={3}
                       />
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="characters">Personagens Favoritos</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione seus personagens" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="naruto">Naruto</SelectItem>
-                          <SelectItem value="sasuke">Sasuke</SelectItem>
-                          <SelectItem value="sakura">Sakura</SelectItem>
-                          <SelectItem value="kakashi">Kakashi</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <CharacterSelector
+                      selectedCharacters={editedCharacters}
+                      onCharactersChange={setEditedCharacters}
+                      maxSelection={3}
+                    />
                   </CardContent>
                 </Card>
 
@@ -445,7 +493,15 @@ export default function Profile() {
                           Permitir que outros vejam suas avaliações
                         </div>
                       </div>
-                      <Switch defaultChecked={player.privacySettings && typeof player.privacySettings === 'object' && 'evaluation_visibility' in player.privacySettings ? (player.privacySettings as any).evaluation_visibility === "all" : false} />
+                      <Switch 
+                        checked={editedPrivacySettings?.evaluation_visibility === "all"}
+                        onCheckedChange={(checked) => 
+                          setEditedPrivacySettings(prev => ({
+                            ...prev,
+                            evaluation_visibility: checked ? "all" : "private"
+                          }))
+                        }
+                      />
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -472,13 +528,22 @@ export default function Profile() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={() => {
-                  toast({
-                    title: "Configurações salvas!",
-                    description: "Suas alterações foram aplicadas com sucesso.",
-                  });
-                }}>
-                  Salvar Configurações
+                <Button 
+                  onClick={handleSaveProfile}
+                  disabled={isUpdating}
+                  className="min-w-32"
+                >
+                  {isUpdating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar Configurações
+                    </>
+                  )}
                 </Button>
               </div>
             </TabsContent>

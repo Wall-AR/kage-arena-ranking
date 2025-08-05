@@ -13,94 +13,144 @@ interface SkillsRadarChartProps {
 }
 
 export const SkillsRadarChart = ({ skills, rankColor, className }: SkillsRadarChartProps) => {
+  const size = 340;
+  const center = size / 2;
+  const maxRadius = 140;
+  
   return (
     <div className={cn("relative w-full h-80 flex items-center justify-center", className)}>
-      <svg width="280" height="280" viewBox="0 0 280 280" className="transform -rotate-90">
-        {/* Grid do radar */}
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-lg">
+        {/* Grids concêntricos com gradiente */}
+        <defs>
+          <radialGradient id="gridGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="hsl(var(--border))" stopOpacity="0.3" />
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge> 
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        
+        {/* Grid circular com efeito gradiente */}
         {[2, 4, 6, 8, 10].map((level) => (
           <circle
             key={level}
-            cx="140"
-            cy="140"
-            r={level * 12}
+            cx={center}
+            cy={center}
+            r={(level / 10) * maxRadius}
             fill="none"
-            stroke="hsl(var(--border))"
-            strokeWidth="1"
-            opacity="0.3"
+            stroke="url(#gridGradient)"
+            strokeWidth={level === 10 ? "2" : "1"}
+            opacity={level === 10 ? "0.8" : "0.4"}
+            className="animate-pulse"
+            style={{ animationDuration: `${3 + level * 0.5}s` }}
           />
         ))}
         
-        {/* Linhas dos eixos */}
+        {/* Linhas dos eixos com gradiente */}
         {skills.map((skill, index) => {
           const angle = (skill.angle * Math.PI) / 180;
-          const x = 140 + Math.cos(angle) * 120;
-          const y = 140 + Math.sin(angle) * 120;
+          const x = center + Math.cos(angle) * maxRadius;
+          const y = center + Math.sin(angle) * maxRadius;
           return (
             <line
               key={index}
-              x1="140"
-              y1="140"
+              x1={center}
+              y1={center}
               x2={x}
               y2={y}
               stroke="hsl(var(--border))"
-              strokeWidth="1"
-              opacity="0.3"
+              strokeWidth="1.5"
+              opacity="0.5"
+              strokeDasharray="5,5"
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
             />
           );
         })}
 
-        {/* Polígono das habilidades */}
+        {/* Área preenchida das habilidades com gradiente */}
+        <defs>
+          <radialGradient id={`skillGradient-${rankColor}`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={`hsl(var(--${rankColor}))`} stopOpacity="0.6" />
+            <stop offset="100%" stopColor={`hsl(var(--${rankColor}))`} stopOpacity="0.1" />
+          </radialGradient>
+        </defs>
+        
         <polygon
           points={skills.map(skill => {
             const angle = (skill.angle * Math.PI) / 180;
-            const radius = (skill.value / 10) * 120;
-            const x = 140 + Math.cos(angle) * radius;
-            const y = 140 + Math.sin(angle) * radius;
+            const radius = Math.max(0, Math.min(10, skill.value)) / 10 * maxRadius;
+            const x = center + Math.cos(angle) * radius;
+            const y = center + Math.sin(angle) * radius;
             return `${x},${y}`;
           }).join(' ')}
-          fill={`hsl(var(--${rankColor}) / 0.3)`}
+          fill={`url(#skillGradient-${rankColor})`}
           stroke={`hsl(var(--${rankColor}))`}
-          strokeWidth="2"
-          className="drop-shadow-lg"
+          strokeWidth="3"
+          filter="url(#glow)"
+          className="animate-scale-in drop-shadow-2xl"
         />
 
-        {/* Pontos das habilidades */}
+        {/* Pontos das habilidades com animação */}
         {skills.map((skill, index) => {
           const angle = (skill.angle * Math.PI) / 180;
-          const radius = (skill.value / 10) * 120;
-          const x = 140 + Math.cos(angle) * radius;
-          const y = 140 + Math.sin(angle) * radius;
+          const radius = Math.max(0, Math.min(10, skill.value)) / 10 * maxRadius;
+          const x = center + Math.cos(angle) * radius;
+          const y = center + Math.sin(angle) * radius;
           return (
-            <circle
-              key={index}
-              cx={x}
-              cy={y}
-              r="4"
-              fill={`hsl(var(--${rankColor}))`}
-              className="drop-shadow-md"
-            />
+            <g key={index}>
+              <circle
+                cx={x}
+                cy={y}
+                r="8"
+                fill={`hsl(var(--${rankColor}))`}
+                stroke="hsl(var(--background))"
+                strokeWidth="2"
+                filter="url(#glow)"
+                className="animate-scale-in hover:scale-125 transition-transform cursor-pointer"
+                style={{ animationDelay: `${index * 0.1 + 0.5}s` }}
+              />
+              <circle
+                cx={x}
+                cy={y}
+                r="3"
+                fill="hsl(var(--background))"
+                className="animate-scale-in"
+                style={{ animationDelay: `${index * 0.1 + 0.7}s` }}
+              />
+            </g>
           );
         })}
       </svg>
 
-      {/* Labels das habilidades */}
+      {/* Labels das habilidades com posicionamento melhorado */}
       {skills.map((skill, index) => {
         const angle = (skill.angle * Math.PI) / 180;
-        const x = 140 + Math.cos(angle) * 150;
-        const y = 140 + Math.sin(angle) * 150;
+        const labelRadius = maxRadius + 30;
+        const x = center + Math.cos(angle) * labelRadius;
+        const y = center + Math.sin(angle) * labelRadius;
         
         return (
           <div
             key={index}
-            className="absolute text-xs font-semibold text-center transition-all duration-300 hover:scale-110"
+            className="absolute text-sm font-bold text-center transition-all duration-300 hover:scale-110 cursor-default"
             style={{
-              left: `${x - 25}px`,
-              top: `${y - 10}px`,
-              width: '50px'
+              left: `${x - 30}px`,
+              top: `${y - 15}px`,
+              width: '60px',
+              animationDelay: `${index * 0.1}s`
             }}
           >
-            {skill.name}
-            <div className="text-accent font-bold">{skill.value.toFixed(1)}</div>
+            <div className="text-foreground">{skill.name}</div>
+            <div className={`text-${rankColor} font-extrabold text-lg`}>
+              {skill.value.toFixed(1)}
+            </div>
+            <div className="text-xs text-muted-foreground">/10</div>
           </div>
         );
       })}
