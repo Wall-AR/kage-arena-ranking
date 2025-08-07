@@ -570,6 +570,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      set_initial_admin: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       update_kage_titles: {
         Args: Record<PropertyKey, never>
         Returns: undefined
