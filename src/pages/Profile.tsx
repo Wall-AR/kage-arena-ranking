@@ -17,7 +17,7 @@ import Navigation from "@/components/ui/navigation";
 import { SkillsRadarChart } from "@/components/profile/SkillsRadarChart";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { EvaluationRequest } from "@/components/profile/EvaluationRequest";
-import StudentsTab from "@/components/profile/StudentsTab";
+import { StudentsTab } from "@/components/profile/StudentsTab";
 import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import { CharacterSelector } from "@/components/profile/CharacterSelector";
 import { MatchHistory } from "@/components/profile/MatchHistory";

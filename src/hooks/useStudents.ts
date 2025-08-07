@@ -5,26 +5,17 @@ export const useStudents = (evaluatorId?: string) => {
   return useQuery({
     queryKey: ['students', evaluatorId],
     queryFn: async () => {
-      if (!evaluatorId) return [];
+      if (!evaluatorId) throw new Error('Evaluator ID is required');
       
       const { data, error } = await supabase
         .from('players')
         .select(`
-          id,
-          name,
-          avatar_url,
-          rank_level,
-          current_points,
-          wins,
-          losses,
-          is_ranked,
-          created_at,
-          evaluations:evaluations!evaluations_player_id_fkey(
+          *,
+          evaluations:evaluations!player_id(
             id,
             status,
             created_at,
             evaluated_at,
-            initial_rank,
             pin_score,
             defense_score,
             aerial_score,
@@ -33,12 +24,10 @@ export const useStudents = (evaluatorId?: string) => {
             resource_score,
             dash_score,
             general_score,
-            tips,
-            comments
+            tips
           )
         `)
         .eq('tutor_id', evaluatorId)
-        .eq('is_ranked', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -52,27 +41,17 @@ export const useEvaluationHistory = (evaluatorId?: string) => {
   return useQuery({
     queryKey: ['evaluation-history', evaluatorId],
     queryFn: async () => {
-      if (!evaluatorId) return [];
+      if (!evaluatorId) throw new Error('Evaluator ID is required');
       
       const { data, error } = await supabase
-        .from('evaluation_results')
+        .from('evaluations')
         .select(`
           *,
-          evaluations:evaluation_id(
-            id,
-            created_at,
-            player_id
-          ),
-          players:player_id(
-            id,
-            name,
-            avatar_url,
-            rank_level,
-            current_points
-          )
+          players:player_id(name, avatar_url, rank)
         `)
         .eq('evaluator_id', evaluatorId)
-        .order('created_at', { ascending: false });
+        .eq('status', 'completed')
+        .order('evaluated_at', { ascending: false });
 
       if (error) throw error;
       return data || [];

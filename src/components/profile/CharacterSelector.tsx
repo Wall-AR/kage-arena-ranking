@@ -4,8 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, Search, User } from "lucide-react";
 import { NARUTO_CHARACTERS } from "@/hooks/useProfile";
+import { useCharacterImages, getCharacterImageUrl } from "@/hooks/useCharacterImages";
 
 interface CharacterSelectorProps {
   selectedCharacters: string[];
@@ -19,6 +21,7 @@ export const CharacterSelector = ({
   maxSelection = 3 
 }: CharacterSelectorProps) => {
   const [search, setSearch] = useState("");
+  const { data: characterImages = [] } = useCharacterImages();
 
   const filteredCharacters = NARUTO_CHARACTERS.filter(character =>
     character.toLowerCase().includes(search.toLowerCase()) &&
@@ -52,19 +55,27 @@ export const CharacterSelector = ({
           <Label className="text-sm font-medium">Selecionados:</Label>
           <div className="flex flex-wrap gap-2">
             {selectedCharacters.map((character) => (
-              <Badge 
+              <div 
                 key={character} 
-                variant="secondary" 
-                className="flex items-center gap-1 px-3 py-1"
+                className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2"
               >
-                {character}
+                <Avatar className="w-8 h-8">
+                  <AvatarImage 
+                    src={getCharacterImageUrl(character, characterImages)} 
+                    alt={character}
+                  />
+                  <AvatarFallback className="text-xs">
+                    {character.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium">{character}</span>
                 <button
                   onClick={() => handleCharacterRemove(character)}
-                  className="hover:bg-destructive/20 rounded-full p-0.5"
+                  className="hover:bg-destructive/20 rounded-full p-1"
                 >
                   <X className="w-3 h-3" />
                 </button>
-              </Badge>
+              </div>
             ))}
           </div>
         </div>
@@ -93,10 +104,18 @@ export const CharacterSelector = ({
                 size="sm"
                 onClick={() => handleCharacterSelect(character)}
                 disabled={selectedCharacters.length >= maxSelection}
-                className="w-full justify-start h-auto p-2 text-left"
+                className="w-full justify-start h-auto p-3 text-left"
               >
-                <User className="w-4 h-4 mr-2 shrink-0" />
-                {character}
+                <Avatar className="w-8 h-8 mr-3 shrink-0">
+                  <AvatarImage 
+                    src={getCharacterImageUrl(character, characterImages)} 
+                    alt={character}
+                  />
+                  <AvatarFallback className="text-xs">
+                    {character.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm">{character}</span>
               </Button>
             ))
           ) : (

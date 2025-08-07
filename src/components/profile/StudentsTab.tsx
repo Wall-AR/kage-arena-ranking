@@ -1,16 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { Trophy, User, Target, Calendar, Star } from "lucide-react";
+import { Trophy, User, Target, Calendar, Star, GraduationCap } from "lucide-react";
 import { useStudents, useEvaluationHistory } from "@/hooks/useStudents";
 
 interface StudentsTabProps {
   evaluatorId: string;
 }
 
-const StudentsTab = ({ evaluatorId }: StudentsTabProps) => {
+export const StudentsTab = ({ evaluatorId }: StudentsTabProps) => {
   const { data: students = [], isLoading: loadingStudents } = useStudents(evaluatorId);
   const { data: evaluationHistory = [], isLoading: loadingHistory } = useEvaluationHistory(evaluatorId);
 
@@ -225,4 +226,3 @@ const StudentsTab = ({ evaluatorId }: StudentsTabProps) => {
   );
 };
 
-export default StudentsTab;

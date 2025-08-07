@@ -71,6 +71,27 @@ export type Database = {
           },
         ]
       }
+      character_images: {
+        Row: {
+          character_name: string
+          created_at: string
+          id: string
+          image_url: string
+        }
+        Insert: {
+          character_name: string
+          created_at?: string
+          id?: string
+          image_url: string
+        }
+        Update: {
+          character_name?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+        }
+        Relationships: []
+      }
       evaluation_results: {
         Row: {
           aerial_score: number | null
