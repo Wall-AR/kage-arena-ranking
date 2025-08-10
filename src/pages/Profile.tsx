@@ -27,7 +27,6 @@ import { cn } from "@/lib/utils";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState("overview");
-  const [editedName, setEditedName] = useState("");
   const [editedNinjaPhrase, setEditedNinjaPhrase] = useState("");
   const [editedCharacters, setEditedCharacters] = useState<string[]>([]);
   const [editedPrivacySettings, setEditedPrivacySettings] = useState<any>({});
@@ -50,41 +49,41 @@ export default function Profile() {
     }
   }, [user, loading, playerId, navigate]);
 
-  // Dados processados do jogador
-  const processedPlayerData = playerData ? {
-    ...playerData,
-    // Mapear campos do DB para interface do componente
-    winRate: playerData.wins + playerData.losses > 0 
-      ? Math.round((playerData.wins / (playerData.wins + playerData.losses)) * 100) 
-      : 0,
-    winStreak: playerData.win_streak || 0,
-    isRanked: playerData.is_ranked,
-    favoriteCharacters: Array.isArray(playerData.favorite_characters) 
-      ? playerData.favorite_characters 
-      : [],
-    achievements: [],
-    ninjaPhrase: playerData.ninja_phrase || "Esse é o meu jeito ninja de ser!",
-    avatar: playerData.avatar_url || "/placeholder.svg",
-    lastMatch: playerData.last_match_date || "Nunca",
-    privacySettings: playerData.privacy_settings || { evaluation_visibility: "all" },
-    // Pegar última avaliação se existir
-    evaluation: playerData.evaluations && playerData.evaluations.length > 0 
-      ? playerData.evaluations[playerData.evaluations.length - 1] 
-      : null,
-    tutor: playerData.evaluations && playerData.evaluations.length > 0 && playerData.evaluations[0].evaluator
-      ? playerData.evaluations[0].evaluator
-      : null
-  } : null;
+// Dados processados do jogador
+const processedPlayerData = playerData ? {
+  ...playerData,
+  // Mapear campos do DB para interface do componente
+  points: playerData.current_points ?? playerData.points ?? 0,
+  winRate: playerData.wins + playerData.losses > 0 
+    ? Math.round((playerData.wins / (playerData.wins + playerData.losses)) * 100) 
+    : 0,
+  winStreak: playerData.win_streak || 0,
+  isRanked: playerData.is_ranked,
+  favoriteCharacters: Array.isArray(playerData.favorite_characters) 
+    ? playerData.favorite_characters 
+    : [],
+  achievements: [],
+  ninjaPhrase: playerData.ninja_phrase || "Esse é o meu jeito ninja de ser!",
+  avatar: playerData.avatar_url || "/placeholder.svg",
+  lastMatch: playerData.last_match_date || "Nunca",
+  privacySettings: playerData.privacy_settings || { evaluation_visibility: "all" },
+  // Pegar última avaliação se existir
+  evaluation: playerData.evaluations && playerData.evaluations.length > 0 
+    ? playerData.evaluations[playerData.evaluations.length - 1] 
+    : null,
+  tutor: playerData.evaluations && playerData.evaluations.length > 0 && playerData.evaluations[0].evaluator
+    ? playerData.evaluations[0].evaluator
+    : null
+} : null;
 
-  // Inicializar valores de edição quando playerData carrega
-  useEffect(() => {
-    if (processedPlayerData && isOwnProfile) {
-      setEditedName(processedPlayerData.name || "");
-      setEditedNinjaPhrase(processedPlayerData.ninjaPhrase || "");
-      setEditedCharacters((processedPlayerData.favoriteCharacters || []).map(char => String(char)));
-      setEditedPrivacySettings(processedPlayerData.privacySettings || {});
-    }
-  }, [processedPlayerData, isOwnProfile]);
+// Inicializar valores de edição quando playerData carrega
+useEffect(() => {
+  if (processedPlayerData && isOwnProfile) {
+    setEditedNinjaPhrase(processedPlayerData.ninjaPhrase || "");
+    setEditedCharacters((processedPlayerData.favoriteCharacters || []).map(char => String(char)));
+    setEditedPrivacySettings(processedPlayerData.privacySettings || {});
+  }
+}, [processedPlayerData, isOwnProfile]);
 
   // Fallback para dados mock se não houver dados do DB
   const player = processedPlayerData || {
@@ -162,7 +161,6 @@ export default function Profile() {
     updateProfile({
       playerId: playerData.id,
       updates: {
-        name: editedName,
         ninja_phrase: editedNinjaPhrase,
         favorite_characters: editedCharacters,
         privacy_settings: editedPrivacySettings
@@ -203,7 +201,6 @@ export default function Profile() {
         <ProfileHeader 
           player={player} 
           rankColor={rankColor}
-          onRequestEvaluation={handleRequestEvaluation}
         />
 
         {/* Conteúdo Principal */}
@@ -450,15 +447,6 @@ export default function Profile() {
                       )}
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Nome</Label>
-                      <Input
-                        id="name" 
-                        placeholder="Seu nome ninja"
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                      />
-                    </div>
                     
                     <div className="space-y-2">
                       <Label htmlFor="phrase">Frase Ninja</Label>

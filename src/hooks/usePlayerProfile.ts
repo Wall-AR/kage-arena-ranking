@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export const usePlayerProfile = (userId?: string) => {
+export const usePlayerProfile = (id?: string) => {
   return useQuery({
-    queryKey: ['player-profile', userId],
+    queryKey: ['player-profile', id],
     queryFn: async () => {
-      if (!userId) throw new Error('User ID is required');
+      if (!id) throw new Error('User or Player ID is required');
       
       const { data: player, error } = await supabase
         .from('players')
@@ -16,8 +16,9 @@ export const usePlayerProfile = (userId?: string) => {
             evaluator:evaluator_id(name, avatar_url, ninja_phrase)
           )
         `)
-        .eq('user_id', userId)
-        .single();
+        .or(`user_id.eq.${id},id.eq.${id}`)
+        .limit(1)
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         throw error;
@@ -25,7 +26,7 @@ export const usePlayerProfile = (userId?: string) => {
 
       return player;
     },
-    enabled: !!userId
+    enabled: !!id
   });
 };
 
