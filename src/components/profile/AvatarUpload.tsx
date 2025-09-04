@@ -66,7 +66,7 @@ export const AvatarUpload = ({
       
       // Atualizar o perfil com a nova URL do avatar
       updateProfile({
-        playerId,
+        userId,
         updates: { avatar_url: avatarUrl }
       });
 

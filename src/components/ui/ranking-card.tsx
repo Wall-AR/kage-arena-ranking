@@ -126,19 +126,20 @@ const RankingCard = ({ player }: RankingCardProps) => {
               <span className="text-xs font-medium text-muted-foreground">PERSONAGENS</span>
               <div className="flex space-x-1">
                 {player.favoriteCharacters.slice(0, 3).map((character, index) => (
-                  <Avatar key={index} className="w-8 h-8 ring-1 ring-border">
+                  <Avatar key={index} className="w-10 h-10 ring-1 ring-border hover:ring-primary/50 transition-all duration-200">
                     <AvatarImage 
                       src={getCharacterImageUrl(character, characterImages)}
                       alt={character}
+                      className="object-cover"
                     />
-                    <AvatarFallback className="text-xs">
+                    <AvatarFallback className="text-xs bg-primary/10 text-primary">
                       {character.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                 ))}
                 {player.favoriteCharacters.length < 3 && 
                   Array.from({ length: 3 - player.favoriteCharacters.length }).map((_, index) => (
-                    <div key={index} className="w-8 h-8 rounded-full bg-muted border border-dashed border-muted-foreground/30 flex items-center justify-center">
+                    <div key={index} className="w-10 h-10 rounded-full bg-muted border border-dashed border-muted-foreground/30 flex items-center justify-center">
                       <span className="text-xs text-muted-foreground">?</span>
                     </div>
                   ))

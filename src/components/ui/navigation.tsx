@@ -44,7 +44,7 @@ const Navigation = ({ currentPage }: NavigationProps) => {
   const currentUser = user ? {
     name: currentPlayer?.name || user.user_metadata?.name || "Ninja",
     rank: currentPlayer?.rank || "Unranked",
-    avatar: currentPlayer?.avatar_url || "/placeholder.svg",
+    avatar: currentPlayer?.avatar_url,
     isModerator: currentPlayer?.is_moderator || false,
     notifications: 3
   } : null;

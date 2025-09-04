@@ -10,6 +10,7 @@ interface ProfileHeaderProps {
     rank: string;
     points: number;
     avatar?: string;
+    avatar_url?: string;
     ninjaPhrase: string;
     achievements: string[];
     isRanked: boolean;
@@ -43,7 +44,11 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
                 "w-24 h-24 ring-4 transition-all duration-300 hover:scale-105",
                 !player.isRanked ? "ring-muted/30 grayscale" : `ring-${rankColor}/60`
               )}>
-                <AvatarImage src={player.avatar} alt={player.name} />
+                <AvatarImage 
+                  src={player.avatar || player.avatar_url} 
+                  alt={player.name} 
+                  className="object-cover"
+                />
                 <AvatarFallback className={cn(
                   "text-2xl font-bold transition-all duration-300",
                   !player.isRanked 

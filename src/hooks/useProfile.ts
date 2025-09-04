@@ -10,9 +10,8 @@ export const useProfileUpdate = () => {
 
   const updateProfile = useMutation({
     mutationFn: async (data: {
-      playerId: string;
+      userId: string;
       updates: {
-        name?: string;
         ninja_phrase?: string;
         avatar_url?: string;
         favorite_characters?: string[];
@@ -22,12 +21,13 @@ export const useProfileUpdate = () => {
       const { error } = await supabase
         .from('players')
         .update(data.updates)
-        .eq('id', data.playerId);
+        .eq('user_id', data.userId);
 
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['player-profile'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['player-profile', variables.userId] });
+      queryClient.invalidateQueries({ queryKey: ['currentPlayer', variables.userId] });
       toast({
         title: "Perfil atualizado!",
         description: "Suas informações foram salvas com sucesso.",

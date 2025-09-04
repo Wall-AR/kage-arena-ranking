@@ -156,10 +156,10 @@ useEffect(() => {
   };
 
   const handleSaveProfile = () => {
-    if (!playerData?.id) return;
+    if (!user?.id) return;
 
     updateProfile({
-      playerId: playerData.id,
+      userId: user.id,
       updates: {
         ninja_phrase: editedNinjaPhrase,
         favorite_characters: editedCharacters,
