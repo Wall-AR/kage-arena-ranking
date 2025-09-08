@@ -64,7 +64,7 @@ const processedPlayerData = playerData ? {
     : [],
   achievements: [],
   ninjaPhrase: playerData.ninja_phrase || "Esse é o meu jeito ninja de ser!",
-  avatar: playerData.avatar_url || "/placeholder.svg",
+  avatar_url: playerData.avatar_url || null,
   lastMatch: playerData.last_match_date || "Nunca",
   privacySettings: playerData.privacy_settings || { evaluation_visibility: "all" },
   // Pegar última avaliação se existir
@@ -99,7 +99,7 @@ useEffect(() => {
     favoriteCharacters: [],
     achievements: [],
     ninjaPhrase: "Esse é o meu jeito ninja de ser!",
-    avatar: "/placeholder.svg",
+    avatar_url: null,
     lastMatch: "Nunca",
     privacySettings: { evaluation_visibility: "all" },
     tutor: null,
@@ -156,7 +156,21 @@ useEffect(() => {
   };
 
   const handleSaveProfile = () => {
-    if (!user?.id) return;
+    console.log('Saving profile - user:', user);
+    console.log('Saving profile - updates:', {
+      ninja_phrase: editedNinjaPhrase,
+      favorite_characters: editedCharacters,
+      privacy_settings: editedPrivacySettings
+    });
+    
+    if (!user?.id) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar logado para salvar.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     updateProfile({
       userId: user.id,
@@ -438,7 +452,7 @@ useEffect(() => {
                       <Label>Avatar do Perfil</Label>
                       {user && playerData && (
                         <AvatarUpload
-                          currentAvatar={player.avatar}
+                          currentAvatar={player.avatar_url}
                           playerName={player.name}
                           userId={user.id}
                           playerId={playerData.id}

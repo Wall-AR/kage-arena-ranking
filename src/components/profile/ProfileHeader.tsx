@@ -45,7 +45,7 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
                 !player.isRanked ? "ring-muted/30 grayscale" : `ring-${rankColor}/60`
               )}>
                 <AvatarImage 
-                  src={player.avatar || player.avatar_url} 
+                  src={player.avatar_url || player.avatar || "/placeholder.svg"} 
                   alt={player.name} 
                   className="object-cover"
                 />
