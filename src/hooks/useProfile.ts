@@ -18,12 +18,19 @@ export const useProfileUpdate = () => {
         privacy_settings?: any;
       };
     }) => {
-      const { error } = await supabase
+      console.log('Updating profile:', data);
+      const { data: result, error } = await supabase
         .from('players')
         .update(data.updates)
-        .eq('user_id', data.userId);
+        .eq('user_id', data.userId)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Profile update error:', error);
+        throw error;
+      }
+      return result;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['player-profile', variables.userId] });
