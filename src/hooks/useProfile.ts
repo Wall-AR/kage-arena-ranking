@@ -19,6 +19,9 @@ export const useProfileUpdate = () => {
       };
     }) => {
       console.log('Updating profile:', data);
+      console.log('User ID for update:', data.userId);
+      console.log('Updates:', data.updates);
+      
       const { data: result, error } = await supabase
         .from('players')
         .update(data.updates)
@@ -28,8 +31,10 @@ export const useProfileUpdate = () => {
 
       if (error) {
         console.error('Profile update error:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
+      console.log('Profile update successful:', result);
       return result;
     },
     onSuccess: (_, variables) => {
