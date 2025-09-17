@@ -31,11 +31,6 @@ export default function Admin() {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log('Admin Debug - currentPlayer:', currentPlayer);
-    console.log('Admin Debug - user:', user);
-    console.log('Admin Debug - playerLoading:', playerLoading);
-    console.log('Admin Debug - currentPlayer?.is_admin:', currentPlayer?.is_admin);
-    
     if (currentPlayer?.is_admin) {
       fetchPlayers();
     }
@@ -118,10 +113,6 @@ export default function Admin() {
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold mb-4">Acesso Negado</h1>
         <p>Apenas administradores podem acessar esta página.</p>
-        <p className="text-sm text-muted-foreground">User ID: {user?.id}</p>
-        <p className="text-sm text-muted-foreground">Admin: {currentPlayer?.is_admin ? 'true' : 'false'}</p>
-        <p className="text-sm text-muted-foreground">CurrentPlayer: {JSON.stringify(currentPlayer)}</p>
-        <p className="text-sm text-muted-foreground">PlayerLoading: {playerLoading ? 'true' : 'false'}</p>
       </div>
     );
   }

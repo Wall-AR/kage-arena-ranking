@@ -591,6 +591,14 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      make_user_admin: {
+        Args: { user_email: string }
+        Returns: string
+      }
+      make_user_moderator: {
+        Args: { user_email: string }
+        Returns: string
+      }
       set_initial_admin: {
         Args: { target_user_id: string }
         Returns: undefined
