@@ -14,6 +14,9 @@ interface ProfileHeaderProps {
     ninjaPhrase: string;
     achievements: string[];
     isRanked: boolean;
+    isAdmin?: boolean;
+    isModerator?: boolean;
+    role?: string;
   };
   rankColor: string;
   onRequestEvaluation?: () => void;
@@ -71,14 +74,28 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
                 {player.name}
               </h1>
               
-              <Badge variant="secondary" className={cn(
-                "text-lg px-4 py-2 font-bold mb-3 transition-all duration-300",
-                !player.isRanked 
-                  ? "bg-muted/20 text-muted-foreground border-muted/30" 
-                  : `bg-${rankColor}/20 text-${rankColor} border-${rankColor}/30`
-              )}>
-                {player.isRanked ? player.rank : "Não Rankeado"}
-              </Badge>
+              <div className="flex items-center space-x-2 mb-3">
+                <Badge variant="secondary" className={cn(
+                  "text-lg px-4 py-2 font-bold transition-all duration-300",
+                  !player.isRanked 
+                    ? "bg-muted/20 text-muted-foreground border-muted/30" 
+                    : `bg-${rankColor}/20 text-${rankColor} border-${rankColor}/30`
+                )}>
+                  {player.isRanked ? player.rank : "Não Rankeado"}
+                </Badge>
+                
+                {player.isAdmin && (
+                  <Badge variant="destructive" className="text-xs">
+                    ADMIN
+                  </Badge>
+                )}
+                
+                {player.isModerator && !player.isAdmin && (
+                  <Badge variant="outline" className="text-xs border-accent text-accent">
+                    MODERADOR
+                  </Badge>
+                )}
+              </div>
               
               <p className={cn(
                 "italic transition-all duration-300",

@@ -59,6 +59,9 @@ const processedPlayerData = playerData ? {
     : 0,
   winStreak: playerData.win_streak || 0,
   isRanked: playerData.is_ranked,
+  isAdmin: playerData.is_admin,
+  isModerator: playerData.is_moderator,
+  role: playerData.role,
   favoriteCharacters: Array.isArray(playerData.favorite_characters) 
     ? playerData.favorite_characters 
     : [],
@@ -96,6 +99,9 @@ useEffect(() => {
     winRate: 0,
     winStreak: 0,
     isRanked: false,
+    isAdmin: false,
+    isModerator: false,
+    role: "player",
     favoriteCharacters: [],
     achievements: [],
     ninjaPhrase: "Esse é o meu jeito ninja de ser!",
@@ -156,13 +162,6 @@ useEffect(() => {
   };
 
   const handleSaveProfile = () => {
-    console.log('Saving profile - user:', user);
-    console.log('Saving profile - updates:', {
-      ninja_phrase: editedNinjaPhrase,
-      favorite_characters: editedCharacters,
-      privacy_settings: editedPrivacySettings
-    });
-    
     if (!user?.id) {
       toast({
         title: "Erro de autenticação",
@@ -329,7 +328,7 @@ useEffect(() => {
             )}
 
             {/* Solicitar Avaliação para não rankeados */}
-            {!player.isRanked && isOwnProfile && user && (
+            {!player.isRanked && isOwnProfile && user && playerData?.id && (
               <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -343,7 +342,7 @@ useEffect(() => {
                 <CardContent>
                   <div className="text-center py-4">
                     <EvaluationRequest 
-                      playerId={playerData?.id || ""}
+                      playerId={playerData.id}
                       onRequestSent={() => {
                         toast({
                           title: "Solicitação enviada!",
@@ -424,7 +423,14 @@ useEffect(() => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <MatchHistory playerId={playerData?.id || ""} />
+                {playerData?.id ? (
+                  <MatchHistory playerId={playerData.id} />
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                    <p className="text-muted-foreground">Histórico não disponível</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -432,7 +438,18 @@ useEffect(() => {
           {/* Aba: Alunos (apenas para moderadores) */}
           {isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) && (
             <TabsContent value="students" className="space-y-6">
-              <StudentsTab evaluatorId={playerData.id} />
+              {playerData?.id ? (
+                <StudentsTab evaluatorId={playerData.id} />
+              ) : (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center py-8">
+                      <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                      <p className="text-muted-foreground">Dados de alunos não disponíveis</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
           )}
 
