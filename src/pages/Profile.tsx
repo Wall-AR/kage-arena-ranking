@@ -88,12 +88,24 @@ useEffect(() => {
   }
 }, [processedPlayerData, isOwnProfile]);
 
-  // Fallback para dados mock se não houver dados do DB
+  // Se não há dados processados, mostrar loading ou erro
+  if (!processedPlayerData && !loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <h1 className="text-2xl font-bold mb-4">Perfil não encontrado</h1>
+          <p className="text-muted-foreground">Este jogador não foi encontrado ou não possui perfil ativo.</p>
+        </div>
+      </div>
+    );
+  }
+
   const player = processedPlayerData || {
-    id: targetUserId || "mock-id",
-    name: user?.user_metadata?.name || "Ninja Desconhecido",
+    id: targetUserId || "",
+    name: "Carregando...",
     rank: "Unranked",
-    points: 1000,
+    points: 0,
     wins: 0,
     losses: 0,
     winRate: 0,

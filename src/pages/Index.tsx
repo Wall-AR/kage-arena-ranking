@@ -8,6 +8,8 @@ import { Trophy, Swords, Users, Target, TrendingUp, Flame, User } from "lucide-r
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTopPlayers } from "@/hooks/usePlayers";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 // Homepage do Kage Arena - Portal de Ranking Naruto Ultimate Ninja 5
 // Criado por Wall - Página principal com hero section e overview do ranking
@@ -17,33 +19,78 @@ const Index = () => {
   // Buscar top 3 players
   const { data: topKages = [] } = useTopPlayers(3);
 
-  // Estatísticas gerais mockadas
+  // Buscar dados reais para estatísticas
+  const { data: allPlayers = [] } = useQuery({
+    queryKey: ['all-players-stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('id, wins, losses, last_match_date, is_ranked')
+        .eq('is_ranked', true);
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const { data: tournaments = [] } = useQuery({
+    queryKey: ['active-tournaments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tournaments')
+        .select('id, status')
+        .in('status', ['registration', 'ongoing']);
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const { data: recentMatches = [] } = useQuery({
+    queryKey: ['recent-matches'],
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('matches')
+        .select('id, played_at')
+        .gte('played_at', today);
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Calcular estatísticas reais
+  const totalWins = allPlayers.reduce((acc, p) => acc + (p.wins || 0), 0);
+  const totalLosses = allPlayers.reduce((acc, p) => acc + (p.losses || 0), 0);
+  const avgWinRate = totalWins + totalLosses > 0 ? Math.round((totalWins / (totalWins + totalLosses)) * 100) : 0;
+  
   const stats = [
-    { icon: Users, label: "Ninjas Ativos", value: "847", color: "text-ninja-jounin" },
-    { icon: Swords, label: "Batalhas Hoje", value: "23", color: "text-primary" },
-    { icon: Trophy, label: "Torneios Ativos", value: "5", color: "text-ninja-kage" },
-    { icon: Target, label: "Taxa Média", value: "68%", color: "text-ninja-chunin" }
+    { icon: Users, label: "Ninjas Ativos", value: allPlayers.length.toString(), color: "text-ninja-jounin" },
+    { icon: Swords, label: "Batalhas Hoje", value: recentMatches.length.toString(), color: "text-primary" },
+    { icon: Trophy, label: "Torneios Ativos", value: tournaments.length.toString(), color: "text-ninja-kage" },
+    { icon: Target, label: "Taxa Média", value: `${avgWinRate}%`, color: "text-ninja-chunin" }
   ];
 
-  // Updates recentes mockados
+  // Updates baseados em dados reais (simplificado)
   const recentUpdates = [
     {
-      title: "Novo Sistema de Imunidade",
-      description: "Implementado sistema de proteção para os top players",
-      date: "14/01/2025",
-      type: "feature"
+      title: "Sistema de Ranking Ativo",
+      description: `${allPlayers.length} ninjas rankeados competindo na arena`,
+      date: new Date().toLocaleDateString('pt-BR'),
+      type: "ranking"
     },
     {
-      title: "Torneio Sannin iniciado",
-      description: "16 jogadores competem pelo título de Sannin Supremo",
-      date: "13/01/2025", 
+      title: "Torneios Disponíveis",
+      description: `${tournaments.length} torneios ativos para participação`,
+      date: new Date(Date.now() - 86400000).toLocaleDateString('pt-BR'),
       type: "tournament"
     },
     {
-      title: "Ranking atualizado",
-      description: "Novas posições após as batalhas de ontem",
-      date: "12/01/2025",
-      type: "ranking"
+      title: "Batalhas Recentes",
+      description: `${recentMatches.length} partidas disputadas hoje`,
+      date: new Date(Date.now() - 172800000).toLocaleDateString('pt-BR'),
+      type: "feature"
     }
   ];
 

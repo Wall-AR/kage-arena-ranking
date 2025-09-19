@@ -8,96 +8,48 @@ import { Progress } from "@/components/ui/progress";
 import { Trophy, Users, Calendar, Clock, Award, Plus, Eye } from "lucide-react";
 import Navigation from "@/components/ui/navigation";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 // Página de Torneios - Kage Arena
 // Criado por Wall - Sistema completo de torneios com brackets e gerenciamento
 const Tournaments = () => {
   const [activeTab, setActiveTab] = useState("active");
 
-  // Mock data - futuramente virá do backend
-  const activeTournaments = [
-    {
-      id: 1,
-      name: "Copa Hokage 2025",
-      description: "Torneio oficial mensal para determinar o melhor ninja",
-      type: "single_elimination",
-      maxParticipants: 32,
-      currentParticipants: 28,
-      registrationEnd: "2025-01-30",
-      tournamentStart: "2025-02-01",
-      status: "registration",
-      prize: "Título de Hokage do Mês + 500 pontos",
-      createdBy: "Wall"
-    },
-    {
-      id: 2,
-      name: "Batalha dos Clãs",
-      description: "Competição especial entre os principais clãs ninja",
-      type: "round_robin",
-      maxParticipants: 16,
-      currentParticipants: 16,
-      registrationEnd: "2025-01-25",
-      tournamentStart: "2025-01-26",
-      status: "ongoing",
-      prize: "300 pontos + Badge especial",
-      createdBy: "ShadowMaster"
+  // Buscar dados reais dos torneios
+  const { data: allTournaments = [] } = useQuery({
+    queryKey: ['tournaments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tournaments')
+        .select(`
+          *,
+          creator:players!tournaments_created_by_fkey(name),
+          winner:players!tournaments_winner_id_fkey(name)
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     }
-  ];
+  });
 
-  const upcomingTournaments = [
-    {
-      id: 3,
-      name: "Exame Chunin",
-      description: "Torneio especial para jogadores Genin e Chunin",
-      type: "double_elimination",
-      maxParticipants: 24,
-      currentParticipants: 0,
-      registrationStart: "2025-02-10",
-      registrationEnd: "2025-02-20",
-      tournamentStart: "2025-02-22",
-      status: "upcoming",
-      prize: "Promoção automática de rank",
-      createdBy: "Wall"
-    }
-  ];
+  // Filtrar torneios por status
+  const activeTournaments = allTournaments.filter(t => 
+    t.status === 'registration' || t.status === 'ongoing'
+  );
+  
+  const upcomingTournaments = allTournaments.filter(t => 
+    t.status === 'upcoming'
+  );
+  
+  const completedTournaments = allTournaments.filter(t => 
+    t.status === 'completed'
+  );
 
-  const completedTournaments = [
-    {
-      id: 4,
-      name: "Torneio de Ano Novo",
-      description: "Celebração especial de início de ano",
-      type: "single_elimination",
-      participants: 32,
-      winner: "Campeão",
-      completedAt: "2025-01-15",
-      prize: "Título de Campeão + 1000 pontos"
-    }
-  ];
-
-  const mockBracket = [
-    {
-      round: "Quartas de Final",
-      matches: [
-        { player1: "Jogador1", player2: "Jogador2", winner: "Jogador1", score: "3-1" },
-        { player1: "FireStyle", player2: "IceKing", winner: "FireStyle", score: "3-0" },
-        { player1: "LightningBolt", player2: "EarthShaker", winner: "LightningBolt", score: "3-2" },
-        { player1: "WindMaster", player2: "WaterFlow", winner: "WindMaster", score: "3-1" }
-      ]
-    },
-    {
-      round: "Semifinais",
-      matches: [
-        { player1: "Wall", player2: "FireStyle", winner: null, score: null },
-        { player1: "LightningBolt", player2: "WindMaster", winner: null, score: null }
-      ]
-    },
-    {
-      round: "Final",
-      matches: [
-        { player1: "TBD", player2: "TBD", winner: null, score: null }
-      ]
-    }
-  ];
+  const mockBracket = []; // Removido dados mockados de bracket
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -186,30 +138,30 @@ const Tournaments = () => {
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
                         <Trophy className="w-4 h-4 text-accent" />
-                        <span>{getTournamentTypeText(tournament.type)}</span>
+                        <span>{getTournamentTypeText(tournament.tournament_type)}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Users className="w-4 h-4 text-accent" />
-                        <span>{tournament.currentParticipants}/{tournament.maxParticipants}</span>
+                        <span>0/{tournament.max_participants}</span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-accent" />
-                        <span>Início: {tournament.tournamentStart}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-accent" />
-                        <span>Inscrições até: {tournament.registrationEnd}</span>
-                      </div>
+                            <div className="flex items-center space-x-2">
+                              <Calendar className="w-4 h-4 text-accent" />
+                              <span>Início: {format(new Date(tournament.tournament_start), "dd/MM/yyyy", { locale: ptBR })}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Clock className="w-4 h-4 text-accent" />
+                              <span>Inscrições até: {format(new Date(tournament.registration_end), "dd/MM/yyyy", { locale: ptBR })}</span>
+                            </div>
                     </div>
 
                     {/* Progresso de Inscrições */}
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Participantes</span>
-                        <span>{tournament.currentParticipants}/{tournament.maxParticipants}</span>
+                        <span>0/{tournament.max_participants}</span>
                       </div>
                       <Progress 
-                        value={(tournament.currentParticipants / tournament.maxParticipants) * 100} 
+                        value={0} 
                         className="h-2"
                       />
                     </div>
@@ -220,7 +172,7 @@ const Tournaments = () => {
                         <Award className="w-4 h-4 text-accent" />
                         <span className="font-semibold text-sm">Prêmio</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{tournament.prize}</p>
+                      <p className="text-sm text-muted-foreground">{tournament.prize_description || "A ser definido"}</p>
                     </div>
 
                     {/* Botões */}
@@ -273,19 +225,19 @@ const Tournaments = () => {
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
                         <Trophy className="w-4 h-4 text-accent" />
-                        <span>{getTournamentTypeText(tournament.type)}</span>
+                        <span>{getTournamentTypeText(tournament.tournament_type)}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Users className="w-4 h-4 text-accent" />
-                        <span>Máx: {tournament.maxParticipants}</span>
+                        <span>Máx: {tournament.max_participants}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-accent" />
-                        <span>Início: {tournament.tournamentStart}</span>
+                        <span>Início: {format(new Date(tournament.tournament_start), "dd/MM/yyyy", { locale: ptBR })}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Clock className="w-4 h-4 text-accent" />
-                        <span>Inscrições: {tournament.registrationStart}</span>
+                        <span>Inscrições: {format(new Date(tournament.registration_start), "dd/MM/yyyy", { locale: ptBR })}</span>
                       </div>
                     </div>
 
@@ -294,7 +246,7 @@ const Tournaments = () => {
                         <Award className="w-4 h-4 text-accent" />
                         <span className="font-semibold text-sm">Prêmio</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{tournament.prize}</p>
+                      <p className="text-sm text-muted-foreground">{tournament.prize_description || "A ser definido"}</p>
                     </div>
 
                     <Button variant="outline" className="w-full" disabled>
@@ -321,15 +273,15 @@ const Tournaments = () => {
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
                         <Trophy className="w-4 h-4 text-accent" />
-                        <span>{getTournamentTypeText(tournament.type)}</span>
+                        <span>{getTournamentTypeText(tournament.tournament_type)}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Users className="w-4 h-4 text-accent" />
-                        <span>{tournament.participants} participantes</span>
+                        <span>{tournament.max_participants} participantes</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-accent" />
-                        <span>Finalizado: {tournament.completedAt}</span>
+                        <span>Finalizado: {format(new Date(tournament.updated_at), "dd/MM/yyyy", { locale: ptBR })}</span>
                       </div>
                     </div>
 
@@ -338,12 +290,12 @@ const Tournaments = () => {
                       <div className="flex items-center space-x-3">
                         <Avatar className="w-12 h-12 ring-2 ring-ninja-kage">
                           <AvatarFallback className="bg-ninja-kage/20 text-ninja-kage font-bold">
-                            {tournament.winner.charAt(0)}
+                            {tournament.winner?.name ? tournament.winner.name.charAt(0) : "?"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="font-bold text-ninja-kage">🏆 CAMPEÃO</div>
-                          <div className="font-ninja text-lg">{tournament.winner}</div>
+                          <div className="font-ninja text-lg">{tournament.winner?.name || "A ser definido"}</div>
                         </div>
                       </div>
                     </div>
@@ -353,7 +305,7 @@ const Tournaments = () => {
                         <Award className="w-4 h-4 text-accent" />
                         <span className="font-semibold text-sm">Prêmio</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{tournament.prize}</p>
+                      <p className="text-sm text-muted-foreground">{tournament.prize_description || "A ser definido"}</p>
                     </div>
 
                     <Button variant="outline" className="w-full">
@@ -370,45 +322,16 @@ const Tournaments = () => {
           <TabsContent value="brackets" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="font-ninja">Copa Hokage 2025 - Bracket</CardTitle>
-                <CardDescription>Acompanhe o progresso do torneio em tempo real</CardDescription>
+                <CardTitle className="font-ninja">Brackets em Desenvolvimento</CardTitle>
+                <CardDescription>Sistema de brackets será implementado em breve</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-8">
-                  {mockBracket.map((round, roundIndex) => (
-                    <div key={roundIndex}>
-                      <h3 className="font-ninja text-lg font-bold mb-4 text-center">
-                        {round.round}
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {round.matches.map((match, matchIndex) => (
-                          <Card key={matchIndex} className="border-border/50">
-                            <CardContent className="p-4">
-                              <div className="space-y-2">
-                                <div className={cn(
-                                  "flex items-center justify-between p-2 rounded",
-                                  match.winner === match.player1 ? "bg-ninja-chunin/20" : "bg-muted/30"
-                                )}>
-                                  <span className="font-medium">{match.player1}</span>
-                                  {match.winner === match.player1 && <Trophy className="w-4 h-4 text-ninja-chunin" />}
-                                </div>
-                                <div className="text-center text-xs text-muted-foreground">
-                                  {match.score ? `VS - ${match.score}` : "VS"}
-                                </div>
-                                <div className={cn(
-                                  "flex items-center justify-between p-2 rounded",
-                                  match.winner === match.player2 ? "bg-ninja-chunin/20" : "bg-muted/30"
-                                )}>
-                                  <span className="font-medium">{match.player2}</span>
-                                  {match.winner === match.player2 && <Trophy className="w-4 h-4 text-ninja-chunin" />}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center py-8">
+                  <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-semibold text-foreground mb-2">Em Breve</h3>
+                  <p className="text-muted-foreground">
+                    O sistema de visualização de brackets será implementado quando tivermos torneios ativos.
+                  </p>
                 </div>
               </CardContent>
             </Card>
