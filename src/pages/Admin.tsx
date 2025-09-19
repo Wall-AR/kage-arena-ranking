@@ -113,6 +113,17 @@ export default function Admin() {
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-2xl font-bold mb-4">Acesso Negado</h1>
         <p>Apenas administradores podem acessar esta página.</p>
+        <div className="mt-4 p-4 bg-gray-100 rounded text-left text-sm">
+          <h3 className="font-bold">Debug Info:</h3>
+          <p>User ID: {user?.id}</p>
+          <p>User Email: {user?.email}</p>
+          <p>Current Player ID: {currentPlayer?.id}</p>
+          <p>Current Player Name: {currentPlayer?.name}</p>
+          <p>Is Admin: {currentPlayer?.is_admin ? 'true' : 'false'}</p>
+          <p>Is Moderator: {currentPlayer?.is_moderator ? 'true' : 'false'}</p>
+          <p>Role: {currentPlayer?.role}</p>
+          <p>Player Loading: {playerLoading ? 'true' : 'false'}</p>
+        </div>
       </div>
     );
   }

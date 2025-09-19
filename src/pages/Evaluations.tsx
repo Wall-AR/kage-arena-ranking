@@ -33,6 +33,16 @@ export default function Evaluations() {
             <p className="text-muted-foreground">
               Você precisa ser um moderador para acessar esta página.
             </p>
+            <div className="mt-4 p-4 bg-gray-100 rounded text-left text-sm max-w-md mx-auto">
+              <h3 className="font-bold">Debug Info:</h3>
+              <p>User ID: {user?.id}</p>
+              <p>User Email: {user?.email}</p>
+              <p>Current Player ID: {currentPlayer?.id}</p>
+              <p>Current Player Name: {currentPlayer?.name}</p>
+              <p>Is Admin: {currentPlayer?.is_admin ? 'true' : 'false'}</p>
+              <p>Is Moderator: {currentPlayer?.is_moderator ? 'true' : 'false'}</p>
+              <p>Role: {currentPlayer?.role}</p>
+            </div>
           </div>
         </div>
       </div>
