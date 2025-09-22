@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Trophy, Target, Star, Users, TrendingUp, Calendar, Shield, User, Save, Flame } from "lucide-react";
+import { Trophy, Target, Star, Users, TrendingUp, Calendar, Shield, User, Save, Flame, Sword } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navigation from "@/components/ui/navigation";
@@ -21,8 +21,10 @@ import { StudentsTab } from "@/components/profile/StudentsTab";
 import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import { CharacterSelector } from "@/components/profile/CharacterSelector";
 import { MatchHistory } from "@/components/profile/MatchHistory";
+import { EvaluationsTab } from "@/components/profile/EvaluationsTab";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { useProfileUpdate } from "@/hooks/useProfile";
+import { useRankedPlayers } from "@/hooks/usePlayers";
 import { cn } from "@/lib/utils";
 
 export default function Profile() {
@@ -40,6 +42,7 @@ export default function Profile() {
   // Usar playerId da URL ou ID do usuário logado
   const targetUserId = playerId || user?.id;
   const { data: playerData, isLoading } = usePlayerProfile(targetUserId);
+  const { data: allRankedPlayers = [] } = useRankedPlayers();
   const isOwnProfile = !playerId || playerId === user?.id;
 
   // Redirecionar para auth se não estiver logado e for próprio perfil
@@ -70,6 +73,8 @@ const processedPlayerData = playerData ? {
   avatar_url: playerData.avatar_url || null,
   lastMatch: playerData.last_match_date || "Nunca",
   privacySettings: playerData.privacy_settings || { evaluation_visibility: "all" },
+  // Calcular posição no ranking
+  position: allRankedPlayers.findIndex(p => p.id === playerData.id) + 1 || null,
   // Pegar última avaliação se existir
   evaluation: playerData.evaluations && playerData.evaluations.length > 0 
     ? playerData.evaluations[playerData.evaluations.length - 1] 
@@ -89,7 +94,7 @@ useEffect(() => {
 }, [processedPlayerData, isOwnProfile]);
 
   // Se não há dados processados, mostrar loading ou erro
-  if (!processedPlayerData && !loading) {
+  if (!processedPlayerData && !isLoading && !loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
@@ -230,10 +235,11 @@ useEffect(() => {
 
         {/* Conteúdo Principal */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) ? 'grid-cols-5' : 'grid-cols-4'}`}>
+          <TabsList className={`grid w-full ${isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) ? 'grid-cols-6' : 'grid-cols-5'}`}>
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="stats">Estatísticas</TabsTrigger>
             <TabsTrigger value="history">Histórico</TabsTrigger>
+            <TabsTrigger value="evaluations">Avaliações</TabsTrigger>
             {isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) && <TabsTrigger value="students">Alunos</TabsTrigger>}
             {isOwnProfile && <TabsTrigger value="settings">Configurações</TabsTrigger>}
           </TabsList>
@@ -441,6 +447,35 @@ useEffect(() => {
                   <div className="text-center py-8">
                     <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
                     <p className="text-muted-foreground">Histórico não disponível</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Aba: Avaliações */}
+          <TabsContent value="evaluations" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Star className="w-5 h-5 mr-2 text-accent" />
+                  Avaliações
+                </CardTitle>
+                <CardDescription>
+                  Histórico de avaliações e resultados
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {playerData?.id ? (
+                  <EvaluationsTab 
+                    playerId={playerData.id} 
+                    isOwnProfile={isOwnProfile}
+                    privacySettings={playerData.privacy_settings as { evaluation_visibility?: string }}
+                  />
+                ) : (
+                  <div className="text-center py-8">
+                    <Star className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                    <p className="text-muted-foreground">Avaliações não disponíveis</p>
                   </div>
                 )}
               </CardContent>

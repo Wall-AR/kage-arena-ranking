@@ -5,7 +5,7 @@ export const usePlayerProfile = (id?: string) => {
   return useQuery({
     queryKey: ['player-profile', id],
     queryFn: async () => {
-      if (!id) throw new Error('User or Player ID is required');
+      if (!id) return null;
       
       const { data: player, error } = await supabase
         .from('players')
@@ -13,14 +13,14 @@ export const usePlayerProfile = (id?: string) => {
           *,
           evaluations:evaluations(
             *,
-            evaluator:evaluator_id(name, avatar_url, ninja_phrase)
+            evaluator:players!evaluations_evaluator_id_fkey(name, avatar_url, ninja_phrase)
           )
         `)
         .or(`user_id.eq.${id},id.eq.${id}`)
-        .limit(1)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao buscar player profile:', error);
         throw error;
       }
 
