@@ -11,7 +11,7 @@ export const usePlayerProfile = (id?: string) => {
         .from('players')
         .select(`
           *,
-          evaluations:evaluations(
+          evaluations:evaluations!evaluations_player_id_fkey(
             *,
             evaluator:players!evaluations_evaluator_id_fkey(name, avatar_url, ninja_phrase)
           )
