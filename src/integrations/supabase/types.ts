@@ -339,6 +339,7 @@ export type Database = {
           is_ranked: boolean | null
           kage_title: string | null
           last_match_date: string | null
+          last_profile_update: string | null
           last_promotion_attempt: string | null
           losses: number | null
           name: string
@@ -369,6 +370,7 @@ export type Database = {
           is_ranked?: boolean | null
           kage_title?: string | null
           last_match_date?: string | null
+          last_profile_update?: string | null
           last_promotion_attempt?: string | null
           losses?: number | null
           name: string
@@ -399,6 +401,7 @@ export type Database = {
           is_ranked?: boolean | null
           kage_title?: string | null
           last_match_date?: string | null
+          last_profile_update?: string | null
           last_promotion_attempt?: string | null
           losses?: number | null
           name?: string
@@ -579,6 +582,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_update_profile_settings: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       get_initial_points_for_rank: {
         Args: { rank_name: string }
         Returns: number

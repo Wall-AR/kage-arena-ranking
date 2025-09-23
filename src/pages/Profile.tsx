@@ -25,7 +25,11 @@ import { EvaluationsTab } from "@/components/profile/EvaluationsTab";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { useProfileUpdate } from "@/hooks/useProfile";
 import { useRankedPlayers } from "@/hooks/usePlayers";
-import { cn } from "@/lib/utils";
+import { AchievementsBadges } from "@/components/profile/AchievementsBadges";
+import { usePlayerAchievements } from "@/hooks/useAchievements";
+import { useCharacterRanking, getPlayerCharacterRanking } from "@/hooks/useCharacterRanking";
+import { useProfileCooldown } from "@/hooks/useProfileCooldown";
+import { getCharacterImageUrl, useCharacterImages } from "@/hooks/useCharacterImages";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -43,6 +47,9 @@ export default function Profile() {
   const targetUserId = playerId || user?.id;
   const { data: playerData, isLoading } = usePlayerProfile(targetUserId);
   const { data: allRankedPlayers = [] } = useRankedPlayers();
+  const { data: characterImages = [] } = useCharacterImages();
+  const { data: characterRankings = {} } = useCharacterRanking();
+  const profileCooldown = useProfileCooldown(targetUserId);
   const isOwnProfile = !playerId || playerId === user?.id;
 
   // Redirecionar para auth se não estiver logado e for próprio perfil
@@ -51,6 +58,9 @@ export default function Profile() {
       navigate("/auth");
     }
   }, [user, loading, playerId, navigate]);
+
+// Conquistas do jogador
+const achievements = usePlayerAchievements(playerData);
 
 // Dados processados do jogador
 const processedPlayerData = playerData ? {
@@ -68,7 +78,7 @@ const processedPlayerData = playerData ? {
   favoriteCharacters: Array.isArray(playerData.favorite_characters) 
     ? playerData.favorite_characters 
     : [],
-  achievements: [],
+  achievements: achievements.map(a => a.name), // Converter para array de strings
   ninjaPhrase: playerData.ninja_phrase || "Esse é o meu jeito ninja de ser!",
   avatar_url: playerData.avatar_url || null,
   lastMatch: playerData.last_match_date || "Nunca",
@@ -178,7 +188,8 @@ useEffect(() => {
     // A lógica está no componente EvaluationRequest
   };
 
-  const handleSaveProfile = () => {
+  // Função para salvar perfil com confirmação para cooldown
+  const handleSaveProfile = async () => {
     if (!user?.id) {
       toast({
         title: "Erro de autenticação",
@@ -188,14 +199,51 @@ useEffect(() => {
       return;
     }
 
-    updateProfile({
-      userId: user.id,
-      updates: {
-        ninja_phrase: editedNinjaPhrase,
-        favorite_characters: editedCharacters,
-        privacy_settings: editedPrivacySettings
+    // Verificar se está tentando alterar frase ou personagens
+    const isChangingPhrase = editedNinjaPhrase !== (processedPlayerData?.ninjaPhrase || "");
+    const isChangingCharacters = JSON.stringify(editedCharacters.sort()) !== 
+      JSON.stringify((processedPlayerData?.favoriteCharacters || []).map(String).sort());
+
+    const needsCooldownCheck = isChangingPhrase || isChangingCharacters;
+
+    // Se precisa de confirmação e não pode atualizar ainda
+    if (needsCooldownCheck && !profileCooldown.data?.canUpdate) {
+      toast({
+        title: "Alteração bloqueada",
+        description: `Você só pode alterar frase e personagens uma vez a cada 33 dias. Próxima alteração disponível em: ${profileCooldown.data?.nextUpdateDate ? new Date(profileCooldown.data.nextUpdateDate).toLocaleDateString('pt-BR') : 'carregando...'}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Se precisa de confirmação de cooldown
+    if (needsCooldownCheck && profileCooldown.data?.canUpdate) {
+      const nextDate = new Date();
+      nextDate.setDate(nextDate.getDate() + 33);
+      
+      if (window.confirm(`Tem certeza? Após confirmar, você não poderá alterar sua frase ninja e personagens favoritos até ${nextDate.toLocaleDateString('pt-BR')}.`)) {
+        updateProfile({
+          userId: user.id,
+          updates: {
+            ninja_phrase: editedNinjaPhrase,
+            favorite_characters: editedCharacters,
+            privacy_settings: editedPrivacySettings,
+            updateProfileSettings: true // Flag para ativar cooldown
+          }
+        });
       }
-    });
+    } else {
+      // Atualização normal (só privacidade)
+      updateProfile({
+        userId: user.id,
+        updates: {
+          ninja_phrase: editedNinjaPhrase,
+          favorite_characters: editedCharacters,
+          privacy_settings: editedPrivacySettings,
+          updateProfileSettings: false
+        }
+      });
+    }
   };
 
   const handleAvatarUpdate = (newAvatarUrl: string) => {
@@ -279,6 +327,12 @@ useEffect(() => {
                       <div className="font-semibold text-ninja-kage">{player.winStreak}</div>
                       <div className="text-xs text-muted-foreground">Sequência</div>
                     </div>
+                  </div>
+                  
+                  {/* Medalhas e Conquistas */}
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-foreground mb-3">Conquistas</h4>
+                    <AchievementsBadges achievements={achievements} />
                   </div>
                 </CardContent>
               </Card>
@@ -384,14 +438,39 @@ useEffect(() => {
                 <CardContent>
                   <div className="space-y-3">
                     {player.favoriteCharacters && player.favoriteCharacters.length > 0 ? (
-                      player.favoriteCharacters.map((character: any, index: number) => (
-                        <div key={index} className="flex items-center space-x-3 p-2 bg-muted/30 rounded">
-                          <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-sm font-semibold">
-                            {String(character).charAt(0)}
+                      player.favoriteCharacters.map((character: any, index: number) => {
+                        const characterName = String(character);
+                        const characterRank = getPlayerCharacterRanking(characterRankings, playerData?.id || '', characterName);
+                        const imageUrl = getCharacterImageUrl(characterName, characterImages);
+                        
+                        return (
+                          <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center space-x-3">
+                              <Avatar className="w-12 h-12 ring-2 ring-primary/20">
+                                <AvatarImage src={imageUrl} alt={characterName} />
+                                <AvatarFallback className="bg-primary/20 text-primary font-bold">
+                                  {characterName.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium text-sm">{characterName}</p>
+                                {characterRank && (
+                                  <p className="text-xs text-muted-foreground">
+                                    #{characterRank} no ranking deste personagem
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            {characterRank && (
+                              <div className="flex items-center">
+                                <Badge variant="outline" className="text-xs">
+                                  #{characterRank}
+                                </Badge>
+                              </div>
+                            )}
                           </div>
-                          <span className="text-sm">{String(character)}</span>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <div className="text-center py-4 text-muted-foreground">
                         <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -526,22 +605,67 @@ useEffect(() => {
                     </div>
                     
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="phrase">Frase Ninja</Label>
-                      <Textarea 
-                        id="phrase" 
-                        placeholder="Sua frase ninja..."
-                        value={editedNinjaPhrase}
-                        onChange={(e) => setEditedNinjaPhrase(e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-                    
-                    <CharacterSelector
-                      selectedCharacters={editedCharacters}
-                      onCharactersChange={setEditedCharacters}
-                      maxSelection={3}
-                    />
+                     <div className="space-y-2">
+                       <Label htmlFor="phrase">Frase Ninja</Label>
+                       {profileCooldown.data?.canUpdate ? (
+                         <Textarea 
+                           id="phrase" 
+                           placeholder="Sua frase ninja..."
+                           value={editedNinjaPhrase}
+                           onChange={(e) => setEditedNinjaPhrase(e.target.value)}
+                           rows={3}
+                         />
+                       ) : (
+                         <div className="relative">
+                           <Textarea 
+                             id="phrase" 
+                             value={editedNinjaPhrase}
+                             disabled
+                             rows={3}
+                             className="opacity-50 cursor-not-allowed"
+                           />
+                           <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded">
+                             <div className="text-center">
+                               <p className="text-sm font-medium text-muted-foreground">Bloqueado por 33 dias</p>
+                               {profileCooldown.data?.nextUpdateDate && (
+                                 <p className="text-xs text-muted-foreground">
+                                   Disponível em: {new Date(profileCooldown.data.nextUpdateDate).toLocaleDateString('pt-BR')}
+                                 </p>
+                               )}
+                             </div>
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                     
+                     <div className="space-y-2">
+                       <Label>Personagens Favoritos</Label>
+                       {profileCooldown.data?.canUpdate ? (
+                         <CharacterSelector
+                           selectedCharacters={editedCharacters}
+                           onCharactersChange={setEditedCharacters}
+                           maxSelection={3}
+                         />
+                       ) : (
+                         <div className="relative">
+                           <CharacterSelector
+                             selectedCharacters={editedCharacters}
+                             onCharactersChange={() => {}}
+                             maxSelection={3}
+                           />
+                           <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded">
+                             <div className="text-center">
+                               <p className="text-sm font-medium text-muted-foreground">Bloqueado por 33 dias</p>
+                               {profileCooldown.data?.nextUpdateDate && (
+                                 <p className="text-xs text-muted-foreground">
+                                   Disponível em: {new Date(profileCooldown.data.nextUpdateDate).toLocaleDateString('pt-BR')}
+                                 </p>
+                               )}
+                             </div>
+                           </div>
+                         </div>
+                       )}
+                     </div>
                   </CardContent>
                 </Card>
 

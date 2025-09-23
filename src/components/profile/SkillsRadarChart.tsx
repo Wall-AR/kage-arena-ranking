@@ -13,13 +13,38 @@ interface SkillsRadarChartProps {
 }
 
 export const SkillsRadarChart = ({ skills, rankColor, className }: SkillsRadarChartProps) => {
-  const size = 340;
+  const size = 280;
   const center = size / 2;
-  const maxRadius = 140;
+  const maxRadius = 110;
+  
+  // Calcular dicas de melhoria baseadas nas habilidades mais baixas
+  const weakestSkills = [...skills]
+    .sort((a, b) => a.value - b.value)
+    .slice(0, 3);
+  
+  const improvementTips = weakestSkills.map(skill => {
+    const tips: Record<string, string> = {
+      "Kunai": "Pratique combos de kunai e timing de arremessos",
+      "Pin": "Trabalhe movimentos de pinning e controle espacial",
+      "Defesa": "Melhore block timing e escape de combos",
+      "Aéreo": "Desenvolva ataques aéreos e air dash",
+      "Dash": "Pratique movimento e posicionamento",
+      "Tempo": "Aprimore timing de ataques e contadores",
+      "Geral": "Foque em estratégia e adaptabilidade",
+      "Recursos": "Otimize uso de chakra e itens"
+    };
+    return {
+      skill: skill.name,
+      tip: tips[skill.name] || "Continue praticando esta habilidade",
+      score: skill.value
+    };
+  });
   
   return (
-    <div className={cn("relative w-full h-80 flex items-center justify-center", className)}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-lg">
+    <div className={cn("grid grid-cols-1 lg:grid-cols-2 gap-6", className)}>
+      {/* Gráfico à esquerda */}
+      <div className="relative flex items-center justify-center h-80">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-lg">
         {/* Grids concêntricos com gradiente */}
         <defs>
           <radialGradient id="gridGradient" cx="50%" cy="50%" r="50%">
@@ -128,32 +153,68 @@ export const SkillsRadarChart = ({ skills, rankColor, className }: SkillsRadarCh
         })}
       </svg>
 
-      {/* Labels das habilidades com posicionamento melhorado */}
-      {skills.map((skill, index) => {
-        const angle = (skill.angle * Math.PI) / 180;
-        const labelRadius = maxRadius + 30;
-        const x = center + Math.cos(angle) * labelRadius;
-        const y = center + Math.sin(angle) * labelRadius;
-        
-        return (
-          <div
-            key={index}
-            className="absolute text-sm font-bold text-center transition-all duration-300 hover:scale-110 cursor-default"
-            style={{
-              left: `${x - 30}px`,
-              top: `${y - 15}px`,
-              width: '60px',
-              animationDelay: `${index * 0.1}s`
-            }}
-          >
-            <div className="text-foreground">{skill.name}</div>
-            <div className={`text-${rankColor} font-extrabold text-lg`}>
-              {skill.value.toFixed(1)}
+        {/* Labels das habilidades com posicionamento melhorado */}
+        {skills.map((skill, index) => {
+          const angle = (skill.angle * Math.PI) / 180;
+          const labelRadius = maxRadius + 25;
+          const x = center + Math.cos(angle) * labelRadius;
+          const y = center + Math.sin(angle) * labelRadius;
+          
+          return (
+            <div
+              key={index}
+              className="absolute text-xs font-bold text-center transition-all duration-300 hover:scale-110 cursor-default"
+              style={{
+                left: `${x - 25}px`,
+                top: `${y - 10}px`,
+                width: '50px',
+                animationDelay: `${index * 0.1}s`
+              }}
+            >
+              <div className="text-foreground text-xs">{skill.name}</div>
+              <div className={`text-${rankColor} font-extrabold text-sm`}>
+                {skill.value.toFixed(1)}
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground">/10</div>
+          );
+        })}
+      </div>
+      
+      {/* Dicas de melhoria à direita */}
+      <div className="space-y-4">
+        <div className="flex items-center mb-4">
+          <div className="w-3 h-3 bg-accent rounded-full mr-2"></div>
+          <h3 className="font-semibold text-foreground">Áreas para Melhorar</h3>
+        </div>
+        
+        {improvementTips.map((tip, index) => (
+          <div 
+            key={index} 
+            className="bg-muted/30 rounded-lg p-4 border-l-4 border-accent/60 hover:bg-muted/50 transition-colors"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium text-foreground text-sm">{tip.skill}</span>
+              <span className={`text-xs px-2 py-1 rounded-full bg-${rankColor}/20 text-${rankColor} font-bold`}>
+                {tip.score.toFixed(1)}/10
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {tip.tip}
+            </p>
           </div>
-        );
-      })}
+        ))}
+        
+        {improvementTips.length === 0 && (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-2xl">🏆</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Excelente! Suas habilidades estão equilibradas.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -16,20 +16,49 @@ export const useProfileUpdate = () => {
         avatar_url?: string;
         favorite_characters?: string[];
         privacy_settings?: any;
+        updateProfileSettings?: boolean; // Flag para indicar se está atualizando frase/personagens
+        last_profile_update?: string;
       };
     }) => {
-      const { data: result, error } = await supabase
-        .from('players')
-        .update(data.updates)
-        .eq('user_id', data.userId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Profile update error:', error);
-        throw error;
+      // Se está atualizando configurações de perfil, verificar cooldown
+      if (data.updates.updateProfileSettings) {
+        const { data: canUpdate, error: canUpdateError } = await supabase
+          .rpc('can_update_profile_settings', { user_id: data.userId });
+        
+        if (canUpdateError) throw canUpdateError;
+        if (!canUpdate) {
+          throw new Error('Você só pode alterar essas configurações uma vez a cada 33 dias.');
+        }
+        
+        // Atualizar com timestamp
+        const updateData = { ...data.updates };
+        delete updateData.updateProfileSettings;
+        updateData.last_profile_update = new Date().toISOString();
+        
+        const { data: result, error } = await supabase
+          .from('players')
+          .update(updateData)
+          .eq('user_id', data.userId)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return result;
+      } else {
+        // Atualização normal (sem cooldown)
+        const updateData = { ...data.updates };
+        delete updateData.updateProfileSettings;
+        
+        const { data: result, error } = await supabase
+          .from('players')
+          .update(updateData)
+          .eq('user_id', data.userId)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return result;
       }
-      return result;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['player-profile', variables.userId] });
@@ -41,9 +70,10 @@ export const useProfileUpdate = () => {
     },
     onError: (error) => {
       console.error('Error updating profile:', error);
+      const errorMessage = error instanceof Error ? error.message : "Tente novamente em alguns instantes.";
       toast({
         title: "Erro ao atualizar perfil",
-        description: "Tente novamente em alguns instantes.",
+        description: errorMessage,
         variant: "destructive"
       });
     }
