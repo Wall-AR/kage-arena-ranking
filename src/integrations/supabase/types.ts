@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      banners: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_name: string
+          id: string
+          image_url: string
+          is_default: boolean | null
+          name: string
+          unlock_condition: string
+          unlock_description: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          id?: string
+          image_url: string
+          is_default?: boolean | null
+          name: string
+          unlock_condition: string
+          unlock_description?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          id?: string
+          image_url?: string
+          is_default?: boolean | null
+          name?: string
+          unlock_condition?: string
+          unlock_description?: string | null
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           accepted_at: string | null
@@ -326,6 +362,42 @@ export type Database = {
           },
         ]
       }
+      player_banners: {
+        Row: {
+          banner_id: string
+          id: string
+          player_id: string
+          unlocked_at: string | null
+        }
+        Insert: {
+          banner_id: string
+          id?: string
+          player_id: string
+          unlocked_at?: string | null
+        }
+        Update: {
+          banner_id?: string
+          id?: string
+          player_id?: string
+          unlocked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_banners_banner_id_fkey"
+            columns: ["banner_id"]
+            isOneToOne: false
+            referencedRelation: "banners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_banners_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       players: {
         Row: {
           avatar_url: string | null
@@ -352,6 +424,7 @@ export type Database = {
           rank: string | null
           rank_level: string | null
           role: Database["public"]["Enums"]["user_role"] | null
+          selected_banner_id: string | null
           tutor_id: string | null
           updated_at: string
           user_id: string | null
@@ -383,6 +456,7 @@ export type Database = {
           rank?: string | null
           rank_level?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          selected_banner_id?: string | null
           tutor_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -414,6 +488,7 @@ export type Database = {
           rank?: string | null
           rank_level?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          selected_banner_id?: string | null
           tutor_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -421,6 +496,13 @@ export type Database = {
           wins?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "players_selected_banner_id_fkey"
+            columns: ["selected_banner_id"]
+            isOneToOne: false
+            referencedRelation: "banners"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "players_tutor_id_fkey"
             columns: ["tutor_id"]
@@ -582,6 +664,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_request_evaluation: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
       can_update_profile_settings: {
         Args: { user_id: string }
         Returns: boolean

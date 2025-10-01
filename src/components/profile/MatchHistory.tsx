@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +7,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Sword, Calendar, TrendingUp, TrendingDown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { MatchDetailDialog } from "./MatchDetailDialog";
 
 interface MatchHistoryProps {
   playerId: string;
 }
 
 export const MatchHistory = ({ playerId }: MatchHistoryProps) => {
+  const [selectedMatch, setSelectedMatch] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
   const { data: matches, isLoading } = useQuery({
     queryKey: ['match-history', playerId],
     queryFn: async () => {
@@ -61,16 +66,26 @@ export const MatchHistory = ({ playerId }: MatchHistoryProps) => {
     );
   }
 
-  return (
-    <div className="space-y-4">
-      {matches.map((match) => {
-        const isWinner = match.winner_id === playerId;
-        const opponent = isWinner ? match.loser : match.winner;
-        const pointsChange = isWinner ? match.winner_points_change : match.loser_points_change;
+  const handleMatchClick = (match: any) => {
+    setSelectedMatch(match);
+    setDialogOpen(true);
+  };
 
-        return (
-          <Card key={match.id} className="overflow-hidden">
-            <CardContent className="p-4">
+  return (
+    <>
+      <div className="space-y-4">
+        {matches.map((match) => {
+          const isWinner = match.winner_id === playerId;
+          const opponent = isWinner ? match.loser : match.winner;
+          const pointsChange = isWinner ? match.winner_points_change : match.loser_points_change;
+
+          return (
+            <Card 
+              key={match.id} 
+              className="overflow-hidden cursor-pointer hover:bg-accent/5 transition-colors"
+              onClick={() => handleMatchClick(match)}
+            >
+              <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
@@ -134,5 +149,13 @@ export const MatchHistory = ({ playerId }: MatchHistoryProps) => {
         );
       })}
     </div>
+
+    <MatchDetailDialog
+      match={selectedMatch}
+      playerId={playerId}
+      open={dialogOpen}
+      onOpenChange={setDialogOpen}
+    />
+    </>
   );
 };

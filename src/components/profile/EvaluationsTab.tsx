@@ -20,6 +20,10 @@ interface Evaluation {
   evaluated_at: string | null;
   request_message: string | null;
   tips: string | null;
+  tip_1: string | null;
+  tip_2: string | null;
+  tip_3: string | null;
+  summary: string | null;
   pin_score: number | null;
   defense_score: number | null;
   aerial_score: number | null;
@@ -199,31 +203,75 @@ export const EvaluationsTab = ({ playerId, isOwnProfile, privacySettings }: Eval
 
             {/* Scores da avaliação (apenas se concluída) */}
             {evaluation.status === 'completed' && (evaluation.pin_score || evaluation.general_score) && (
-              <div className="grid grid-cols-4 gap-3 p-4 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg">
-                <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{evaluation.pin_score || 0}</div>
-                  <div className="text-xs text-muted-foreground">Pin</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{evaluation.defense_score || 0}</div>
-                  <div className="text-xs text-muted-foreground">Defesa</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{evaluation.kunai_score || 0}</div>
-                  <div className="text-xs text-muted-foreground">Kunai</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-accent">{evaluation.general_score || 0}</div>
-                  <div className="text-xs text-muted-foreground">Geral</div>
+              <div className="space-y-4">
+                <h4 className="font-semibold text-sm">Pontuações por Área:</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="text-center p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{evaluation.pin_score?.toFixed(1) || '0.0'}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Pin</div>
+                  </div>
+                  <div className="text-center p-3 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg">
+                    <div className="text-2xl font-bold text-accent">{evaluation.defense_score?.toFixed(1) || '0.0'}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Defesa</div>
+                  </div>
+                  <div className="text-center p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{evaluation.aerial_score?.toFixed(1) || '0.0'}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Aéreo</div>
+                  </div>
+                  <div className="text-center p-3 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg">
+                    <div className="text-2xl font-bold text-accent">{evaluation.kunai_score?.toFixed(1) || '0.0'}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Kunai</div>
+                  </div>
+                  <div className="text-center p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{evaluation.timing_score?.toFixed(1) || '0.0'}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Timing</div>
+                  </div>
+                  <div className="text-center p-3 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg">
+                    <div className="text-2xl font-bold text-accent">{evaluation.resource_score?.toFixed(1) || '0.0'}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Recurso</div>
+                  </div>
+                  <div className="text-center p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{evaluation.dash_score?.toFixed(1) || '0.0'}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Dash</div>
+                  </div>
+                  <div className="text-center p-3 bg-gradient-to-br from-ninja-chunin/20 to-ninja-chunin/10 rounded-lg border-2 border-ninja-chunin/30">
+                    <div className="text-2xl font-bold text-ninja-chunin">{evaluation.general_score?.toFixed(1) || '0.0'}</div>
+                    <div className="text-xs text-muted-foreground mt-1">Geral</div>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Dicas e comentários (apenas se concluída) */}
-            {evaluation.status === 'completed' && evaluation.tips && (
-              <div className="bg-muted/30 rounded-lg p-4 border-l-4 border-accent">
-                <h4 className="font-medium mb-2 text-sm text-accent">Comentários do Avaliador:</h4>
-                <p className="text-sm leading-relaxed">{evaluation.tips}</p>
+            {/* Dicas organizadas (apenas se concluída) */}
+            {evaluation.status === 'completed' && (evaluation.tip_1 || evaluation.tip_2 || evaluation.tip_3) && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm text-accent">Dicas do Avaliador:</h4>
+                {evaluation.tip_1 && (
+                  <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-accent">
+                    <div className="font-medium text-xs text-accent mb-1">1. Dica Principal</div>
+                    <p className="text-sm leading-relaxed">{evaluation.tip_1}</p>
+                  </div>
+                )}
+                {evaluation.tip_2 && (
+                  <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-accent/70">
+                    <div className="font-medium text-xs text-accent mb-1">2. Segunda Dica</div>
+                    <p className="text-sm leading-relaxed">{evaluation.tip_2}</p>
+                  </div>
+                )}
+                {evaluation.tip_3 && (
+                  <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-accent/50">
+                    <div className="font-medium text-xs text-accent mb-1">3. Terceira Dica</div>
+                    <p className="text-sm leading-relaxed">{evaluation.tip_3}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Resumo da avaliação */}
+            {evaluation.status === 'completed' && evaluation.summary && (
+              <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg p-4">
+                <h4 className="font-medium mb-2 text-sm">Resumo da Avaliação:</h4>
+                <p className="text-sm leading-relaxed">{evaluation.summary}</p>
               </div>
             )}
 

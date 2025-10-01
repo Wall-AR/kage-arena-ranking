@@ -29,8 +29,10 @@ export const CharacterSelector = ({
   );
 
   const handleCharacterSelect = (character: string) => {
-    if (selectedCharacters.length < maxSelection) {
-      onCharactersChange([...selectedCharacters, character]);
+    if (selectedCharacters.length < maxSelection && !selectedCharacters.includes(character)) {
+      const newSelection = [...selectedCharacters, character];
+      onCharactersChange(newSelection);
+      setSearch(""); // Limpar busca após seleção
     }
   };
 
@@ -102,9 +104,12 @@ export const CharacterSelector = ({
                 key={character}
                 variant="ghost"
                 size="sm"
-                onClick={() => handleCharacterSelect(character)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleCharacterSelect(character);
+                }}
                 disabled={selectedCharacters.length >= maxSelection}
-                className="w-full justify-start h-auto p-3 text-left"
+                className="w-full justify-start h-auto p-3 text-left hover:bg-accent/10"
               >
                 <Avatar className="w-8 h-8 mr-3 shrink-0">
                   <AvatarImage 
