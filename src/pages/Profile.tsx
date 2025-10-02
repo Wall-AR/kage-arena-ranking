@@ -140,16 +140,16 @@ useEffect(() => {
   };
 
   // Dados das 8 habilidades ninja
-  const skills = [
-    { name: "Pin", value: player.evaluation?.pin_score || 0, angle: 0 },
-    { name: "Defesa", value: player.evaluation?.defense_score || 0, angle: 45 },
-    { name: "Aéreo", value: player.evaluation?.aerial_score || 0, angle: 90 },
-    { name: "Kunai", value: player.evaluation?.kunai_score || 0, angle: 135 },
-    { name: "Timing", value: player.evaluation?.timing_score || 0, angle: 180 },
-    { name: "Recursos", value: player.evaluation?.resource_score || 0, angle: 225 },
-    { name: "Dash", value: player.evaluation?.dash_score || 0, angle: 270 },
-    { name: "Geral", value: player.evaluation?.general_score || 0, angle: 315 }
-  ];
+  const skills = {
+    pin: player.evaluation?.pin_score || 0,
+    defense: player.evaluation?.defense_score || 0,
+    aerial: player.evaluation?.aerial_score || 0,
+    kunai: player.evaluation?.kunai_score || 0,
+    timing: player.evaluation?.timing_score || 0,
+    resource: player.evaluation?.resource_score || 0,
+    dash: player.evaluation?.dash_score || 0,
+    general: player.evaluation?.general_score || 0
+  };
 
   const getRankColor = (rank: string) => {
     const colors = {
@@ -348,11 +348,7 @@ useEffect(() => {
                 </CardHeader>
                 <CardContent>
                   {player.isRanked ? (
-                    <SkillsRadarChart 
-                      skills={skills} 
-                      rankColor={rankColor}
-                      className="transition-all duration-500"
-                    />
+                    <SkillsRadarChart skills={skills} />
                   ) : (
                     <div className="relative h-80 flex items-center justify-center">
                       <div className="text-center text-muted-foreground">
