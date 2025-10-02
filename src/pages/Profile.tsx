@@ -20,6 +20,7 @@ import { EvaluationRequest } from "@/components/profile/EvaluationRequest";
 import { StudentsTab } from "@/components/profile/StudentsTab";
 import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import { CharacterSelector } from "@/components/profile/CharacterSelector";
+import { BannerSelector } from "@/components/profile/BannerSelector";
 import { MatchHistory } from "@/components/profile/MatchHistory";
 import { EvaluationsTab } from "@/components/profile/EvaluationsTab";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
@@ -91,7 +92,8 @@ const processedPlayerData = playerData ? {
     : null,
   tutor: playerData.evaluations && playerData.evaluations.length > 0 && playerData.evaluations[0].evaluator
     ? playerData.evaluations[0].evaluator
-    : null
+    : null,
+  selected_banner_id: playerData.selected_banner_id || null
 } : null;
 
 // Inicializar valores de edição quando playerData carrega
@@ -136,7 +138,8 @@ useEffect(() => {
     lastMatch: "Nunca",
     privacySettings: { evaluation_visibility: "all" },
     tutor: null,
-    evaluation: null
+    evaluation: null,
+    selected_banner_id: null
   };
 
   // Dados das 8 habilidades ninja
@@ -603,24 +606,18 @@ useEffect(() => {
                     
                      <div className="space-y-2">
                        <Label htmlFor="phrase">Frase Ninja</Label>
-                       {profileCooldown.data?.canUpdate ? (
+                       <div className="relative">
                          <Textarea 
                            id="phrase" 
                            placeholder="Sua frase ninja..."
                            value={editedNinjaPhrase}
                            onChange={(e) => setEditedNinjaPhrase(e.target.value)}
+                           disabled={!profileCooldown.data?.canUpdate}
                            rows={3}
+                           className={!profileCooldown.data?.canUpdate ? "opacity-50 cursor-not-allowed" : ""}
                          />
-                       ) : (
-                         <div className="relative">
-                           <Textarea 
-                             id="phrase" 
-                             value={editedNinjaPhrase}
-                             disabled
-                             rows={3}
-                             className="opacity-50 cursor-not-allowed"
-                           />
-                           <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded">
+                         {!profileCooldown.data?.canUpdate && (
+                           <div className="absolute inset-0 flex items-center justify-center bg-background/90 rounded pointer-events-none">
                              <div className="text-center">
                                <p className="text-sm font-medium text-muted-foreground">Bloqueado por 33 dias</p>
                                {profileCooldown.data?.nextUpdateDate && (
@@ -630,37 +627,40 @@ useEffect(() => {
                                )}
                              </div>
                            </div>
-                         </div>
-                       )}
-                     </div>
-                     
-                     <div className="space-y-2">
-                       <Label>Personagens Favoritos</Label>
-                       {profileCooldown.data?.canUpdate ? (
-                         <CharacterSelector
-                           selectedCharacters={editedCharacters}
-                           onCharactersChange={setEditedCharacters}
-                           maxSelection={3}
+                         )}
+                       </div>
+                      </div>
+
+                       <div className="space-y-2">
+                         <Label>Banner do Perfil</Label>
+                         <BannerSelector 
+                           playerId={player.id}
+                           selectedBannerId={player.selected_banner_id || undefined}
                          />
-                       ) : (
-                         <div className="relative">
-                           <CharacterSelector
-                             selectedCharacters={editedCharacters}
-                             onCharactersChange={() => {}}
-                             maxSelection={3}
-                           />
-                           <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded">
-                             <div className="text-center">
-                               <p className="text-sm font-medium text-muted-foreground">Bloqueado por 33 dias</p>
-                               {profileCooldown.data?.nextUpdateDate && (
-                                 <p className="text-xs text-muted-foreground">
-                                   Disponível em: {new Date(profileCooldown.data.nextUpdateDate).toLocaleDateString('pt-BR')}
-                                 </p>
-                               )}
-                             </div>
-                           </div>
-                         </div>
-                       )}
+                       </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Personagens Favoritos</Label>
+                        <div className="relative">
+                          <CharacterSelector
+                            selectedCharacters={editedCharacters}
+                            onCharactersChange={setEditedCharacters}
+                            maxSelection={3}
+                            disabled={!profileCooldown.data?.canUpdate}
+                          />
+                          {!profileCooldown.data?.canUpdate && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-background/90 rounded pointer-events-none">
+                              <div className="text-center">
+                                <p className="text-sm font-medium text-muted-foreground">Bloqueado por 33 dias</p>
+                                {profileCooldown.data?.nextUpdateDate && (
+                                  <p className="text-xs text-muted-foreground">
+                                    Disponível em: {new Date(profileCooldown.data.nextUpdateDate).toLocaleDateString('pt-BR')}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                      </div>
                   </CardContent>
                 </Card>

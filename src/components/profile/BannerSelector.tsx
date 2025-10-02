@@ -8,14 +8,14 @@ import { useBanners, usePlayerBanners, useSelectBanner } from "@/hooks/useBanner
 
 interface BannerSelectorProps {
   playerId: string;
-  currentBannerId?: string;
+  selectedBannerId?: string;
 }
 
-export const BannerSelector = ({ playerId, currentBannerId }: BannerSelectorProps) => {
+export const BannerSelector = ({ playerId, selectedBannerId }: BannerSelectorProps) => {
   const { data: allBanners = [] } = useBanners();
   const { data: playerBanners = [] } = usePlayerBanners(playerId);
   const selectBanner = useSelectBanner();
-  const [selectedId, setSelectedId] = useState(currentBannerId);
+  const [selectedId, setSelectedId] = useState(selectedBannerId);
 
   const unlockedBannerIds = new Set(playerBanners.map(pb => pb.banner_id));
   

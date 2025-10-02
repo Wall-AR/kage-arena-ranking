@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Sword, Shield, Flame, Star, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCharacterImages, getCharacterImageUrl } from "@/hooks/useCharacterImages";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface Player {
   id: string;
@@ -22,6 +24,7 @@ interface Player {
   isImmune: boolean;
   avatar: string;
   avatar_url?: string;
+  selected_banner_id?: string | null;
 }
 
 interface RankingCardProps {
@@ -30,6 +33,22 @@ interface RankingCardProps {
 
 const RankingCard = ({ player }: RankingCardProps) => {
   const { data: characterImages = [] } = useCharacterImages();
+
+  const { data: bannerUrl } = useQuery({
+    queryKey: ['banner-image', player.selected_banner_id],
+    queryFn: async () => {
+      if (!player.selected_banner_id) return null;
+      
+      const { data: banner } = await supabase
+        .from('banners')
+        .select('image_url')
+        .eq('id', player.selected_banner_id)
+        .single();
+      
+      return banner?.image_url || null;
+    },
+    enabled: !!player.selected_banner_id
+  });
 
   const getRankIcon = (rank: string) => {
     const icons = {
@@ -66,8 +85,22 @@ const RankingCard = ({ player }: RankingCardProps) => {
 
   return (
     <Link to={`/profile/${player.id}`}>
-      <Card className="bg-gradient-card border-border/50 hover:border-primary/30 hover:shadow-card transition-all duration-300 cursor-pointer group">
-        <CardContent className="p-6">
+      <Card className="relative overflow-hidden bg-gradient-card border-border/50 hover:border-primary/30 hover:shadow-card transition-all duration-300 cursor-pointer group">
+        {/* Banner de Fundo */}
+        {bannerUrl && (
+          <>
+            <div className="absolute inset-0">
+              <img 
+                src={bannerUrl} 
+                alt="Player banner" 
+                className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/70" />
+          </>
+        )}
+        
+        <CardContent className="p-6 relative z-10">
           <div className="flex items-center justify-between">
             {/* Lado Esquerdo: Avatar e Info Principal */}
             <div className="flex items-center space-x-4">

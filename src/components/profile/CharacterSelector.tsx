@@ -13,12 +13,14 @@ interface CharacterSelectorProps {
   selectedCharacters: string[];
   onCharactersChange: (characters: string[]) => void;
   maxSelection?: number;
+  disabled?: boolean;
 }
 
 export const CharacterSelector = ({ 
   selectedCharacters, 
   onCharactersChange, 
-  maxSelection = 3 
+  maxSelection = 3,
+  disabled = false
 }: CharacterSelectorProps) => {
   const [search, setSearch] = useState("");
   const { data: characterImages = [] } = useCharacterImages();
@@ -37,6 +39,7 @@ export const CharacterSelector = ({
   };
 
   const handleCharacterRemove = (character: string) => {
+    if (disabled) return;
     onCharactersChange(selectedCharacters.filter(c => c !== character));
   };
 
@@ -72,8 +75,9 @@ export const CharacterSelector = ({
                 </Avatar>
                 <span className="text-sm font-medium">{character}</span>
                 <button
-                  onClick={() => handleCharacterRemove(character)}
-                  className="hover:bg-destructive/20 rounded-full p-1"
+                  onClick={() => !disabled && handleCharacterRemove(character)}
+                  disabled={disabled}
+                  className="hover:bg-destructive/20 rounded-full p-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -106,9 +110,11 @@ export const CharacterSelector = ({
                 size="sm"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleCharacterSelect(character);
+                  if (!disabled) {
+                    handleCharacterSelect(character);
+                  }
                 }}
-                disabled={selectedCharacters.length >= maxSelection}
+                disabled={selectedCharacters.length >= maxSelection || disabled}
                 className="w-full justify-start h-auto p-3 text-left hover:bg-accent/10"
               >
                 <Avatar className="w-8 h-8 mr-3 shrink-0">
