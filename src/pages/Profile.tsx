@@ -50,8 +50,16 @@ export default function Profile() {
   const { data: allRankedPlayers = [] } = useRankedPlayers();
   const { data: characterImages = [] } = useCharacterImages();
   const { data: characterRankings = {} } = useCharacterRanking();
-  const profileCooldown = useProfileCooldown(targetUserId);
+  const profileCooldown = useProfileCooldown(user?.id); // Sempre usar user.id do auth
   const isOwnProfile = !playerId || playerId === user?.id;
+  
+  console.log('🔧 Profile Debug:', {
+    userId: user?.id,
+    playerId,
+    targetUserId,
+    isOwnProfile,
+    cooldownData: profileCooldown.data
+  });
 
   // Redirecionar para auth se não estiver logado e for próprio perfil
   useEffect(() => {
@@ -612,11 +620,11 @@ useEffect(() => {
                            placeholder="Sua frase ninja..."
                            value={editedNinjaPhrase}
                            onChange={(e) => setEditedNinjaPhrase(e.target.value)}
-                           disabled={!profileCooldown.data?.canUpdate}
+                           disabled={profileCooldown.data?.canUpdate === false}
                            rows={3}
-                           className={!profileCooldown.data?.canUpdate ? "opacity-40" : ""}
+                           className={profileCooldown.data?.canUpdate === false ? "opacity-40" : ""}
                          />
-                         {!profileCooldown.data?.canUpdate && profileCooldown.data?.nextUpdateDate && (
+                         {profileCooldown.data?.canUpdate === false && profileCooldown.data?.nextUpdateDate && (
                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm rounded-md pointer-events-none border-2 border-dashed border-muted">
                              <div className="text-center p-4">
                                <Shield className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
@@ -653,9 +661,9 @@ useEffect(() => {
                             selectedCharacters={editedCharacters}
                             onCharactersChange={setEditedCharacters}
                             maxSelection={3}
-                            disabled={!profileCooldown.data?.canUpdate}
+                            disabled={profileCooldown.data?.canUpdate === false}
                           />
-                          {!profileCooldown.data?.canUpdate && profileCooldown.data?.nextUpdateDate && (
+                          {profileCooldown.data?.canUpdate === false && profileCooldown.data?.nextUpdateDate && (
                             <div className="absolute inset-0 flex items-center justify-center bg-background/95 backdrop-blur-sm rounded-md pointer-events-none border-2 border-dashed border-muted z-10">
                               <div className="text-center p-4">
                                 <Shield className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
