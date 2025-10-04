@@ -614,22 +614,29 @@ useEffect(() => {
                            onChange={(e) => setEditedNinjaPhrase(e.target.value)}
                            disabled={!profileCooldown.data?.canUpdate}
                            rows={3}
-                           className={!profileCooldown.data?.canUpdate ? "opacity-50 cursor-not-allowed" : ""}
+                           className={!profileCooldown.data?.canUpdate ? "opacity-40" : ""}
                          />
-                         {!profileCooldown.data?.canUpdate && (
-                           <div className="absolute inset-0 flex items-center justify-center bg-background/90 rounded pointer-events-none">
-                             <div className="text-center">
-                               <p className="text-sm font-medium text-muted-foreground">Bloqueado por 33 dias</p>
-                               {profileCooldown.data?.nextUpdateDate && (
-                                 <p className="text-xs text-muted-foreground">
-                                   Disponível em: {new Date(profileCooldown.data.nextUpdateDate).toLocaleDateString('pt-BR')}
+                         {!profileCooldown.data?.canUpdate && profileCooldown.data?.nextUpdateDate && (
+                           <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm rounded-md pointer-events-none border-2 border-dashed border-muted">
+                             <div className="text-center p-4">
+                               <Shield className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
+                               <p className="text-sm font-bold text-foreground mb-1">Bloqueado por 33 dias</p>
+                               <p className="text-xs text-muted-foreground mb-2">
+                                 Próxima edição disponível em:
+                               </p>
+                               <div className="bg-muted/50 rounded-lg px-4 py-2">
+                                 <p className="text-lg font-bold text-accent">
+                                   {Math.ceil((new Date(profileCooldown.data.nextUpdateDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} dias
                                  </p>
-                               )}
+                                 <p className="text-xs text-muted-foreground">
+                                   ({new Date(profileCooldown.data.nextUpdateDate).toLocaleDateString('pt-BR')})
+                                 </p>
+                               </div>
                              </div>
                            </div>
                          )}
                        </div>
-                      </div>
+                     </div>
 
                        <div className="space-y-2">
                          <Label>Banner do Perfil</Label>
@@ -648,20 +655,27 @@ useEffect(() => {
                             maxSelection={3}
                             disabled={!profileCooldown.data?.canUpdate}
                           />
-                          {!profileCooldown.data?.canUpdate && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-background/90 rounded pointer-events-none">
-                              <div className="text-center">
-                                <p className="text-sm font-medium text-muted-foreground">Bloqueado por 33 dias</p>
-                                {profileCooldown.data?.nextUpdateDate && (
-                                  <p className="text-xs text-muted-foreground">
-                                    Disponível em: {new Date(profileCooldown.data.nextUpdateDate).toLocaleDateString('pt-BR')}
+                          {!profileCooldown.data?.canUpdate && profileCooldown.data?.nextUpdateDate && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-background/95 backdrop-blur-sm rounded-md pointer-events-none border-2 border-dashed border-muted z-10">
+                              <div className="text-center p-4">
+                                <Shield className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
+                                <p className="text-sm font-bold text-foreground mb-1">Bloqueado por 33 dias</p>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  Próxima edição disponível em:
+                                </p>
+                                <div className="bg-muted/50 rounded-lg px-4 py-2">
+                                  <p className="text-lg font-bold text-accent">
+                                    {Math.ceil((new Date(profileCooldown.data.nextUpdateDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} dias
                                   </p>
-                                )}
+                                  <p className="text-xs text-muted-foreground">
+                                    ({new Date(profileCooldown.data.nextUpdateDate).toLocaleDateString('pt-BR')})
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           )}
                         </div>
-                     </div>
+                      </div>
                   </CardContent>
                 </Card>
 
