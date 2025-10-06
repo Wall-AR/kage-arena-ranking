@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,14 +52,6 @@ export default function Profile() {
   const { data: characterRankings = {} } = useCharacterRanking();
   const profileCooldown = useProfileCooldown(user?.id); // Sempre usar user.id do auth
   const isOwnProfile = !playerId || playerId === user?.id;
-  
-  console.log('🔧 Profile Debug:', {
-    userId: user?.id,
-    playerId,
-    targetUserId,
-    isOwnProfile,
-    cooldownData: profileCooldown.data
-  });
 
   // Redirecionar para auth se não estiver logado e for próprio perfil
   useEffect(() => {
@@ -71,38 +63,42 @@ export default function Profile() {
 // Conquistas do jogador
 const achievements = usePlayerAchievements(playerData);
 
-// Dados processados do jogador
-const processedPlayerData = playerData ? {
-  ...playerData,
-  // Mapear campos do DB para interface do componente
-  points: playerData.current_points ?? playerData.points ?? 0,
-  winRate: playerData.wins + playerData.losses > 0 
-    ? Math.round((playerData.wins / (playerData.wins + playerData.losses)) * 100) 
-    : 0,
-  winStreak: playerData.win_streak || 0,
-  isRanked: playerData.is_ranked,
-  isAdmin: playerData.is_admin,
-  isModerator: playerData.is_moderator,
-  role: playerData.role,
-  favoriteCharacters: Array.isArray(playerData.favorite_characters) 
-    ? playerData.favorite_characters 
-    : [],
-  achievements: achievements.map(a => a.name), // Converter para array de strings
-  ninjaPhrase: playerData.ninja_phrase || "Esse é o meu jeito ninja de ser!",
-  avatar_url: playerData.avatar_url || null,
-  lastMatch: playerData.last_match_date || "Nunca",
-  privacySettings: playerData.privacy_settings || { evaluation_visibility: "all" },
-  // Calcular posição no ranking
-  position: allRankedPlayers.findIndex(p => p.id === playerData.id) + 1 || null,
-  // Pegar última avaliação se existir
-  evaluation: playerData.evaluations && playerData.evaluations.length > 0 
-    ? playerData.evaluations[playerData.evaluations.length - 1] 
-    : null,
-  tutor: playerData.evaluations && playerData.evaluations.length > 0 && playerData.evaluations[0].evaluator
-    ? playerData.evaluations[0].evaluator
-    : null,
-  selected_banner_id: playerData.selected_banner_id || null
-} : null;
+// Dados processados do jogador - usar useMemo para evitar recriações
+const processedPlayerData = useMemo(() => {
+  if (!playerData) return null;
+  
+  return {
+    ...playerData,
+    // Mapear campos do DB para interface do componente
+    points: playerData.current_points ?? playerData.points ?? 0,
+    winRate: playerData.wins + playerData.losses > 0 
+      ? Math.round((playerData.wins / (playerData.wins + playerData.losses)) * 100) 
+      : 0,
+    winStreak: playerData.win_streak || 0,
+    isRanked: playerData.is_ranked,
+    isAdmin: playerData.is_admin,
+    isModerator: playerData.is_moderator,
+    role: playerData.role,
+    favoriteCharacters: Array.isArray(playerData.favorite_characters) 
+      ? playerData.favorite_characters 
+      : [],
+    achievements: achievements.map(a => a.name), // Converter para array de strings
+    ninjaPhrase: playerData.ninja_phrase || "Esse é o meu jeito ninja de ser!",
+    avatar_url: playerData.avatar_url || null,
+    lastMatch: playerData.last_match_date || "Nunca",
+    privacySettings: playerData.privacy_settings || { evaluation_visibility: "all" },
+    // Calcular posição no ranking
+    position: allRankedPlayers.findIndex(p => p.id === playerData.id) + 1 || null,
+    // Pegar última avaliação se existir
+    evaluation: playerData.evaluations && playerData.evaluations.length > 0 
+      ? playerData.evaluations[playerData.evaluations.length - 1] 
+      : null,
+    tutor: playerData.evaluations && playerData.evaluations.length > 0 && playerData.evaluations[0].evaluator
+      ? playerData.evaluations[0].evaluator
+      : null,
+    selected_banner_id: playerData.selected_banner_id || null
+  };
+}, [playerData, achievements, allRankedPlayers]);
 
 // Inicializar valores de edição quando playerData carrega
 useEffect(() => {
