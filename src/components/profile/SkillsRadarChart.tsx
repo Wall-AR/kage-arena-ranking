@@ -22,14 +22,14 @@ export const SkillsRadarChart = ({ skills }: SkillsRadarChartProps) => {
   const maxRadius = 110;
   
   const skillsData = [
-    { name: 'Pin', value: skills.pin || 0, angle: 0 },
-    { name: 'Defesa', value: skills.defense || 0, angle: 45 },
-    { name: 'Aéreo', value: skills.aerial || 0, angle: 90 },
-    { name: 'Kunai', value: skills.kunai || 0, angle: 135 },
-    { name: 'Timing', value: skills.timing || 0, angle: 180 },
-    { name: 'Recurso', value: skills.resource || 0, angle: 225 },
-    { name: 'Dash', value: skills.dash || 0, angle: 270 },
-    { name: 'Geral', value: skills.general || 0, angle: 315 },
+    { name: 'Dash', value: skills.dash || 0, angle: -90 },  // Topo
+    { name: 'Geral', value: skills.general || 0, angle: -45 },  // Direita superior
+    { name: 'Pin', value: skills.pin || 0, angle: 0 },  // Direita
+    { name: 'Defesa', value: skills.defense || 0, angle: 45 },  // Direita inferior
+    { name: 'Aéreo', value: skills.aerial || 0, angle: 90 },  // Baixo
+    { name: 'Kunai', value: skills.kunai || 0, angle: 135 },  // Esquerda inferior
+    { name: 'Timing', value: skills.timing || 0, angle: 180 },  // Esquerda
+    { name: 'Recurso', value: skills.resource || 0, angle: 225 },  // Esquerda superior
   ];
   
   // Calcular dicas de melhoria baseadas nas habilidades mais baixas
@@ -66,8 +66,9 @@ export const SkillsRadarChart = ({ skills }: SkillsRadarChartProps) => {
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Gráfico de Radar */}
-          <div className="relative flex items-center justify-center h-80">
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-lg">
+          <div className="relative flex items-center justify-center min-h-[400px] w-full">
+            <div className="relative w-full max-w-[280px] aspect-square">
+            <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`} className="drop-shadow-lg absolute inset-0">
               <defs>
                 <radialGradient id="gridGradient" cx="50%" cy="50%" r="50%">
                   <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity="0.1" />
@@ -171,27 +172,33 @@ export const SkillsRadarChart = ({ skills }: SkillsRadarChartProps) => {
             {/* Labels das habilidades */}
             {skillsData.map((skill, index) => {
               const angle = (skill.angle * Math.PI) / 180;
-              const labelRadius = maxRadius + 25;
+              const labelRadius = maxRadius + 30;
               const x = center + Math.cos(angle) * labelRadius;
               const y = center + Math.sin(angle) * labelRadius;
+              
+              // Converter coordenadas SVG para porcentagem
+              const leftPercent = (x / size) * 100;
+              const topPercent = (y / size) * 100;
               
               return (
                 <div
                   key={index}
-                  className="absolute text-xs font-bold text-center transition-all duration-300 hover:scale-110 cursor-default"
+                  className="absolute text-xs font-bold text-center transition-all duration-300 hover:scale-110 cursor-default pointer-events-none"
                   style={{
-                    left: `${x - 25}px`,
-                    top: `${y - 10}px`,
-                    width: '50px',
+                    left: `${leftPercent}%`,
+                    top: `${topPercent}%`,
+                    transform: 'translate(-50%, -50%)',
+                    minWidth: '60px',
                   }}
                 >
-                  <div className="text-foreground text-xs">{skill.name}</div>
+                  <div className="text-foreground text-xs whitespace-nowrap">{skill.name}</div>
                   <div className="text-accent font-extrabold text-sm">
                     {skill.value.toFixed(1)}
                   </div>
                 </div>
               );
             })}
+            </div>
           </div>
           
           {/* Dicas de Melhoria */}
