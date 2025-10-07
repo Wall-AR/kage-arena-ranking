@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+import { Achievement } from "@/hooks/useAchievements";
+import { AchievementsBadges } from "./AchievementsBadges";
+
 interface ProfileHeaderProps {
   player: {
     name: string;
@@ -15,7 +18,7 @@ interface ProfileHeaderProps {
     avatar?: string;
     avatar_url?: string;
     ninjaPhrase: string;
-    achievements: string[];
+    achievements: Achievement[];
     isRanked: boolean;
     isAdmin?: boolean;
     isModerator?: boolean;
@@ -68,6 +71,10 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
             src={bannerUrl} 
             alt="Profile banner" 
             className="w-full h-full object-cover opacity-40"
+            style={{
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
@@ -216,19 +223,8 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
 
         {/* Conquistas */}
         {player.isRanked && player.achievements && player.achievements.length > 0 && (
-          <div className="flex items-center space-x-2 mt-6">
-            <span className="text-sm text-muted-foreground mr-2">Conquistas:</span>
-            {player.achievements.map((achievement, index) => {
-              const Icon = getAchievementIcon(achievement);
-              return (
-                <div key={index} className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110",
-                  `bg-${rankColor}/20 text-${rankColor}`
-                )}>
-                  <Icon className="w-4 h-4" />
-                </div>
-              );
-            })}
+          <div className="mt-6">
+            <AchievementsBadges achievements={player.achievements} />
           </div>
         )}
 

@@ -1,114 +1,151 @@
-import { useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export interface Achievement {
   id: string;
   name: string;
   description: string;
-  icon: "trophy" | "medal" | "star" | "crown" | "shield" | "fire" | "target" | "zap";
+  icon: "trophy" | "medal" | "star" | "crown" | "shield" | "fire" | "target" | "zap" | "award";
   color: "gold" | "silver" | "bronze" | "primary" | "accent" | "success" | "warning" | "destructive";
 }
 
-export const usePlayerAchievements = (playerData: any) => {
-  return useMemo(() => {
-    const achievements: Achievement[] = [];
-    
-    if (!playerData) return achievements;
+export const useAchievements = () => {
+  return useQuery({
+    queryKey: ['achievements'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('achievements')
+        .select('*')
+        .order('created_at', { ascending: true });
 
-    // Kage titles
-    if (playerData.kage_title) {
-      achievements.push({
-        id: `kage-${playerData.kage_title}`,
-        name: playerData.kage_title,
-        description: "Título de Kage - Top 5 do ranking",
-        icon: "crown",
-        color: "gold"
+      if (error) throw error;
+      return data || [];
+    }
+  });
+};
+
+export const usePlayerAchievements = (playerId?: string) => {
+  return useQuery({
+    queryKey: ['player-achievements', playerId],
+    queryFn: async () => {
+      if (!playerId) return [];
+      
+      const { data, error } = await supabase
+        .from('player_achievements')
+        .select(`
+          *,
+          achievement:achievements(*)
+        `)
+        .eq('player_id', playerId)
+        .order('unlocked_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!playerId
+  });
+};
+
+export const useRedeemCode = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ playerId, code }: { playerId: string; code: string }) => {
+      const { data, error } = await supabase.rpc('redeem_code', {
+        p_player_id: playerId,
+        p_code: code
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data: any) => {
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ['player-achievements'] });
+        queryClient.invalidateQueries({ queryKey: ['player-banners'] });
+        
+        let message = data.message;
+        if (data.banner_unlocked && data.achievement_unlocked) {
+          message += ' Você desbloqueou um novo banner e uma conquista!';
+        } else if (data.banner_unlocked) {
+          message += ' Você desbloqueou um novo banner!';
+        } else if (data.achievement_unlocked) {
+          message += ' Você desbloqueou uma nova conquista!';
+        }
+        
+        toast({
+          title: "Código resgatado!",
+          description: message,
+        });
+      } else {
+        toast({
+          title: "Erro ao resgatar código",
+          description: data.message,
+          variant: "destructive"
+        });
+      }
+    },
+    onError: (error) => {
+      console.error('Error redeeming code:', error);
+      toast({
+        title: "Erro ao resgatar código",
+        description: "Tente novamente em alguns instantes.",
+        variant: "destructive"
       });
     }
+  });
+};
 
-    // Win streak achievements
-    const winStreak = playerData.win_streak || 0;
-    if (winStreak >= 10) {
-      achievements.push({
-        id: "win-streak-10",
-        name: "Sequência Lendária",
-        description: "10+ vitórias consecutivas",
-        icon: "fire",
-        color: "gold"
+export const useUpdateDisplayedAchievements = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ 
+      playerId, 
+      achievementIds 
+    }: { 
+      playerId: string; 
+      achievementIds: string[];
+    }) => {
+      // Primeiro, remover todos os displays
+      await supabase
+        .from('player_achievements')
+        .update({ is_displayed: false, display_order: null })
+        .eq('player_id', playerId);
+
+      // Depois, marcar os selecionados
+      if (achievementIds.length > 0) {
+        const updates = achievementIds.map((id, index) => 
+          supabase
+            .from('player_achievements')
+            .update({ is_displayed: true, display_order: index })
+            .eq('player_id', playerId)
+            .eq('achievement_id', id)
+        );
+
+        await Promise.all(updates);
+      }
+
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['player-achievements'] });
+      queryClient.invalidateQueries({ queryKey: ['player-profile'] });
+      toast({
+        title: "Conquistas atualizadas!",
+        description: "Suas conquistas foram atualizadas com sucesso.",
       });
-    } else if (winStreak >= 5) {
-      achievements.push({
-        id: "win-streak-5",
-        name: "Sequência Épica",
-        description: "5+ vitórias consecutivas",
-        icon: "fire",
-        color: "silver"
+    },
+    onError: (error) => {
+      console.error('Error updating achievements:', error);
+      toast({
+        title: "Erro ao atualizar conquistas",
+        description: "Tente novamente em alguns instantes.",
+        variant: "destructive"
       });
     }
-
-    // Points achievements
-    const points = playerData.current_points || 0;
-    if (points >= 2000) {
-      achievements.push({
-        id: "points-2000",
-        name: "Ninja Lendário",
-        description: "2000+ pontos no ranking",
-        icon: "star",
-        color: "gold"
-      });
-    } else if (points >= 1500) {
-      achievements.push({
-        id: "points-1500",
-        name: "Ninja Élite",
-        description: "1500+ pontos no ranking",
-        icon: "star",
-        color: "silver"
-      });
-    }
-
-    // Win rate achievements
-    const totalGames = (playerData.wins || 0) + (playerData.losses || 0);
-    const winRate = totalGames > 0 ? (playerData.wins / totalGames) * 100 : 0;
-    
-    if (totalGames >= 10 && winRate >= 80) {
-      achievements.push({
-        id: "winrate-80",
-        name: "Dominador",
-        description: "80%+ taxa de vitória (10+ jogos)",
-        icon: "target",
-        color: "gold"
-      });
-    }
-
-    // Role-based achievements
-    if (playerData.is_admin) {
-      achievements.push({
-        id: "admin",
-        name: "Administrador",
-        description: "Líder da comunidade",
-        icon: "crown",
-        color: "destructive"
-      });
-    } else if (playerData.is_moderator) {
-      achievements.push({
-        id: "moderator",
-        name: "Moderador",
-        description: "Guardião da comunidade",
-        icon: "shield",
-        color: "primary"
-      });
-    }
-
-    // Immunity achievement
-    if (playerData.immunity_until && new Date(playerData.immunity_until) > new Date()) {
-      achievements.push({
-        id: "immunity",
-        name: "Protegido",
-        description: "Proteção temporária no ranking",
-        icon: "shield",
-        color: "accent"
-      });
-    }
-
-    return achievements;
-  }, [playerData]);
+  });
 };

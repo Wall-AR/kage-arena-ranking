@@ -57,10 +57,14 @@ export const BannerSelector = ({ playerId, selectedBannerId }: BannerSelectorPro
               >
                 {/* Banner preview */}
                 <div 
-                  className="h-32 bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center relative"
+                  className="h-32 flex items-center justify-center relative bg-gradient-to-br from-muted to-muted-foreground/20"
                   style={
                     banner.image_url 
-                      ? { backgroundImage: `url(${banner.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                      ? { 
+                          backgroundImage: `url(${banner.image_url})`, 
+                          backgroundSize: 'cover', 
+                          backgroundPosition: 'center'
+                        }
                       : {}
                   }
                 >

@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string
+          color: string
+          created_at: string
+          description: string | null
+          display_name: string
+          icon: string
+          id: string
+          name: string
+        }
+        Insert: {
+          category?: string
+          color?: string
+          created_at?: string
+          description?: string | null
+          display_name: string
+          icon: string
+          id?: string
+          name: string
+        }
+        Update: {
+          category?: string
+          color?: string
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          icon?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           created_at: string | null
@@ -362,6 +395,48 @@ export type Database = {
           },
         ]
       }
+      player_achievements: {
+        Row: {
+          achievement_id: string
+          display_order: number | null
+          id: string
+          is_displayed: boolean | null
+          player_id: string
+          unlocked_at: string
+        }
+        Insert: {
+          achievement_id: string
+          display_order?: number | null
+          id?: string
+          is_displayed?: boolean | null
+          player_id: string
+          unlocked_at?: string
+        }
+        Update: {
+          achievement_id?: string
+          display_order?: number | null
+          id?: string
+          is_displayed?: boolean | null
+          player_id?: string
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_achievements_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_banners: {
         Row: {
           banner_id: string
@@ -424,6 +499,7 @@ export type Database = {
           rank: string | null
           rank_level: string | null
           role: Database["public"]["Enums"]["user_role"] | null
+          selected_achievements: Json | null
           selected_banner_id: string | null
           tutor_id: string | null
           updated_at: string
@@ -456,6 +532,7 @@ export type Database = {
           rank?: string | null
           rank_level?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          selected_achievements?: Json | null
           selected_banner_id?: string | null
           tutor_id?: string | null
           updated_at?: string
@@ -488,6 +565,7 @@ export type Database = {
           rank?: string | null
           rank_level?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          selected_achievements?: Json | null
           selected_banner_id?: string | null
           tutor_id?: string | null
           updated_at?: string
@@ -550,6 +628,93 @@ export type Database = {
           player_id?: string
         }
         Relationships: []
+      }
+      redeemed_codes: {
+        Row: {
+          code_id: string
+          id: string
+          player_id: string
+          redeemed_at: string
+        }
+        Insert: {
+          code_id: string
+          id?: string
+          player_id: string
+          redeemed_at?: string
+        }
+        Update: {
+          code_id?: string
+          id?: string
+          player_id?: string
+          redeemed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redeemed_codes_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "redemption_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redeemed_codes_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      redemption_codes: {
+        Row: {
+          achievement_id: string | null
+          banner_id: string | null
+          code: string
+          created_at: string
+          current_uses: number | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+        }
+        Insert: {
+          achievement_id?: string | null
+          banner_id?: string | null
+          code: string
+          created_at?: string
+          current_uses?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+        }
+        Update: {
+          achievement_id?: string | null
+          banner_id?: string | null
+          code?: string
+          created_at?: string
+          current_uses?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redemption_codes_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redemption_codes_banner_id_fkey"
+            columns: ["banner_id"]
+            isOneToOne: false
+            referencedRelation: "banners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournament_participants: {
         Row: {
@@ -691,6 +856,10 @@ export type Database = {
       make_user_moderator: {
         Args: { user_email: string }
         Returns: string
+      }
+      redeem_code: {
+        Args: { p_code: string; p_player_id: string }
+        Returns: Json
       }
       set_initial_admin: {
         Args: { target_user_id: string }

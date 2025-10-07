@@ -27,7 +27,9 @@ import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { useProfileUpdate } from "@/hooks/useProfile";
 import { useRankedPlayers } from "@/hooks/usePlayers";
 import { AchievementsBadges } from "@/components/profile/AchievementsBadges";
-import { usePlayerAchievements } from "@/hooks/useAchievements";
+import { usePlayerAchievements, Achievement } from "@/hooks/useAchievements";
+import { AchievementSelector } from "@/components/profile/AchievementSelector";
+import { RedemptionCodeDialog } from "@/components/profile/RedemptionCodeDialog";
 import { useCharacterRanking, getPlayerCharacterRanking } from "@/hooks/useCharacterRanking";
 import { useProfileCooldown } from "@/hooks/useProfileCooldown";
 import { getCharacterImageUrl, useCharacterImages } from "@/hooks/useCharacterImages";
@@ -60,8 +62,8 @@ export default function Profile() {
     }
   }, [user, loading, playerId, navigate]);
 
-// Conquistas do jogador
-const achievements = usePlayerAchievements(playerData);
+// Conquistas do jogador (do banco de dados)
+const { data: playerAchievements = [] } = usePlayerAchievements(playerData?.id);
 
 // Dados processados do jogador - usar useMemo para evitar recriações
 const processedPlayerData = useMemo(() => {
@@ -82,7 +84,15 @@ const processedPlayerData = useMemo(() => {
     favoriteCharacters: Array.isArray(playerData.favorite_characters) 
       ? playerData.favorite_characters 
       : [],
-    achievements: achievements.map(a => a.name), // Converter para array de strings
+    achievements: playerAchievements
+      .filter(pa => pa.is_displayed)
+      .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+      .map(pa => ({
+        ...pa.achievement,
+        description: pa.achievement.description || '',
+        icon: pa.achievement.icon as Achievement['icon'],
+        color: pa.achievement.color as Achievement['color']
+      })),
     ninjaPhrase: playerData.ninja_phrase || "Esse é o meu jeito ninja de ser!",
     avatar_url: playerData.avatar_url || null,
     lastMatch: playerData.last_match_date || "Nunca",
@@ -98,7 +108,7 @@ const processedPlayerData = useMemo(() => {
       : null,
     selected_banner_id: playerData.selected_banner_id || null
   };
-}, [playerData, achievements, allRankedPlayers]);
+}, [playerData, playerAchievements, allRankedPlayers]);
 
 // Inicializar valores de edição quando playerData carrega
 useEffect(() => {
@@ -290,11 +300,12 @@ useEffect(() => {
 
         {/* Conteúdo Principal */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) ? 'grid-cols-6' : 'grid-cols-5'}`}>
+          <TabsList className={`grid w-full ${isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) ? 'grid-cols-7' : (isOwnProfile ? 'grid-cols-6' : 'grid-cols-4')}`}>
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="stats">Estatísticas</TabsTrigger>
             <TabsTrigger value="history">Histórico</TabsTrigger>
             <TabsTrigger value="evaluations">Avaliações</TabsTrigger>
+            {isOwnProfile && <TabsTrigger value="achievements">Conquistas</TabsTrigger>}
             {isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) && <TabsTrigger value="students">Alunos</TabsTrigger>}
             {isOwnProfile && <TabsTrigger value="settings">Configurações</TabsTrigger>}
           </TabsList>
@@ -339,7 +350,7 @@ useEffect(() => {
                   {/* Medalhas e Conquistas */}
                   <div className="mt-4">
                     <h4 className="text-sm font-medium text-foreground mb-3">Conquistas</h4>
-                    <AchievementsBadges achievements={achievements} />
+                    <AchievementsBadges achievements={player.achievements} />
                   </div>
                 </CardContent>
               </Card>
@@ -563,6 +574,20 @@ useEffect(() => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Aba: Conquistas */}
+          {isOwnProfile && (
+            <TabsContent value="achievements" className="space-y-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold">Minhas Conquistas</h2>
+                  <p className="text-muted-foreground">Gerencie suas medalhas e resgates</p>
+                </div>
+                {playerData?.id && <RedemptionCodeDialog playerId={playerData.id} />}
+              </div>
+              {playerData?.id && <AchievementSelector playerId={playerData.id} />}
+            </TabsContent>
+          )}
 
           {/* Aba: Alunos (apenas para moderadores) */}
           {isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) && (
