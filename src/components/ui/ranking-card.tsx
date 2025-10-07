@@ -1,11 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy, Sword, Shield, Flame, Star, Users } from "lucide-react";
+import { Trophy, Sword, Shield, Flame, Star, Users, Medal, Crown, Target, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCharacterImages, getCharacterImageUrl } from "@/hooks/useCharacterImages";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { Achievement } from "@/hooks/useAchievements";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Player {
   id: string;
@@ -25,6 +32,7 @@ interface Player {
   avatar: string;
   avatar_url?: string;
   selected_banner_id?: string | null;
+  selected_achievements?: Achievement[];
 }
 
 interface RankingCardProps {
@@ -33,6 +41,34 @@ interface RankingCardProps {
 
 const RankingCard = ({ player }: RankingCardProps) => {
   const { data: characterImages = [] } = useCharacterImages();
+
+  const getAchievementIcon = (iconType: Achievement['icon']) => {
+    const iconMap = {
+      trophy: Trophy,
+      medal: Medal,
+      star: Star,
+      crown: Crown,
+      shield: Shield,
+      fire: Flame,
+      target: Target,
+      zap: Zap,
+    };
+    return iconMap[iconType];
+  };
+
+  const getAchievementColorClasses = (color: Achievement['color']) => {
+    const colorMap = {
+      gold: "bg-yellow-500/20 text-yellow-600 border-yellow-500/30",
+      silver: "bg-gray-400/20 text-gray-600 border-gray-400/30",
+      bronze: "bg-amber-600/20 text-amber-700 border-amber-600/30",
+      primary: "bg-primary/20 text-primary border-primary/30",
+      accent: "bg-accent/20 text-accent border-accent/30",
+      success: "bg-green-500/20 text-green-600 border-green-500/30",
+      warning: "bg-orange-500/20 text-orange-600 border-orange-500/30",
+      destructive: "bg-red-500/20 text-red-600 border-red-500/30",
+    };
+    return colorMap[color];
+  };
 
   const { data: bannerUrl } = useQuery({
     queryKey: ['banner-image', player.selected_banner_id],
@@ -93,10 +129,14 @@ const RankingCard = ({ player }: RankingCardProps) => {
               <img 
                 src={bannerUrl} 
                 alt="Player banner" 
-                className="w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                style={{
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
               />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/70" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/60" />
           </>
         )}
         
@@ -143,6 +183,38 @@ const RankingCard = ({ player }: RankingCardProps) => {
                     {player.current_points} pontos
                   </span>
                 </div>
+                
+                {/* Conquistas */}
+                {player.selected_achievements && player.selected_achievements.length > 0 && (
+                  <TooltipProvider>
+                    <div className="flex items-center gap-1 mt-1">
+                      {player.selected_achievements.slice(0, 5).map((achievement) => {
+                        const Icon = getAchievementIcon(achievement.icon);
+                        const colorClasses = getAchievementColorClasses(achievement.color);
+                        
+                        return (
+                          <Tooltip key={achievement.id}>
+                            <TooltipTrigger asChild>
+                              <div
+                                className={`p-1 rounded-full border transition-all duration-300 hover:scale-110 cursor-pointer ${colorClasses}`}
+                              >
+                                <Icon className="w-3 h-3" />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="text-center text-xs">
+                                <div className="font-medium">{achievement.name}</div>
+                                <div className="text-muted-foreground mt-0.5">
+                                  {achievement.description}
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
+                    </div>
+                  </TooltipProvider>
+                )}
                 
                 <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                   <span>{player.wins}V - {player.losses}D</span>

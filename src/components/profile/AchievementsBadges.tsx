@@ -1,6 +1,12 @@
 import { Trophy, Medal, Star, Crown, Shield, Flame, Target, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Achievement } from "@/hooks/useAchievements";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AchievementsBadgesProps {
   achievements: Achievement[];
@@ -47,37 +53,41 @@ export const AchievementsBadges = ({ achievements, className }: AchievementsBadg
   }
 
   return (
-    <div className={cn("space-y-3", className)}>
-      <div className="flex flex-wrap gap-2">
-        {achievements.map((achievement) => {
-          const Icon = getAchievementIcon(achievement.icon);
-          const colorClasses = getColorClasses(achievement.color);
-          
-          return (
-            <div
-              key={achievement.id}
-              className={cn(
-                "group relative flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-300 hover:scale-105 cursor-pointer",
-                colorClasses
-              )}
-              title={achievement.description}
-            >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              <span className="text-sm font-medium truncate max-w-[120px]">
-                {achievement.name}
-              </span>
-              
-              {/* Tooltip */}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-background border rounded-lg shadow-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                <div className="font-medium">{achievement.name}</div>
-                <div className="text-muted-foreground text-xs mt-1">
-                  {achievement.description}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+    <TooltipProvider>
+      <div className={cn("space-y-3", className)}>
+        <div className="flex flex-wrap gap-2">
+          {achievements.map((achievement) => {
+            const Icon = getAchievementIcon(achievement.icon);
+            const colorClasses = getColorClasses(achievement.color);
+            
+            return (
+              <Tooltip key={achievement.id}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-300 hover:scale-105 cursor-pointer",
+                      colorClasses
+                    )}
+                  >
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm font-medium truncate max-w-[120px]">
+                      {achievement.name}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="text-center">
+                    <div className="font-medium">{achievement.name}</div>
+                    <div className="text-muted-foreground text-xs mt-1">
+                      {achievement.description}
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };

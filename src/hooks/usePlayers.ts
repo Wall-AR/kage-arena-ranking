@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Achievement } from "@/hooks/useAchievements";
 
 export interface Player {
   id: string;
@@ -11,12 +12,15 @@ export interface Player {
   current_points: number;
   wins: number;
   losses: number;
+  win_streak: number;
   winRate?: number;
   lastMatch?: string;
   favoriteCharacters?: string[];
   achievements?: string[];
+  selected_achievements?: Achievement[];
   isImmune?: boolean;
   avatar?: string;
+  avatar_url?: string;
   user_id: string;
   is_ranked: boolean;
   is_moderator: boolean;
@@ -24,6 +28,8 @@ export interface Player {
   role: string;
   kage_title?: string;
   ninja_phrase?: string;
+  rank_level?: string;
+  selected_banner_id?: string | null;
 }
 
 // Hook para buscar todos os players rankeados
@@ -48,6 +54,8 @@ export const useRankedPlayers = () => {
         favoriteCharacters: Array.isArray(player.favorite_characters) ? 
           player.favorite_characters.filter(char => typeof char === 'string') : [],
         achievements: [],
+        selected_achievements: Array.isArray(player.selected_achievements) ? 
+          player.selected_achievements as unknown as Achievement[] : [],
         isImmune: player.immunity_until ? new Date(player.immunity_until) > new Date() : false,
         avatar: player.avatar_url || "/placeholder.svg"
       })) || [];
@@ -78,6 +86,8 @@ export const useTopPlayers = (limit: number = 3) => {
         favoriteCharacters: Array.isArray(player.favorite_characters) ? 
           player.favorite_characters.filter(char => typeof char === 'string') : [],
         achievements: [],
+        selected_achievements: Array.isArray(player.selected_achievements) ? 
+          player.selected_achievements as unknown as Achievement[] : [],
         isImmune: player.immunity_until ? new Date(player.immunity_until) > new Date() : false,
         avatar: player.avatar_url || "/placeholder.svg"
       })) || [];

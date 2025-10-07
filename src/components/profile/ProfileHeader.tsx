@@ -70,7 +70,7 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
           <img 
             src={bannerUrl} 
             alt="Profile banner" 
-            className="w-full h-full object-cover opacity-40"
+            className="w-full h-full object-cover"
             style={{
               objectFit: 'cover',
               objectPosition: 'center'
@@ -79,7 +79,6 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
       </div>
 
       {/* Conteúdo */}
@@ -115,7 +114,7 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
 
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-2">
-                <h1 className="font-ninja text-3xl font-bold text-foreground transition-all duration-300 hover:text-accent">
+                <h1 className="font-ninja text-3xl font-bold text-foreground drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] transition-all duration-300 hover:text-accent">
                   {player.name}
                 </h1>
                 {player.kage_title && (
@@ -176,7 +175,7 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
               </div>
               
               <p className={cn(
-                "italic text-sm leading-relaxed transition-all duration-300 max-w-md",
+                "italic text-sm leading-relaxed transition-all duration-300 max-w-md px-2 py-1 rounded bg-background/60 backdrop-blur-sm",
                 !player.isRanked ? "text-muted-foreground/60" : "text-muted-foreground"
               )}>
                 "{player.ninjaPhrase}"
