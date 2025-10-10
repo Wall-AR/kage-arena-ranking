@@ -82,13 +82,20 @@ export const useMatches = () => {
 
       if (matchError) throw matchError;
 
+      // Buscar win_streak atual do vencedor
+      const { data: winnerData } = await supabase
+        .from("players")
+        .select("win_streak")
+        .eq("id", matchData.winnerId)
+        .single();
+
       // Atualizar pontos e estatísticas dos jogadores
       const { error: winnerUpdateError } = await supabase
         .from("players")
         .update({
           current_points: winner.current_points + winnerPointsChange,
           wins: winner.wins + 1,
-          win_streak: winner.id === currentPlayer.id ? (currentPlayer.wins || 0) + 1 : 0
+          win_streak: (winnerData?.win_streak || 0) + 1
         })
         .eq("id", matchData.winnerId);
 

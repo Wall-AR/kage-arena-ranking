@@ -82,7 +82,7 @@ const processedPlayerData = useMemo(() => {
     isModerator: playerData.is_moderator,
     role: playerData.role,
     favoriteCharacters: Array.isArray(playerData.favorite_characters) 
-      ? playerData.favorite_characters 
+      ? (playerData.favorite_characters as any[]).map(char => String(char)) 
       : [],
     achievements: playerAchievements
       .filter(pa => pa.is_displayed)
@@ -754,6 +754,34 @@ useEffect(() => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Solicitação de Avaliação */}
+                {!player.isRanked && user && playerData?.id && (
+                  <Card className="border-primary/20 bg-gradient-to-br from-card to-primary/5">
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Star className="w-5 h-5 mr-2 text-primary" />
+                        Solicitar Nova Avaliação
+                      </CardTitle>
+                      <CardDescription>
+                        Solicite uma avaliação para ingressar no ranking oficial
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-4">
+                        <EvaluationRequest 
+                          playerId={playerData.id}
+                          onRequestSent={() => {
+                            toast({
+                              title: "Solicitação enviada!",
+                              description: "Os moderadores foram notificados e entrarão em contato em breve.",
+                            });
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               <div className="flex justify-end">

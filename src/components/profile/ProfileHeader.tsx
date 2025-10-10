@@ -2,16 +2,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trophy, Target, Flame, Shield, Settings, Star } from "lucide-react";
+import { Trophy, Target, Flame, Shield, Settings, Star, Medal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 import { Achievement } from "@/hooks/useAchievements";
 import { AchievementsBadges } from "./AchievementsBadges";
+import { useCharacterRanking, getPlayerCharacterRanking } from "@/hooks/useCharacterRanking";
+import { getCharacterImageUrl, useCharacterImages } from "@/hooks/useCharacterImages";
 
 interface ProfileHeaderProps {
   player: {
+    id?: string;
     name: string;
     rank: string;
     points: number;
@@ -30,12 +33,16 @@ interface ProfileHeaderProps {
     kage_title?: string | null;
     current_points?: number;
     win_streak?: number;
+    favoriteCharacters?: string[];
   };
   rankColor: string;
   onRequestEvaluation?: () => void;
 }
 
 export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: ProfileHeaderProps) => {
+  const { data: characterRankings = {} } = useCharacterRanking();
+  const { data: characterImages = [] } = useCharacterImages();
+  
   const { data: bannerUrl } = useQuery({
     queryKey: ['banner-image', player.selected_banner_id],
     queryFn: async () => {
@@ -219,6 +226,42 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
             )}
           </div>
         </div>
+
+        {/* Personagens Favoritos com Ranking */}
+        {player.isRanked && player.favoriteCharacters && player.favoriteCharacters.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-sm font-medium text-muted-foreground mb-3 px-2 py-1 rounded bg-background/60 backdrop-blur-sm">Personagens Favoritos</h3>
+            <div className="flex gap-3 flex-wrap">
+              {player.favoriteCharacters.slice(0, 3).map((character, index) => {
+                const characterName = String(character);
+                const characterRank = getPlayerCharacterRanking(characterRankings, player.id || '', characterName);
+                const imageUrl = getCharacterImageUrl(characterName, characterImages);
+                const isTopThree = characterRank && characterRank <= 3;
+                
+                return (
+                  <div key={index} className="relative group">
+                    <Avatar className="w-16 h-16 ring-2 ring-primary/30 transition-all hover:ring-primary/60 hover:scale-105">
+                      <AvatarImage src={imageUrl} alt={characterName} className="object-cover" />
+                      <AvatarFallback className="bg-primary/20 text-primary font-bold">
+                        {characterName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    {isTopThree && (
+                      <div className={cn(
+                        "absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shadow-lg ring-2 ring-background",
+                        characterRank === 1 ? "bg-yellow-500 text-yellow-900" :
+                        characterRank === 2 ? "bg-gray-300 text-gray-700" :
+                        "bg-amber-600 text-amber-950"
+                      )}>
+                        {characterRank}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Conquistas */}
         {player.isRanked && player.achievements && player.achievements.length > 0 && (

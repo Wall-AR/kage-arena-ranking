@@ -23,9 +23,13 @@ export const MatchDetailDialog = ({ match, playerId, open, onOpenChange }: Match
   const opponentPointsChange = isWinner ? match.loser_points_change : match.winner_points_change;
   
   // Extrair dados dos rounds se disponíveis
-  const roundsData = match.rounds_data || {};
-  const playerWins = roundsData.player_wins || 0;
-  const opponentWins = roundsData.opponent_wins || 0;
+  const roundsData = match.rounds_data || [];
+  const playerWins = Array.isArray(roundsData) 
+    ? roundsData.filter((r: any) => r.winner === playerId).length 
+    : 0;
+  const opponentWins = Array.isArray(roundsData) 
+    ? roundsData.filter((r: any) => r.winner !== playerId).length 
+    : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

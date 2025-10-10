@@ -7,6 +7,8 @@ import { useCharacterImages, getCharacterImageUrl } from "@/hooks/useCharacterIm
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Achievement } from "@/hooks/useAchievements";
+import { useCharacterRanking, getPlayerCharacterRanking } from "@/hooks/useCharacterRanking";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -41,6 +43,7 @@ interface RankingCardProps {
 
 const RankingCard = ({ player }: RankingCardProps) => {
   const { data: characterImages = [] } = useCharacterImages();
+  const { data: characterRankings = {} } = useCharacterRanking();
 
   const getAchievementIcon = (iconType: Achievement['icon']) => {
     const iconMap = {
@@ -230,18 +233,35 @@ const RankingCard = ({ player }: RankingCardProps) => {
             <div className="hidden md:flex flex-col items-center space-y-2">
               <span className="text-xs font-medium text-muted-foreground">PERSONAGENS</span>
               <div className="flex space-x-1">
-                {player.favoriteCharacters.slice(0, 3).map((character, index) => (
-                  <Avatar key={index} className="w-10 h-10 ring-1 ring-border hover:ring-primary/50 transition-all duration-200">
-                    <AvatarImage 
-                      src={getCharacterImageUrl(character, characterImages)}
-                      alt={character}
-                      className="object-cover"
-                    />
-                    <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                      {character.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
+                {player.favoriteCharacters.slice(0, 3).map((character, index) => {
+                  const characterRank = getPlayerCharacterRanking(characterRankings, player.id, character);
+                  const isTopThree = characterRank && characterRank <= 3;
+                  
+                  return (
+                    <div key={index} className="relative">
+                      <Avatar className="w-10 h-10 ring-1 ring-border hover:ring-primary/50 transition-all duration-200">
+                        <AvatarImage 
+                          src={getCharacterImageUrl(character, characterImages)}
+                          alt={character}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                          {character.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      {isTopThree && (
+                        <div className={cn(
+                          "absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shadow-lg ring-1 ring-background",
+                          characterRank === 1 ? "bg-yellow-500 text-yellow-900" :
+                          characterRank === 2 ? "bg-gray-300 text-gray-700" :
+                          "bg-amber-600 text-amber-950"
+                        )}>
+                          {characterRank}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
                 {player.favoriteCharacters.length < 3 && 
                   Array.from({ length: 3 - player.favoriteCharacters.length }).map((_, index) => (
                     <div key={index} className="w-10 h-10 rounded-full bg-muted border border-dashed border-muted-foreground/30 flex items-center justify-center">
