@@ -8,6 +8,7 @@ import Ranking from "./pages/Ranking";
 import Challenges from "./pages/Challenges";
 import Profile from "./pages/Profile";
 import Tournaments from "./pages/Tournaments";
+import TournamentDetail from "./pages/TournamentDetail";
 import Forum from "./pages/Forum";
 import Training from "./pages/Training";
 import Auth from "./pages/Auth";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:playerId" element={<Profile />} />
           <Route path="/tournaments" element={<Tournaments />} />
+          <Route path="/tournaments/:id" element={<TournamentDetail />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/training" element={<Training />} />
           <Route path="/evaluations" element={<Evaluations />} />
