@@ -23,6 +23,7 @@ import { CharacterSelector } from "@/components/profile/CharacterSelector";
 import { BannerSelector } from "@/components/profile/BannerSelector";
 import { MatchHistory } from "@/components/profile/MatchHistory";
 import { EvaluationsTab } from "@/components/profile/EvaluationsTab";
+import { TournamentsHistory } from "@/components/profile/TournamentsHistory";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { useProfileUpdate } from "@/hooks/useProfile";
 import { useRankedPlayers } from "@/hooks/usePlayers";
@@ -300,10 +301,11 @@ useEffect(() => {
 
         {/* Conteúdo Principal */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className={`grid w-full ${isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) ? 'grid-cols-7' : (isOwnProfile ? 'grid-cols-6' : 'grid-cols-4')}`}>
+          <TabsList className={`grid w-full ${isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) ? 'grid-cols-8' : (isOwnProfile ? 'grid-cols-7' : 'grid-cols-5')}`}>
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="stats">Estatísticas</TabsTrigger>
             <TabsTrigger value="history">Histórico</TabsTrigger>
+            <TabsTrigger value="tournaments">Torneios</TabsTrigger>
             <TabsTrigger value="evaluations">Avaliações</TabsTrigger>
             {isOwnProfile && <TabsTrigger value="achievements">Conquistas</TabsTrigger>}
             {isOwnProfile && (playerData?.is_moderator || playerData?.is_admin) && <TabsTrigger value="students">Alunos</TabsTrigger>}
@@ -540,6 +542,31 @@ useEffect(() => {
                   <div className="text-center py-8">
                     <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
                     <p className="text-muted-foreground">Histórico não disponível</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Aba: Torneios */}
+          <TabsContent value="tournaments" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Trophy className="w-5 h-5 mr-2 text-primary" />
+                  Histórico de Torneios
+                </CardTitle>
+                <CardDescription>
+                  Torneios que você participou e suas colocações
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {playerData?.id ? (
+                  <TournamentsHistory playerId={playerData.id} />
+                ) : (
+                  <div className="text-center py-8">
+                    <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                    <p className="text-muted-foreground">Histórico de torneios não disponível</p>
                   </div>
                 )}
               </CardContent>

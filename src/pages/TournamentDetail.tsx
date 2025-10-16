@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TournamentBracket } from "@/components/tournaments/TournamentBracket";
+import { TournamentMatchReportDialog } from "@/components/tournaments/TournamentMatchReportDialog";
+import { TournamentManagement } from "@/components/tournaments/TournamentManagement";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Trophy, Users, CheckCircle, Clock } from "lucide-react";
+import { Calendar, Trophy, Users, CheckCircle, Clock, Flag } from "lucide-react";
 import { format, isAfter, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -43,8 +45,10 @@ export default function TournamentDetail() {
   }
 
   const participants = tournament.participants || [];
+  const matches = tournament.matches || [];
   const isRegistered = participants.some((p: any) => p.player_id === currentPlayer?.id);
   const myParticipation = participants.find((p: any) => p.player_id === currentPlayer?.id);
+  const isModerator = currentPlayer?.is_moderator || currentPlayer?.is_admin;
   const now = new Date();
   const canRegister = tournament.status === "registration" && 
     isAfter(now, new Date(tournament.registration_start)) &&
@@ -171,6 +175,16 @@ export default function TournamentDetail() {
           )}
         </div>
 
+        {/* Management for Moderators */}
+        {isModerator && (status === "check_in" || status === "in_progress") && (
+          <TournamentManagement
+            tournamentId={tournament.id}
+            status={tournament.status}
+            participants={participants}
+            maxParticipants={tournament.max_participants}
+          />
+        )}
+
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
@@ -258,9 +272,53 @@ export default function TournamentDetail() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="bracket">
-            {tournament.matches && tournament.matches.length > 0 ? (
-              <TournamentBracket matches={tournament.matches} currentRound={tournament.current_round} />
+          <TabsContent value="bracket" className="space-y-4">
+            {matches.length > 0 ? (
+              <>
+                <TournamentBracket matches={matches} currentRound={tournament.current_round} />
+                
+                {/* Lista de partidas para reportar resultados */}
+                {(isRegistered || isModerator) && status === "in_progress" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Suas Partidas</CardTitle>
+                      <CardDescription>Reporte os resultados de suas partidas</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {matches
+                        .filter((match: any) => 
+                          match.status === 'pending' && 
+                          match.player1_id && 
+                          match.player2_id &&
+                          (isModerator || 
+                           match.player1?.player?.id === currentPlayer?.id || 
+                           match.player2?.player?.id === currentPlayer?.id)
+                        )
+                        .map((match: any) => (
+                          <div key={match.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <Flag className="h-5 w-5 text-muted-foreground" />
+                              <div>
+                                <p className="font-medium">
+                                  {match.player1?.player?.name} vs {match.player2?.player?.name}
+                                </p>
+                                <p className="text-sm text-muted-foreground">Rodada {match.round}</p>
+                              </div>
+                            </div>
+                            <TournamentMatchReportDialog
+                              matchId={match.id}
+                              player1={match.player1?.player}
+                              player2={match.player2?.player}
+                              isParticipant={isRegistered}
+                            >
+                              <Button size="sm">Reportar Resultado</Button>
+                            </TournamentMatchReportDialog>
+                          </div>
+                        ))}
+                    </CardContent>
+                  </Card>
+                )}
+              </>
             ) : (
               <Card>
                 <CardContent className="py-12 text-center">
