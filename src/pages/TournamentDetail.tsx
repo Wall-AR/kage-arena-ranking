@@ -336,11 +336,6 @@ export default function TournamentDetail() {
                 <CardDescription>Premiação por colocação</CardDescription>
               </CardHeader>
               <CardContent>
-                {tournament.prize_description && (
-                  <div className="mb-4 p-4 bg-gradient-kage/10 rounded-lg">
-                    <p className="font-medium">{tournament.prize_description}</p>
-                  </div>
-                )}
                 {tournament.rewards && tournament.rewards.length > 0 ? (
                   <div className="space-y-3">
                     {tournament.rewards.map((reward: any) => (

@@ -1,17 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 export const useCharacterImages = () => {
   return useQuery({
     queryKey: ['character-images'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('character_images')
-        .select('*')
-        .order('character_name');
-
-      if (error) throw error;
-      return data || [];
+      // Retornar array vazio já que a tabela character_images não existe mais
+      return [];
     },
     staleTime: 1000 * 60 * 30, // 30 minutos
   });

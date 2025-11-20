@@ -18,12 +18,6 @@ export const BannerSelector = ({ playerId, selectedBannerId }: BannerSelectorPro
   const [selectedId, setSelectedId] = useState(selectedBannerId);
 
   const unlockedBannerIds = new Set(playerBanners.map(pb => pb.banner_id));
-  
-  // Sempre incluir o banner padrão como desbloqueado
-  const defaultBanner = allBanners.find(b => b.is_default);
-  if (defaultBanner) {
-    unlockedBannerIds.add(defaultBanner.id);
-  }
 
   const handleSelectBanner = (bannerId: string) => {
     setSelectedId(bannerId);
@@ -96,7 +90,7 @@ export const BannerSelector = ({ playerId, selectedBannerId }: BannerSelectorPro
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {isUnlocked ? banner.description : banner.unlock_description}
+                    {banner.description || "Banner exclusivo"}
                   </p>
                 </div>
               </div>
