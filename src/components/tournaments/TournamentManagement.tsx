@@ -117,7 +117,7 @@ export function TournamentManagement({
     try {
       // Chamar função do banco para distribuir recompensas
       const { error } = await supabase.rpc('distribute_tournament_rewards', {
-        p_tournament_id: tournamentId
+        tournament_uuid: tournamentId
       });
 
       if (error) throw error;

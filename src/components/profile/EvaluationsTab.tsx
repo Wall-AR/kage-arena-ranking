@@ -56,7 +56,7 @@ export const EvaluationsTab = ({ playerId, isOwnProfile, privacySettings }: Eval
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Evaluation[] || [];
+      return data || [];
     },
     enabled: !!playerId && shouldShowEvaluations
   });
@@ -242,36 +242,21 @@ export const EvaluationsTab = ({ playerId, isOwnProfile, privacySettings }: Eval
               </div>
             )}
 
-            {/* Dicas organizadas (apenas se concluída) */}
-            {evaluation.status === 'completed' && (evaluation.tip_1 || evaluation.tip_2 || evaluation.tip_3) && (
+            {/* Dicas (apenas se concluída) */}
+            {evaluation.status === 'completed' && evaluation.tips && (
               <div className="space-y-3">
                 <h4 className="font-semibold text-sm text-accent">Dicas do Avaliador:</h4>
-                {evaluation.tip_1 && (
-                  <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-accent">
-                    <div className="font-medium text-xs text-accent mb-1">1. Dica Principal</div>
-                    <p className="text-sm leading-relaxed">{evaluation.tip_1}</p>
-                  </div>
-                )}
-                {evaluation.tip_2 && (
-                  <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-accent/70">
-                    <div className="font-medium text-xs text-accent mb-1">2. Segunda Dica</div>
-                    <p className="text-sm leading-relaxed">{evaluation.tip_2}</p>
-                  </div>
-                )}
-                {evaluation.tip_3 && (
-                  <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-accent/50">
-                    <div className="font-medium text-xs text-accent mb-1">3. Terceira Dica</div>
-                    <p className="text-sm leading-relaxed">{evaluation.tip_3}</p>
-                  </div>
-                )}
+                <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-accent">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{evaluation.tips}</p>
+                </div>
               </div>
             )}
 
-            {/* Resumo da avaliação */}
-            {evaluation.status === 'completed' && evaluation.summary && (
+            {/* Comentários da avaliação */}
+            {evaluation.status === 'completed' && evaluation.comments && (
               <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg p-4">
-                <h4 className="font-medium mb-2 text-sm">Resumo da Avaliação:</h4>
-                <p className="text-sm leading-relaxed">{evaluation.summary}</p>
+                <h4 className="font-medium mb-2 text-sm">Comentários da Avaliação:</h4>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{evaluation.comments}</p>
               </div>
             )}
 

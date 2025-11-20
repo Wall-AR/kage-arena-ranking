@@ -55,7 +55,7 @@ export const useRedeemCode = () => {
     mutationFn: async ({ playerId, code }: { playerId: string; code: string }) => {
       const { data, error } = await supabase.rpc('redeem_code', {
         p_player_id: playerId,
-        p_code: code
+        p_code_text: code
       });
 
       if (error) throw error;
