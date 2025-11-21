@@ -120,8 +120,25 @@ useEffect(() => {
   }
 }, [processedPlayerData, isOwnProfile]);
 
-  // Se não há dados processados, mostrar loading ou erro
-  if (!processedPlayerData && !isLoading && !loading) {
+  // Se ainda está carregando dados básicos do player, mostrar loading
+  if (!playerData && (isLoading || loading)) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Carregando perfil...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Se não há dados do player mesmo após carregar, mostrar erro
+  if (!playerData && !isLoading && !loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
@@ -135,7 +152,7 @@ useEffect(() => {
 
   const player = processedPlayerData || {
     id: targetUserId || "",
-    name: "Carregando...",
+    name: playerData?.name || "Carregando...",
     rank: "Unranked",
     points: 0,
     wins: 0,
@@ -143,18 +160,18 @@ useEffect(() => {
     winRate: 0,
     winStreak: 0,
     isRanked: false,
-    isAdmin: false,
-    isModerator: false,
-    role: "player",
+    isAdmin: playerData?.is_admin || false,
+    isModerator: playerData?.is_moderator || false,
+    role: playerData?.role || "player",
     favoriteCharacters: [],
     achievements: [],
-    ninjaPhrase: "Esse é o meu jeito ninja de ser!",
-    avatar_url: null,
+    ninjaPhrase: playerData?.ninja_phrase || "Esse é o meu jeito ninja de ser!",
+    avatar_url: playerData?.avatar_url || null,
     lastMatch: "Nunca",
-    privacySettings: { evaluation_visibility: "all" },
+    privacySettings: playerData?.privacy_settings || { evaluation_visibility: "all" },
     tutor: null,
     evaluation: null,
-    selected_banner_id: null
+    selected_banner_id: playerData?.selected_banner_id || null
   };
 
   // Dados das 8 habilidades ninja
@@ -272,21 +289,6 @@ useEffect(() => {
     });
   };
 
-  if (loading || isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Carregando perfil...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -297,6 +299,7 @@ useEffect(() => {
         <ProfileHeader 
           player={player} 
           rankColor={rankColor}
+          onRequestEvaluation={isOwnProfile ? handleRequestEvaluation : undefined}
         />
 
         {/* Conteúdo Principal */}
