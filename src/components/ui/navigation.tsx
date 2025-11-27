@@ -25,7 +25,7 @@ const Navigation = ({ currentPage }: NavigationProps) => {
     { id: "ranking", label: "Ranking", icon: Trophy, href: "/ranking" },
     { id: "challenges", label: "Desafios", icon: Swords, href: "/challenges" },
     { id: "tournaments", label: "Torneios", icon: Users, href: "/tournaments" },
-    { id: "training", label: "Treinamento", icon: BookOpen, href: "/training" },
+    { id: "academy", label: "Academia", icon: BookOpen, href: "/academy" },
     { id: "forum", label: "Fórum", icon: MessageCircle, href: "/forum" },
   ];
 
