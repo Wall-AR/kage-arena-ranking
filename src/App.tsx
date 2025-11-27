@@ -10,7 +10,7 @@ import Profile from "./pages/Profile";
 import Tournaments from "./pages/Tournaments";
 import TournamentDetail from "./pages/TournamentDetail";
 import Forum from "./pages/Forum";
-import Training from "./pages/Training";
+import Academy from "./pages/Academy";
 import Auth from "./pages/Auth";
 import Evaluations from "./pages/Evaluations";
 import Admin from "./pages/Admin";
@@ -33,7 +33,7 @@ const App = () => (
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentDetail />} />
           <Route path="/forum" element={<Forum />} />
-          <Route path="/training" element={<Training />} />
+          <Route path="/academy" element={<Academy />} />
           <Route path="/evaluations" element={<Evaluations />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/auth" element={<Auth />} />
