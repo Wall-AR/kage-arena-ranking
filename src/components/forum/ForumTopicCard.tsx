@@ -5,7 +5,7 @@ import { Pin, TrendingUp, MessageCircle, Eye, Clock, Award, Flame, Crown } from 
 import { cn } from "@/lib/utils";
 
 interface Topic {
-  id: number;
+  id: string | number;
   title: string;
   author: string;
   authorRank: string;

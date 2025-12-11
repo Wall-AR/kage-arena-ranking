@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { MessageCircle, Brain, Swords, Lightbulb, ScrollText, Trophy, Shield } from "lucide-react";
+import { MessageCircle, Brain, Swords, Lightbulb, ScrollText, Trophy, Shield, Target, Users, AlertTriangle, Coffee, LayoutGrid } from "lucide-react";
 
 interface Category {
   id: string;
@@ -16,6 +16,13 @@ interface ForumCategoriesProps {
 }
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  all: LayoutGrid,
+  geral: MessageCircle,
+  estrategias: Target,
+  personagens: Users,
+  torneios: Trophy,
+  "bugs-suporte": AlertTriangle,
+  "off-topic": Coffee,
   general: MessageCircle,
   strategies: Brain,
   matches: Swords,
@@ -26,6 +33,13 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 };
 
 const categoryColors: Record<string, string> = {
+  all: "from-primary to-accent",
+  geral: "from-ninja-chunin to-ninja-chunin/60",
+  estrategias: "from-ninja-anbu to-ninja-anbu/60",
+  personagens: "from-ninja-jounin to-ninja-jounin/60",
+  torneios: "from-ninja-kage to-ninja-kage/60",
+  "bugs-suporte": "from-ninja-sannin to-ninja-sannin/60",
+  "off-topic": "from-ninja-genin to-ninja-genin/60",
   general: "from-ninja-chunin to-ninja-chunin/60",
   strategies: "from-ninja-jounin to-ninja-jounin/60",
   matches: "from-ninja-anbu to-ninja-anbu/60",
