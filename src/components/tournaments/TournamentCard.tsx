@@ -92,9 +92,9 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
           <Calendar className="h-4 w-4" />
           <span>{format(new Date(tournament.tournament_start), "PPP 'às' HH:mm", { locale: ptBR })}</span>
         </div>
-        {tournament.prize_description && (
-          <div className="mt-3 p-3 bg-gradient-kage/10 rounded-lg">
-            <p className="text-sm font-medium text-accent">🏆 {tournament.prize_description}</p>
+        {tournament.rules_text && (
+          <div className="mt-3 p-3 bg-primary/10 rounded-lg">
+            <p className="text-sm font-medium text-primary">📜 Regras definidas</p>
           </div>
         )}
       </CardContent>
