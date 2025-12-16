@@ -909,12 +909,79 @@ export type Database = {
           },
         ]
       }
+      tournament_disputes: {
+        Row: {
+          created_at: string
+          dispute_reason: string
+          evidence_url: string | null
+          id: string
+          match_id: string
+          reported_by: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dispute_reason: string
+          evidence_url?: string | null
+          id?: string
+          match_id: string
+          reported_by: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dispute_reason?: string
+          evidence_url?: string | null
+          id?: string
+          match_id?: string
+          reported_by?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_disputes_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_disputes_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_disputes_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_matches: {
         Row: {
           bracket_position: number | null
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string | null
           evidence_url: string | null
           id: string
+          is_disputed: boolean | null
           match_number: number
           next_match_id: string | null
           notes: string | null
@@ -923,6 +990,8 @@ export type Database = {
           player1_score: number | null
           player2_id: string | null
           player2_score: number | null
+          reported_by: string | null
+          reported_winner_id: string | null
           round: number
           status: string | null
           tournament_id: string
@@ -931,9 +1000,12 @@ export type Database = {
         }
         Insert: {
           bracket_position?: number | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string | null
           evidence_url?: string | null
           id?: string
+          is_disputed?: boolean | null
           match_number: number
           next_match_id?: string | null
           notes?: string | null
@@ -942,6 +1014,8 @@ export type Database = {
           player1_score?: number | null
           player2_id?: string | null
           player2_score?: number | null
+          reported_by?: string | null
+          reported_winner_id?: string | null
           round: number
           status?: string | null
           tournament_id: string
@@ -950,9 +1024,12 @@ export type Database = {
         }
         Update: {
           bracket_position?: number | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string | null
           evidence_url?: string | null
           id?: string
+          is_disputed?: boolean | null
           match_number?: number
           next_match_id?: string | null
           notes?: string | null
@@ -961,6 +1038,8 @@ export type Database = {
           player1_score?: number | null
           player2_id?: string | null
           player2_score?: number | null
+          reported_by?: string | null
+          reported_winner_id?: string | null
           round?: number
           status?: string | null
           tournament_id?: string
@@ -968,6 +1047,13 @@ export type Database = {
           winner_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tournament_matches_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "tournament_participants"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tournament_matches_next_match_id_fkey"
             columns: ["next_match_id"]
@@ -985,6 +1071,20 @@ export type Database = {
           {
             foreignKeyName: "tournament_matches_player2_id_fkey"
             columns: ["player2_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_matches_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "tournament_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_matches_reported_winner_id_fkey"
+            columns: ["reported_winner_id"]
             isOneToOne: false
             referencedRelation: "tournament_participants"
             referencedColumns: ["id"]
@@ -1191,6 +1291,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      advance_tournament_winner: {
+        Args: { p_match_id: string; p_winner_id: string }
+        Returns: undefined
+      }
       can_update_profile_settings: {
         Args: { user_id: string }
         Returns: boolean
