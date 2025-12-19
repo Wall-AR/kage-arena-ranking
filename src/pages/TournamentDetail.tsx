@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useTournament, useRegisterForTournament, useCheckInTournament, useReportTournamentMatch, useConfirmTournamentMatch, useCreateDispute } from "@/hooks/useTournaments";
+import { useTournament, useRegisterForTournament, useCheckInTournament, useReportTournamentMatch, useConfirmTournamentMatch, useCreateDispute, useTournamentDisputes, useResolveDispute } from "@/hooks/useTournaments";
 import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/ui/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,21 +10,27 @@ import { TournamentBracketDBZ } from "@/components/tournaments/TournamentBracket
 import { TournamentCheckInCard } from "@/components/tournaments/TournamentCheckInCard";
 import { TournamentResultReport } from "@/components/tournaments/TournamentResultReport";
 import { TournamentManagement } from "@/components/tournaments/TournamentManagement";
+import { TournamentDisputePanel } from "@/components/tournaments/TournamentDisputePanel";
+import { TournamentCountdown } from "@/components/tournaments/TournamentCountdown";
+import { TournamentPhaseProgress } from "@/components/tournaments/TournamentPhaseIndicator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Trophy, Users, CheckCircle, Clock, Flag, Swords, Zap } from "lucide-react";
+import { Calendar, Trophy, Users, CheckCircle, Clock, Flag, Swords, Zap, Shield, AlertTriangle } from "lucide-react";
 import { format, isAfter, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 export default function TournamentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentPlayer } = useAuth();
   const { data: tournament, isLoading } = useTournament(id);
+  const { data: disputes = [] } = useTournamentDisputes(id);
   const registerForTournament = useRegisterForTournament();
   const checkInTournament = useCheckInTournament();
   const reportMatch = useReportTournamentMatch();
   const confirmMatch = useConfirmTournamentMatch();
   const createDispute = useCreateDispute();
+  const resolveDispute = useResolveDispute();
 
   if (isLoading) {
     return (
@@ -132,8 +138,28 @@ export default function TournamentDetail() {
     });
   };
 
+  const handleResolveDispute = async (disputeId: string, resolution: "player1" | "player2" | "annul", notes: string) => {
+    if (!currentPlayer) return;
+    
+    const dispute = disputes.find((d: any) => d.id === disputeId);
+    if (!dispute) return;
+
+    const matchId = dispute.match_id;
+    const match = matches.find((m: any) => m.id === matchId);
+    if (!match) return;
+
+    await resolveDispute.mutateAsync({
+      disputeId,
+      matchId,
+      winnerId: resolution === "player1" ? match.player1_id : resolution === "player2" ? match.player2_id : undefined,
+      resolvedBy: currentPlayer.id,
+      notes,
+      shouldAnnul: resolution === "annul",
+    });
+  };
+
   // Find current player's active match
-  const myActiveMatch = matches.find((m: any) => 
+  const myActiveMatch = matches.find((m: any) =>
     (m.player1?.player?.id === currentPlayer?.id || m.player2?.player?.id === currentPlayer?.id) &&
     (m.status === "pending" || m.status === "awaiting_confirmation" || m.status === "in_progress")
   );
@@ -225,9 +251,9 @@ export default function TournamentDetail() {
 
         {/* Action Area */}
         <div className="grid md:grid-cols-2 gap-6 mb-6">
-          {/* Registration/Check-in Actions */}
+          {/* Registration Actions */}
           {canRegister && !isRegistered && (
-            <Card className="border-primary/50 bg-primary/5">
+            <Card className="border-primary/50 bg-gradient-to-br from-primary/5 to-primary/10">
               <CardContent className="pt-6">
                 <div className="text-center">
                   <Zap className="h-12 w-12 mx-auto mb-4 text-primary animate-pulse" />
@@ -246,6 +272,31 @@ export default function TournamentDetail() {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Countdown Timers */}
+          {tournament.status === "registration" && (
+            <TournamentCountdown
+              targetDate={tournament.registration_end}
+              label="Inscrições encerram em"
+              variant="registration"
+            />
+          )}
+
+          {tournament.status === "check_in" && tournament.check_in_end && (
+            <TournamentCountdown
+              targetDate={tournament.check_in_end}
+              label="Check-in encerra em"
+              variant="checkin"
+            />
+          )}
+
+          {(tournament.status === "registration" || tournament.status === "check_in") && (
+            <TournamentCountdown
+              targetDate={tournament.tournament_start}
+              label="Torneio começa em"
+              variant="start"
+            />
           )}
 
           {isRegistered && tournament.check_in_start && tournament.check_in_end && (
@@ -322,14 +373,32 @@ export default function TournamentDetail() {
 
         {/* Tabs */}
         <Tabs defaultValue="bracket" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={cn("grid w-full", isModerator ? "grid-cols-5" : "grid-cols-4")}>
             <TabsTrigger value="bracket">⚔️ Chaveamento</TabsTrigger>
             <TabsTrigger value="participants">👥 Participantes</TabsTrigger>
             <TabsTrigger value="overview">📋 Informações</TabsTrigger>
             <TabsTrigger value="rewards">🏆 Recompensas</TabsTrigger>
+            {isModerator && (
+              <TabsTrigger value="disputes" className="relative">
+                🛡️ Disputas
+                {disputes.filter((d: any) => d.status === "pending").length > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-destructive text-xs">
+                    {disputes.filter((d: any) => d.status === "pending").length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="bracket" className="space-y-4 mt-6">
+            {/* Phase Progress */}
+            {matches.length > 0 && (
+              <TournamentPhaseProgress 
+                currentRound={tournament.current_round || 1} 
+                totalRounds={Math.max(...matches.map((m: any) => m.round))} 
+              />
+            )}
+            
             <TournamentBracketDBZ 
               matches={matches} 
               currentRound={tournament.current_round || 1}
@@ -512,6 +581,30 @@ export default function TournamentDetail() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Disputes Tab - Moderators Only */}
+          {isModerator && (
+            <TabsContent value="disputes" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    Painel de Disputas
+                  </CardTitle>
+                  <CardDescription>
+                    Gerencie contestações de resultados reportados pelos jogadores
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <TournamentDisputePanel
+                    disputes={disputes}
+                    isModerator={isModerator}
+                    onResolve={handleResolveDispute}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
