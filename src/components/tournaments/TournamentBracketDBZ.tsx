@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { Trophy, Swords, Clock, CheckCircle, AlertTriangle, Zap } from "lucide-react";
+import { Trophy, Swords, Clock, CheckCircle, AlertTriangle, Zap, Scroll, Shield, Flame, Crown } from "lucide-react";
 
 interface Match {
   id: string;
@@ -37,19 +37,21 @@ interface TournamentBracketDBZProps {
   onMatchClick?: (match: Match) => void;
 }
 
-const ROUND_NAMES: Record<number, string> = {
-  1: "Exame Chūnin",
-  2: "Batalha Anbu",
-  3: "Guerra Ninja",
-  4: "Final Hokage",
+const ROUND_CONFIG: Record<string, { name: string; icon: typeof Scroll; gradient: string }> = {
+  "first": { name: "Exame Chūnin", icon: Scroll, gradient: "from-blue-500 to-cyan-500" },
+  "second": { name: "Arena Floresta", icon: Shield, gradient: "from-green-500 to-emerald-500" },
+  "quarter": { name: "Batalha Anbu", icon: Swords, gradient: "from-purple-500 to-violet-500" },
+  "semi": { name: "Guerra Ninja", icon: Flame, gradient: "from-orange-500 to-red-500" },
+  "final": { name: "Final Hokage", icon: Crown, gradient: "from-yellow-400 to-amber-500" },
 };
 
-const getRoundName = (round: number, totalRounds: number) => {
+const getRoundConfig = (round: number, totalRounds: number) => {
   const roundsFromEnd = totalRounds - round;
-  if (roundsFromEnd === 0) return "🏆 Final Hokage";
-  if (roundsFromEnd === 1) return "⚔️ Semi-final";
-  if (roundsFromEnd === 2) return "🔥 Quartas de Final";
-  return ROUND_NAMES[round] || `Rodada ${round}`;
+  if (roundsFromEnd === 0) return ROUND_CONFIG.final;
+  if (roundsFromEnd === 1) return ROUND_CONFIG.semi;
+  if (roundsFromEnd === 2) return ROUND_CONFIG.quarter;
+  if (roundsFromEnd === 3) return ROUND_CONFIG.second;
+  return ROUND_CONFIG.first;
 };
 
 const getStatusIcon = (status: string, isDisputed?: boolean) => {
@@ -235,23 +237,54 @@ export function TournamentBracketDBZ({ matches, currentRound, onMatchClick }: To
   return (
     <div className="w-full overflow-x-auto pb-4">
       <div className="flex gap-8 min-w-max p-4">
-        {rounds.map((round) => {
+        {rounds.map((round, roundIndex) => {
           const roundMatches = matchesByRound[round];
           const isCurrentRoundActive = round === currentRound;
+          const config = getRoundConfig(round, totalRounds);
+          const RoundIcon = config.icon;
 
           return (
-            <div key={round} className="flex flex-col min-w-[260px]">
+            <div key={round} className="flex flex-col min-w-[280px] relative">
+              {/* Connection lines to next round */}
+              {roundIndex < rounds.length - 1 && (
+                <div className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none">
+                  {roundMatches.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="absolute h-px bg-gradient-to-r from-primary/50 to-primary/20"
+                      style={{
+                        top: `calc(${(Math.pow(2, round - 1) - 1) * 80}px + ${idx * (Math.pow(2, round) * 20 + 160)}px + 80px)`,
+                        width: "32px",
+                        right: "-8px"
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
               {/* Round Header */}
               <div className="text-center mb-4">
-                <Badge 
-                  variant={isCurrentRoundActive ? "default" : "outline"}
+                <div 
                   className={cn(
-                    "text-sm px-4 py-1.5",
-                    isCurrentRoundActive && "animate-pulse shadow-lg shadow-primary/30"
+                    "inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all",
+                    isCurrentRoundActive 
+                      ? "bg-gradient-to-r border-primary shadow-lg shadow-primary/30 animate-pulse" 
+                      : "bg-muted/50 border-muted"
                   )}
                 >
-                  {getRoundName(round, totalRounds)}
-                </Badge>
+                  <div className={cn(
+                    "p-1.5 rounded-lg bg-gradient-to-br",
+                    config.gradient
+                  )}>
+                    <RoundIcon className="h-4 w-4 text-white" />
+                  </div>
+                  <span className={cn(
+                    "font-bold text-sm",
+                    isCurrentRoundActive && "text-primary"
+                  )}>
+                    {config.name}
+                  </span>
+                </div>
               </div>
 
               {/* Matches */}
