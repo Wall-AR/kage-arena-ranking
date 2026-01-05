@@ -22,7 +22,8 @@ export interface Tournament {
   rules_text: string | null;
   bracket_data: any;
   current_round: number;
-  created_by: string;
+  /** auth user id (backend) */
+  created_by: string | null;
   created_at: string;
   updated_at: string;
 }
