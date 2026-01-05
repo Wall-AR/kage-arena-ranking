@@ -39,6 +39,10 @@ export function CreateTournamentDialog() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!currentPlayer?.id) {
+      return;
+    }
+
     let imageUrl = null;
 
     // Upload da imagem se houver
@@ -62,7 +66,7 @@ export function CreateTournamentDialog() {
     await createTournament.mutateAsync({
       ...formData,
       image_url: imageUrl,
-      created_by: currentPlayer?.id || "",
+      created_by: currentPlayer.id,
       status: "registration",
     });
 
