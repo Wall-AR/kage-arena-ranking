@@ -26,7 +26,6 @@ export function CreateTournamentDialog() {
     tournament_start: "",
     check_in_start: "",
     check_in_end: "",
-    prize_description: "",
     min_rank: "",
     max_rank: "",
     require_top_character: false,
@@ -78,7 +77,6 @@ export function CreateTournamentDialog() {
       tournament_start: "",
       check_in_start: "",
       check_in_end: "",
-      prize_description: "",
       min_rank: "",
       max_rank: "",
       require_top_character: false,
@@ -276,22 +274,13 @@ export function CreateTournamentDialog() {
             )}
 
             <div className="col-span-2">
-              <Label htmlFor="prize_description">Descrição da Premiação</Label>
-              <Textarea
-                id="prize_description"
-                value={formData.prize_description}
-                onChange={(e) => setFormData({ ...formData, prize_description: e.target.value })}
-                rows={2}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <Label htmlFor="rules_text">Regras Adicionais</Label>
+              <Label htmlFor="rules_text">Regras e Premiação</Label>
               <Textarea
                 id="rules_text"
                 value={formData.rules_text}
                 onChange={(e) => setFormData({ ...formData, rules_text: e.target.value })}
-                rows={3}
+                placeholder="Descreva as regras do torneio e a premiação para os vencedores..."
+                rows={4}
               />
             </div>
           </div>
