@@ -14,7 +14,7 @@ export default function Tournaments() {
   const upcomingTournaments = tournaments?.filter(t => t.status === 'registration' || t.status === 'check_in') || [];
   const completedTournaments = tournaments?.filter(t => t.status === 'completed') || [];
   const myTournaments = tournaments?.filter(t => 
-    t.created_by === currentPlayer?.id
+    t.created_by === currentPlayer?.user_id
   ) || [];
 
   const isModerator = currentPlayer?.is_moderator || currentPlayer?.is_admin;

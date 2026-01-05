@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import { useCreateTournament } from "@/hooks/useTournaments";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const RANKS = ["Unranked", "Genin", "Chunnin", "Jounnin", "Anbu", "Sanin", "Kage"];
 
@@ -33,13 +34,22 @@ export function CreateTournamentDialog() {
     rules_text: "",
   });
 
+  const { toast } = useToast();
   const { currentPlayer } = useAuth();
   const createTournament = useCreateTournament();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!currentPlayer?.id) {
+    // created_by referencia o usuário autenticado (auth.users.id), não o players.id
+    const createdBy = currentPlayer?.user_id;
+
+    if (!createdBy) {
+      toast({
+        title: "Faça login para criar torneio",
+        description: "Você precisa estar autenticado para criar um torneio.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -66,7 +76,7 @@ export function CreateTournamentDialog() {
     await createTournament.mutateAsync({
       ...formData,
       image_url: imageUrl,
-      created_by: currentPlayer.id,
+      created_by: createdBy,
       status: "registration",
     });
 
