@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,14 +35,26 @@ export function CreateTournamentDialog() {
   });
 
   const { toast } = useToast();
-  const { currentPlayer } = useAuth();
+  const { user, currentPlayer } = useAuth();
   const createTournament = useCreateTournament();
+
+  const canCreate = useMemo(() => {
+    // Regra de negócio: apenas moderador/admin pode criar.
+    // Regra técnica: created_by precisa ser auth user id.
+    return !!user?.id && !!(currentPlayer?.is_moderator || currentPlayer?.is_admin);
+  }, [currentPlayer?.is_admin, currentPlayer?.is_moderator, user?.id]);
+
+  const toIsoOrNull = (value: string) => {
+    if (!value) return null;
+    const iso = new Date(value).toISOString();
+    return iso;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // created_by referencia o usuário autenticado (auth.users.id), não o players.id
-    const createdBy = currentPlayer?.user_id;
+    const createdBy = user?.id;
 
     if (!createdBy) {
       toast({
@@ -51,6 +63,69 @@ export function CreateTournamentDialog() {
         variant: "destructive",
       });
       return;
+    }
+
+    if (!canCreate) {
+      toast({
+        title: "Sem permissão",
+        description: "Apenas moderadores/admins podem criar torneios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const registrationStartIso = toIsoOrNull(formData.registration_start);
+    const registrationEndIso = toIsoOrNull(formData.registration_end);
+    const tournamentStartIso = toIsoOrNull(formData.tournament_start);
+    const checkInStartIso = toIsoOrNull(formData.check_in_start);
+    const checkInEndIso = toIsoOrNull(formData.check_in_end);
+
+    // Validações básicas (evita inserts inválidos e bugs de agenda)
+    if (!registrationStartIso || !registrationEndIso || !tournamentStartIso) {
+      toast({
+        title: "Datas obrigatórias",
+        description: "Preencha início/fim das inscrições e início do torneio.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (new Date(registrationEndIso).getTime() <= new Date(registrationStartIso).getTime()) {
+      toast({
+        title: "Datas inválidas",
+        description: "O fim das inscrições precisa ser depois do início.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (new Date(tournamentStartIso).getTime() < new Date(registrationEndIso).getTime()) {
+      toast({
+        title: "Datas inválidas",
+        description: "O início do torneio precisa ser depois do fim das inscrições.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (checkInStartIso && checkInEndIso) {
+      if (new Date(checkInEndIso).getTime() <= new Date(checkInStartIso).getTime()) {
+        toast({
+          title: "Check-in inválido",
+          description: "O fim do check-in precisa ser depois do início.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (new Date(checkInEndIso).getTime() > new Date(tournamentStartIso).getTime()) {
+        toast({
+          title: "Check-in inválido",
+          description: "O check-in deve terminar antes do início do torneio.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     let imageUrl = null;
@@ -73,12 +148,26 @@ export function CreateTournamentDialog() {
       }
     }
 
-    await createTournament.mutateAsync({
+    const payload = {
       ...formData,
+      // Converter datetime-local para ISO (backend espera timestamp)
+      registration_start: registrationStartIso,
+      registration_end: registrationEndIso,
+      tournament_start: tournamentStartIso,
+      check_in_start: checkInStartIso,
+      check_in_end: checkInEndIso,
       image_url: imageUrl,
       created_by: createdBy,
       status: "registration",
-    });
+      // Normalizações para o schema (NULL ao invés de string vazia)
+      min_rank: formData.min_rank || null,
+      max_rank: formData.max_rank || null,
+      required_character: formData.require_top_character ? (formData.required_character || null) : null,
+    };
+
+    console.debug("[tournaments] create payload", payload);
+
+    await createTournament.mutateAsync(payload);
 
     setOpen(false);
     setFormData({
