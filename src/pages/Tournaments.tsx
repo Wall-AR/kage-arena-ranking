@@ -8,14 +8,12 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function Tournaments() {
   const { data: tournaments, isLoading } = useTournaments();
-  const { currentPlayer } = useAuth();
+  const { user, currentPlayer } = useAuth();
 
   const activeTournaments = tournaments?.filter(t => t.status === 'in_progress') || [];
   const upcomingTournaments = tournaments?.filter(t => t.status === 'registration' || t.status === 'check_in') || [];
   const completedTournaments = tournaments?.filter(t => t.status === 'completed') || [];
-  const myTournaments = tournaments?.filter(t => 
-    t.created_by === currentPlayer?.user_id
-  ) || [];
+  const myTournaments = tournaments?.filter(t => t.created_by === user?.id) || [];
 
   const isModerator = currentPlayer?.is_moderator || currentPlayer?.is_admin;
 
