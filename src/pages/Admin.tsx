@@ -8,6 +8,8 @@ import { AdminEvaluationsTab } from "@/components/admin/AdminEvaluationsTab";
 import { AdminAchievementsTab } from "@/components/admin/AdminAchievementsTab";
 import { AdminCodesTab } from "@/components/admin/AdminCodesTab";
 import { AdminForumTab } from "@/components/admin/AdminForumTab";
+import { AdminMatchesTab } from "@/components/admin/AdminMatchesTab";
+import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 import { AdminStatsCard } from "@/components/admin/AdminStatsCard";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -68,17 +70,23 @@ export default function Admin() {
       <AdminStatsCard />
 
       <Tabs defaultValue="players" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-6">
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 mb-6">
           <TabsTrigger value="players">Jogadores</TabsTrigger>
+          <TabsTrigger value="matches">Partidas</TabsTrigger>
           <TabsTrigger value="tournaments">Torneios</TabsTrigger>
           <TabsTrigger value="evaluations">Avaliações</TabsTrigger>
           <TabsTrigger value="achievements">Conquistas</TabsTrigger>
           <TabsTrigger value="codes">Códigos</TabsTrigger>
           <TabsTrigger value="forum">Fórum</TabsTrigger>
+          <TabsTrigger value="settings">Sistema</TabsTrigger>
         </TabsList>
 
         <TabsContent value="players">
           <AdminPlayersTab />
+        </TabsContent>
+
+        <TabsContent value="matches">
+          <AdminMatchesTab />
         </TabsContent>
 
         <TabsContent value="tournaments">
@@ -99,6 +107,10 @@ export default function Admin() {
 
         <TabsContent value="forum">
           <AdminForumTab />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <AdminSettingsTab />
         </TabsContent>
       </Tabs>
     </div>
