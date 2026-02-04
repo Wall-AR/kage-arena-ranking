@@ -7,6 +7,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { NotificationsDropdown } from "@/components/ui/notifications-dropdown";
+import kageArenaLogo from "@/assets/kage-arena-logo.png";
 
 interface NavigationProps {
   currentPage?: string;
@@ -52,18 +53,14 @@ const Navigation = ({ currentPage }: NavigationProps) => {
   return (
     <nav className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border/50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo e Título */}
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-kage rounded-lg flex items-center justify-center">
-              <span className="text-lg font-bold text-background">🥷</span>
-            </div>
-            <div>
-              <h1 className="font-ninja text-xl font-bold text-foreground">KAGE ARENA</h1>
-              <p className="text-xs text-muted-foreground">Ultimate Ninja 5</p>
-            </div>
-          </div>
-        </div>
+        {/* Logo */}
+        <Link to="/" className="flex items-center space-x-2 hover:opacity-90 transition-opacity">
+          <img 
+            src={kageArenaLogo} 
+            alt="Kage Arena" 
+            className="h-12 w-auto object-contain"
+          />
+        </Link>
 
         {/* Menu de Navegação */}
         <div className="hidden md:flex items-center space-x-2">

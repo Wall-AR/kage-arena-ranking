@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import Navigation from "@/components/ui/navigation";
 import RankingCard from "@/components/ui/ranking-card";
 import heroImage from "@/assets/hero-naruto-sasuke.jpg";
+import kageArenaLogo from "@/assets/kage-arena-logo.png";
 import { Trophy, Swords, Users, Target, TrendingUp, Flame, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -115,9 +116,12 @@ const Index = () => {
               🥷 Portal Oficial de Ranking
             </Badge>
             
-            <h1 className="font-ninja text-6xl md:text-8xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-              KAGE ARENA
-            </h1>
+            {/* Logo Oficial */}
+            <img 
+              src={kageArenaLogo} 
+              alt="Kage Arena" 
+              className="h-40 md:h-56 w-auto object-contain mx-auto drop-shadow-2xl"
+            />
             
             <h2 className="font-ninja text-2xl md:text-3xl font-semibold text-foreground">
               TORNE-SE UM VERDADEIRO KAGE

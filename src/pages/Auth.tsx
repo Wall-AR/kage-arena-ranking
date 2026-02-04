@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
+import kageArenaLogo from "@/assets/kage-arena-logo.png";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -101,9 +102,11 @@ export default function Auth() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-ninja font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Kage Arena
-          </h1>
+          <img 
+            src={kageArenaLogo} 
+            alt="Kage Arena" 
+            className="h-24 w-auto object-contain mx-auto mb-4"
+          />
           <p className="text-muted-foreground mt-2">
             Entre na arena ninja e prove seu valor
           </p>
