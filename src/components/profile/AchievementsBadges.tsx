@@ -1,4 +1,4 @@
-import { Trophy, Medal, Star, Crown, Shield, Flame, Target, Zap } from "lucide-react";
+import { Trophy, Medal, Star, Crown, Shield, Flame, Target, Zap, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Achievement } from "@/hooks/useAchievements";
 import {
@@ -11,6 +11,7 @@ import {
 interface AchievementsBadgesProps {
   achievements: Achievement[];
   className?: string;
+  compact?: boolean; // Modo compacto para ranking cards
 }
 
 const getAchievementIcon = (iconType: Achievement['icon']) => {
@@ -23,8 +24,9 @@ const getAchievementIcon = (iconType: Achievement['icon']) => {
     fire: Flame,
     target: Target,
     zap: Zap,
+    award: Award,
   };
-  return iconMap[iconType];
+  return iconMap[iconType] || Trophy;
 };
 
 const getColorClasses = (color: Achievement['color']) => {
@@ -41,7 +43,7 @@ const getColorClasses = (color: Achievement['color']) => {
   return colorMap[color];
 };
 
-export const AchievementsBadges = ({ achievements, className }: AchievementsBadgesProps) => {
+export const AchievementsBadges = ({ achievements, className, compact = false }: AchievementsBadgesProps) => {
   if (achievements.length === 0) {
     return (
       <div className={cn("text-center py-4", className)}>
@@ -52,6 +54,44 @@ export const AchievementsBadges = ({ achievements, className }: AchievementsBadg
     );
   }
 
+  // Modo compacto para ranking cards - apenas ícones
+  if (compact) {
+    return (
+      <TooltipProvider>
+        <div className={cn("flex items-center gap-1", className)}>
+          {achievements.slice(0, 5).map((achievement) => {
+            const Icon = getAchievementIcon(achievement.icon);
+            const colorClasses = getColorClasses(achievement.color);
+            
+            return (
+              <Tooltip key={achievement.id}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      "p-1.5 rounded-full border transition-all duration-300 hover:scale-110 cursor-pointer",
+                      colorClasses
+                    )}
+                  >
+                    <Icon className="w-3 h-3" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="text-center text-xs">
+                    <div className="font-medium">{achievement.name}</div>
+                    <div className="text-muted-foreground mt-0.5">
+                      {achievement.description}
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </div>
+      </TooltipProvider>
+    );
+  }
+
+  // Modo completo para páginas de perfil
   return (
     <TooltipProvider>
       <div className={cn("space-y-3", className)}>

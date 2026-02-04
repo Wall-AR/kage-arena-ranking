@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trophy, Target, Flame, Shield, Settings, Star, Medal } from "lucide-react";
+import { Trophy, Target, Flame, Shield, Settings, Star, Medal, Crown, Zap, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,12 @@ import { Achievement } from "@/hooks/useAchievements";
 import { AchievementsBadges } from "./AchievementsBadges";
 import { useCharacterRanking, getPlayerCharacterRanking } from "@/hooks/useCharacterRanking";
 import { getCharacterImageUrl, useCharacterImages } from "@/hooks/useCharacterImages";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ProfileHeaderProps {
   player: {
@@ -39,50 +45,76 @@ interface ProfileHeaderProps {
   onRequestEvaluation?: () => void;
 }
 
+// Resolução recomendada para banners: 1920x480px (proporção 4:1)
+// Isso garante boa qualidade em telas grandes e carregamento rápido
+
 export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: ProfileHeaderProps) => {
   const { data: characterRankings = {} } = useCharacterRanking();
   const { data: characterImages = [] } = useCharacterImages();
   
-  const { data: bannerUrl } = useQuery({
-    queryKey: ['banner-image', player.selected_banner_id],
+  const { data: bannerData } = useQuery({
+    queryKey: ['banner-full', player.selected_banner_id],
     queryFn: async () => {
       if (!player.selected_banner_id) return null;
       
       const { data: banner } = await supabase
         .from('banners')
-        .select('image_url')
+        .select('*')
         .eq('id', player.selected_banner_id)
         .single();
       
-      return banner?.image_url || null;
+      return banner || null;
     },
     enabled: !!player.selected_banner_id
   });
 
-  const getAchievementIcon = (achievement: string) => {
-    const icons = {
-      'champion': Trophy,
-      'undefeated': Target,
-      'veteran': Shield,
-      'streak': Flame
+  const getAchievementIcon = (iconType: Achievement['icon']) => {
+    const iconMap = {
+      'trophy': Trophy,
+      'medal': Medal,
+      'star': Star,
+      'crown': Crown,
+      'shield': Shield,
+      'fire': Flame,
+      'target': Target,
+      'zap': Zap,
+      'award': Award,
     };
-    return icons[achievement as keyof typeof icons] || Trophy;
+    return iconMap[iconType] || Trophy;
+  };
+
+  const getAchievementColorClasses = (color: Achievement['color']) => {
+    const colorMap = {
+      gold: "bg-yellow-500/20 text-yellow-500 border-yellow-500/40",
+      silver: "bg-gray-400/20 text-gray-400 border-gray-400/40",
+      bronze: "bg-amber-600/20 text-amber-600 border-amber-600/40",
+      primary: "bg-primary/20 text-primary border-primary/40",
+      accent: "bg-accent/20 text-accent border-accent/40",
+      success: "bg-green-500/20 text-green-500 border-green-500/40",
+      warning: "bg-orange-500/20 text-orange-500 border-orange-500/40",
+      destructive: "bg-red-500/20 text-red-500 border-red-500/40",
+    };
+    return colorMap[color] || colorMap.primary;
   };
 
   return (
     <Card className="relative overflow-hidden border-border/50 mb-8">
-      {/* Banner de Fundo */}
+      {/* Banner de Fundo - Resolução recomendada: 1920x480px (4:1) */}
       <div className="absolute inset-0">
-        {bannerUrl ? (
-          <img 
-            src={bannerUrl} 
-            alt="Profile banner" 
-            className="w-full h-full object-cover"
-            style={{
-              objectFit: 'cover',
-              objectPosition: 'center'
-            }}
-          />
+        {bannerData?.image_url ? (
+          <>
+            <img 
+              src={bannerData.image_url} 
+              alt={bannerData.display_name || "Profile banner"}
+              className="w-full h-full object-cover"
+              style={{
+                objectFit: 'cover',
+                objectPosition: 'center'
+              }}
+            />
+            {/* Overlay sutil para legibilidade do texto */}
+            <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/50 to-background/30" />
+          </>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
         )}
@@ -263,11 +295,47 @@ export const ProfileHeader = ({ player, rankColor, onRequestEvaluation }: Profil
           </div>
         )}
 
-        {/* Conquistas */}
+        {/* Conquistas - Exibição compacta com ícones */}
         {player.isRanked && player.achievements && player.achievements.length > 0 && (
-          <div className="mt-6">
-            <AchievementsBadges achievements={player.achievements} />
-          </div>
+          <TooltipProvider>
+            <div className="mt-6">
+              <h3 className="text-sm font-medium text-muted-foreground mb-3 px-2 py-1 rounded bg-background/60 backdrop-blur-sm inline-block">
+                Conquistas
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {player.achievements.slice(0, 5).map((achievement) => {
+                  const Icon = getAchievementIcon(achievement.icon);
+                  const colorClasses = getAchievementColorClasses(achievement.color);
+                  
+                  return (
+                    <Tooltip key={achievement.id}>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-300 hover:scale-105 cursor-pointer backdrop-blur-sm",
+                            colorClasses
+                          )}
+                        >
+                          <Icon className="w-4 h-4 flex-shrink-0" />
+                          <span className="text-sm font-medium truncate max-w-[120px]">
+                            {achievement.name}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <div className="text-center">
+                          <div className="font-medium">{achievement.name}</div>
+                          <div className="text-muted-foreground text-xs mt-1">
+                            {achievement.description}
+                          </div>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </div>
+          </TooltipProvider>
         )}
 
         {/* Overlay para jogadores não rankeados */}
