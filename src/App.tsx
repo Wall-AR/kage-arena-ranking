@@ -14,6 +14,7 @@ import Academy from "./pages/Academy";
 import Auth from "./pages/Auth";
 import Evaluations from "./pages/Evaluations";
 import Admin from "./pages/Admin";
+import Moderator from "./pages/Moderator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/forum" element={<Forum />} />
           <Route path="/academy" element={<Academy />} />
           <Route path="/evaluations" element={<Evaluations />} />
+          <Route path="/moderator" element={<Moderator />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/auth" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

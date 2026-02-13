@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Trophy, Swords, Users, BookOpen, MessageCircle, User, Settings, LogOut } from "lucide-react";
+import { Bell, Trophy, Swords, Users, BookOpen, MessageCircle, User, Settings, LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,11 +30,11 @@ const Navigation = ({ currentPage }: NavigationProps) => {
     { id: "forum", label: "Fórum", icon: MessageCircle, href: "/forum" },
   ];
 
-  // Adicionar "Avaliações" para moderadores e "Admin" para admins
+  // Adicionar links baseados em permissões
   let navItems = [...baseNavItems];
   
   if (currentPlayer?.is_moderator || currentPlayer?.is_admin) {
-    navItems.push({ id: "evaluations", label: "Avaliações", icon: Settings, href: "/evaluations" });
+    navItems.push({ id: "moderator", label: "Moderação", icon: Shield, href: "/moderator" });
   }
   
   if (currentPlayer?.is_admin) {
