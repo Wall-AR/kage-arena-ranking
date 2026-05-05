@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import kageArenaLogo from "@/assets/kage-arena-logo.png";
+import { lovable } from "@/integrations/lovable";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
