@@ -23,7 +23,11 @@ const TopKagesSection = ({ topKages, loading }: TopKagesSectionProps) => {
         </div>
         
         <div className="space-y-4 max-w-6xl mx-auto">
-          {topKages.length > 0 ? (
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-28 w-full" />
+            ))
+          ) : topKages.length > 0 ? (
             topKages.map((player) => (
               <RankingCard key={player.id} player={player} />
             ))
