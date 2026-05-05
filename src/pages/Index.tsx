@@ -20,9 +20,9 @@ import FooterSection from "@/components/home/FooterSection";
 
 const Index = () => {
   const { user, loading } = useAuth();
-  const { data: topKages = [] } = useTopPlayers(3);
+  const { data: topKages = [], isLoading: loadingKages } = useTopPlayers(3);
 
-  const { data: allPlayers = [] } = useQuery({
+  const { data: allPlayers = [], isLoading: loadingPlayers } = useQuery({
     queryKey: ['all-players-stats'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -34,7 +34,7 @@ const Index = () => {
     }
   });
 
-  const { data: tournaments = [] } = useQuery({
+  const { data: tournaments = [], isLoading: loadingTournaments } = useQuery({
     queryKey: ['active-tournaments'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -46,7 +46,7 @@ const Index = () => {
     }
   });
 
-  const { data: recentMatches = [] } = useQuery({
+  const { data: recentMatches = [], isLoading: loadingMatches } = useQuery({
     queryKey: ['recent-matches'],
     queryFn: async () => {
       const today = new Date().toISOString().split('T')[0];
@@ -58,6 +58,8 @@ const Index = () => {
       return data || [];
     }
   });
+
+  const statsLoading = loadingPlayers || loadingTournaments || loadingMatches;
 
   const totalWins = allPlayers.reduce((acc, p) => acc + (p.wins || 0), 0);
   const totalLosses = allPlayers.reduce((acc, p) => acc + (p.losses || 0), 0);
@@ -74,11 +76,12 @@ const Index = () => {
         matchesToday={recentMatches.length}
         tournamentsActive={tournaments.length}
         avgWinRate={avgWinRate}
+        loading={statsLoading}
       />
       
       <QuickLinksSection user={user} />
       
-      <TopKagesSection topKages={topKages} />
+      <TopKagesSection topKages={topKages} loading={loadingKages} />
       
       <RecentUpdatesSection
         playersCount={allPlayers.length}

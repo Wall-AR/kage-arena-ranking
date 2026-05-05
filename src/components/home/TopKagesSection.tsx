@@ -1,13 +1,15 @@
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import RankingCard from "@/components/ui/ranking-card";
 
 interface TopKagesSectionProps {
   topKages: any[];
+  loading?: boolean;
 }
 
-const TopKagesSection = ({ topKages }: TopKagesSectionProps) => {
+const TopKagesSection = ({ topKages, loading }: TopKagesSectionProps) => {
   return (
     <section className="py-16 bg-card/30">
       <div className="container mx-auto px-4">
@@ -21,7 +23,11 @@ const TopKagesSection = ({ topKages }: TopKagesSectionProps) => {
         </div>
         
         <div className="space-y-4 max-w-6xl mx-auto">
-          {topKages.length > 0 ? (
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-28 w-full" />
+            ))
+          ) : topKages.length > 0 ? (
             topKages.map((player) => (
               <RankingCard key={player.id} player={player} />
             ))
