@@ -76,11 +76,12 @@ const Index = () => {
         matchesToday={recentMatches.length}
         tournamentsActive={tournaments.length}
         avgWinRate={avgWinRate}
+        loading={statsLoading}
       />
       
       <QuickLinksSection user={user} />
       
-      <TopKagesSection topKages={topKages} />
+      <TopKagesSection topKages={topKages} loading={loadingKages} />
       
       <RecentUpdatesSection
         playersCount={allPlayers.length}
