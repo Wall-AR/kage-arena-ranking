@@ -43,25 +43,32 @@ export default function Auth() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validation = signUpSchema.safeParse({ email, password, name });
+    if (!validation.success) {
+      toast({
+        title: "Dados inválidos",
+        description: validation.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const redirectUrl = `${window.location.origin}/`;
       
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+      const { error } = await supabase.auth.signUp({
+        email: validation.data.email,
+        password: validation.data.password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: {
-            name: name
-          }
+          data: { name: validation.data.name }
         }
       });
 
       if (error) throw error;
-
-      // O perfil será criado automaticamente pelo trigger
 
       toast({
         title: "Cadastro realizado!",
@@ -81,12 +88,23 @@ export default function Auth() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validation = signInSchema.safeParse({ email, password });
+    if (!validation.success) {
+      toast({
+        title: "Dados inválidos",
+        description: validation.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+        email: validation.data.email,
+        password: validation.data.password,
       });
 
       if (error) throw error;
