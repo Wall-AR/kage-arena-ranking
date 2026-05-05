@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import kageArenaLogo from "@/assets/kage-arena-logo.png";
 import { lovable } from "@/integrations/lovable";
+
+const signInSchema = z.object({
+  email: z.string().trim().email("Email inválido").max(255, "Email muito longo"),
+  password: z.string().min(6, "Senha deve ter ao menos 6 caracteres").max(72, "Senha muito longa"),
+});
+
+const signUpSchema = signInSchema.extend({
+  name: z.string().trim().min(2, "Nome deve ter ao menos 2 caracteres").max(50, "Nome muito longo"),
+});
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,25 +43,32 @@ export default function Auth() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validation = signUpSchema.safeParse({ email, password, name });
+    if (!validation.success) {
+      toast({
+        title: "Dados inválidos",
+        description: validation.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const redirectUrl = `${window.location.origin}/`;
       
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+      const { error } = await supabase.auth.signUp({
+        email: validation.data.email,
+        password: validation.data.password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: {
-            name: name
-          }
+          data: { name: validation.data.name }
         }
       });
 
       if (error) throw error;
-
-      // O perfil será criado automaticamente pelo trigger
 
       toast({
         title: "Cadastro realizado!",
@@ -71,12 +88,23 @@ export default function Auth() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validation = signInSchema.safeParse({ email, password });
+    if (!validation.success) {
+      toast({
+        title: "Dados inválidos",
+        description: validation.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+        email: validation.data.email,
+        password: validation.data.password,
       });
 
       if (error) throw error;
