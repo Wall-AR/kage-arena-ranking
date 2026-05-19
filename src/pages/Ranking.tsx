@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import Navigation from "@/components/ui/navigation";
 import RankingCard from "@/components/ui/ranking-card";
-import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import { useRankedPlayers } from "@/hooks/usePlayers";
 
 // Página de Ranking - Kage Arena
@@ -16,7 +17,7 @@ const Ranking = () => {
   const [currentPage, setCurrentPage] = useState(1);
   
   // Buscar todos os players rankeados
-  const { data: allPlayers = [] } = useRankedPlayers();
+  const { data: allPlayers = [], isLoading } = useRankedPlayers();
 
   // Filtros de busca e categoria
   const filteredPlayers = allPlayers.filter(player => {
