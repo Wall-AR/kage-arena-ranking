@@ -61,28 +61,29 @@ const Ranking = () => {
           {/* Estatísticas do Ranking */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
             <div className="text-center">
-              <div className="font-ninja text-2xl font-bold text-ninja-kage">{allPlayers.length}</div>
+              <div className="font-ninja text-2xl font-bold text-ninja-kage">{isLoading ? <Skeleton className="h-8 w-12 mx-auto" /> : allPlayers.length}</div>
               <div className="text-sm text-muted-foreground">Ninjas Rankeados</div>
             </div>
             <div className="text-center">
               <div className="font-ninja text-2xl font-bold text-ninja-jounin">
-                {allPlayers.filter(p => p.rank === "Kage").length}
+                {isLoading ? <Skeleton className="h-8 w-12 mx-auto" /> : allPlayers.filter(p => p.rank === "Kage").length}
               </div>
               <div className="text-sm text-muted-foreground">Kages Ativos</div>
             </div>
             <div className="text-center">
               <div className="font-ninja text-2xl font-bold text-primary">
-                {Math.round(allPlayers.reduce((acc, p) => acc + p.winRate, 0) / allPlayers.length)}%
+                {isLoading || allPlayers.length === 0 ? <Skeleton className="h-8 w-12 mx-auto" /> : `${Math.round(allPlayers.reduce((acc, p) => acc + p.winRate, 0) / allPlayers.length)}%`}
               </div>
               <div className="text-sm text-muted-foreground">Taxa Média</div>
             </div>
             <div className="text-center">
               <div className="font-ninja text-2xl font-bold text-ninja-chunin">
-                {allPlayers.filter(p => p.isImmune).length}
+                {isLoading ? <Skeleton className="h-8 w-12 mx-auto" /> : allPlayers.filter(p => p.isImmune).length}
               </div>
               <div className="text-sm text-muted-foreground">Com Imunidade</div>
             </div>
           </div>
+
         </div>
       </section>
 
