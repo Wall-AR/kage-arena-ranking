@@ -54,7 +54,7 @@ export default function Tournaments() {
 
           <TabsContent value="upcoming" className="space-y-4">
             {isLoading ? (
-              <p>Carregando...</p>
+              <TournamentSkeletons />
             ) : upcomingTournaments.length === 0 ? (
               <div className="text-center py-12">
                 <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -71,7 +71,7 @@ export default function Tournaments() {
 
           <TabsContent value="active" className="space-y-4">
             {isLoading ? (
-              <p>Carregando...</p>
+              <TournamentSkeletons />
             ) : activeTournaments.length === 0 ? (
               <div className="text-center py-12">
                 <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -88,7 +88,7 @@ export default function Tournaments() {
 
           <TabsContent value="completed" className="space-y-4">
             {isLoading ? (
-              <p>Carregando...</p>
+              <TournamentSkeletons />
             ) : completedTournaments.length === 0 ? (
               <div className="text-center py-12">
                 <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -106,7 +106,7 @@ export default function Tournaments() {
           {isModerator && (
             <TabsContent value="my" className="space-y-4">
               {isLoading ? (
-                <p>Carregando...</p>
+                <TournamentSkeletons />
               ) : myTournaments.length === 0 ? (
                 <div className="text-center py-12">
                   <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
