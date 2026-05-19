@@ -131,14 +131,21 @@ const Ranking = () => {
       <section className="py-8">
         <div className="container mx-auto px-4">
           <div className="space-y-4 max-w-6xl mx-auto">
-            {currentPlayers.length > 0 ? (
+            {isLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 w-full" />
+                ))}
+              </div>
+            ) : currentPlayers.length > 0 ? (
               currentPlayers.map((player) => (
                 <RankingCard key={player.id} player={player} />
               ))
             ) : (
-              <div className="text-center py-12">
+              <div className="text-center py-16">
+                <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                 <div className="text-muted-foreground text-lg">
-                  Nenhum ninja encontrado com os filtros aplicados.
+                  {allPlayers.length === 0 ? "Nenhum ninja rankeado ainda. Seja o primeiro!" : "Nenhum ninja encontrado com os filtros aplicados."}
                 </div>
               </div>
             )}
