@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import Navigation from "@/components/ui/navigation";
 import RankingCard from "@/components/ui/ranking-card";
-import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import { useRankedPlayers } from "@/hooks/usePlayers";
 
 // Página de Ranking - Kage Arena
@@ -16,7 +17,7 @@ const Ranking = () => {
   const [currentPage, setCurrentPage] = useState(1);
   
   // Buscar todos os players rankeados
-  const { data: allPlayers = [] } = useRankedPlayers();
+  const { data: allPlayers = [], isLoading } = useRankedPlayers();
 
   // Filtros de busca e categoria
   const filteredPlayers = allPlayers.filter(player => {
@@ -60,28 +61,29 @@ const Ranking = () => {
           {/* Estatísticas do Ranking */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
             <div className="text-center">
-              <div className="font-ninja text-2xl font-bold text-ninja-kage">{allPlayers.length}</div>
+              <div className="font-ninja text-2xl font-bold text-ninja-kage">{isLoading ? <Skeleton className="h-8 w-12 mx-auto" /> : allPlayers.length}</div>
               <div className="text-sm text-muted-foreground">Ninjas Rankeados</div>
             </div>
             <div className="text-center">
               <div className="font-ninja text-2xl font-bold text-ninja-jounin">
-                {allPlayers.filter(p => p.rank === "Kage").length}
+                {isLoading ? <Skeleton className="h-8 w-12 mx-auto" /> : allPlayers.filter(p => p.rank === "Kage").length}
               </div>
               <div className="text-sm text-muted-foreground">Kages Ativos</div>
             </div>
             <div className="text-center">
               <div className="font-ninja text-2xl font-bold text-primary">
-                {Math.round(allPlayers.reduce((acc, p) => acc + p.winRate, 0) / allPlayers.length)}%
+                {isLoading || allPlayers.length === 0 ? <Skeleton className="h-8 w-12 mx-auto" /> : `${Math.round(allPlayers.reduce((acc, p) => acc + p.winRate, 0) / allPlayers.length)}%`}
               </div>
               <div className="text-sm text-muted-foreground">Taxa Média</div>
             </div>
             <div className="text-center">
               <div className="font-ninja text-2xl font-bold text-ninja-chunin">
-                {allPlayers.filter(p => p.isImmune).length}
+                {isLoading ? <Skeleton className="h-8 w-12 mx-auto" /> : allPlayers.filter(p => p.isImmune).length}
               </div>
               <div className="text-sm text-muted-foreground">Com Imunidade</div>
             </div>
           </div>
+
         </div>
       </section>
 
@@ -129,14 +131,21 @@ const Ranking = () => {
       <section className="py-8">
         <div className="container mx-auto px-4">
           <div className="space-y-4 max-w-6xl mx-auto">
-            {currentPlayers.length > 0 ? (
+            {isLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 w-full" />
+                ))}
+              </div>
+            ) : currentPlayers.length > 0 ? (
               currentPlayers.map((player) => (
                 <RankingCard key={player.id} player={player} />
               ))
             ) : (
-              <div className="text-center py-12">
+              <div className="text-center py-16">
+                <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                 <div className="text-muted-foreground text-lg">
-                  Nenhum ninja encontrado com os filtros aplicados.
+                  {allPlayers.length === 0 ? "Nenhum ninja rankeado ainda. Seja o primeiro!" : "Nenhum ninja encontrado com os filtros aplicados."}
                 </div>
               </div>
             )}

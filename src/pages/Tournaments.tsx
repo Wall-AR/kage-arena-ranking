@@ -1,10 +1,19 @@
 import Navigation from "@/components/ui/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy } from "lucide-react";
 import { useTournaments } from "@/hooks/useTournaments";
 import { CreateTournamentDialog } from "@/components/tournaments/CreateTournamentDialog";
 import { TournamentCard } from "@/components/tournaments/TournamentCard";
 import { useAuth } from "@/hooks/useAuth";
+
+const TournamentSkeletons = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <Skeleton key={i} className="h-64 w-full" />
+    ))}
+  </div>
+);
 
 export default function Tournaments() {
   const { data: tournaments, isLoading } = useTournaments();
@@ -45,7 +54,7 @@ export default function Tournaments() {
 
           <TabsContent value="upcoming" className="space-y-4">
             {isLoading ? (
-              <p>Carregando...</p>
+              <TournamentSkeletons />
             ) : upcomingTournaments.length === 0 ? (
               <div className="text-center py-12">
                 <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -62,7 +71,7 @@ export default function Tournaments() {
 
           <TabsContent value="active" className="space-y-4">
             {isLoading ? (
-              <p>Carregando...</p>
+              <TournamentSkeletons />
             ) : activeTournaments.length === 0 ? (
               <div className="text-center py-12">
                 <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -79,7 +88,7 @@ export default function Tournaments() {
 
           <TabsContent value="completed" className="space-y-4">
             {isLoading ? (
-              <p>Carregando...</p>
+              <TournamentSkeletons />
             ) : completedTournaments.length === 0 ? (
               <div className="text-center py-12">
                 <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -97,7 +106,7 @@ export default function Tournaments() {
           {isModerator && (
             <TabsContent value="my" className="space-y-4">
               {isLoading ? (
-                <p>Carregando...</p>
+                <TournamentSkeletons />
               ) : myTournaments.length === 0 ? (
                 <div className="text-center py-12">
                   <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
