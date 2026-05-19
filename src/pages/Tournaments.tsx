@@ -1,10 +1,19 @@
 import Navigation from "@/components/ui/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy } from "lucide-react";
 import { useTournaments } from "@/hooks/useTournaments";
 import { CreateTournamentDialog } from "@/components/tournaments/CreateTournamentDialog";
 import { TournamentCard } from "@/components/tournaments/TournamentCard";
 import { useAuth } from "@/hooks/useAuth";
+
+const TournamentSkeletons = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <Skeleton key={i} className="h-64 w-full" />
+    ))}
+  </div>
+);
 
 export default function Tournaments() {
   const { data: tournaments, isLoading } = useTournaments();
