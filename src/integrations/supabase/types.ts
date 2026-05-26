@@ -1303,6 +1303,14 @@ export type Database = {
         Args: { tournament_uuid: string }
         Returns: undefined
       }
+      finalize_tournament: {
+        Args: { tournament_uuid: string }
+        Returns: undefined
+      }
+      generate_tournament_bracket: {
+        Args: { tournament_uuid: string }
+        Returns: undefined
+      }
       get_initial_points_for_rank: {
         Args: { rank_name: string }
         Returns: number
