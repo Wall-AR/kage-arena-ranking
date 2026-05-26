@@ -28,10 +28,8 @@ export function TournamentManagement({
   const generateBracket = async () => {
     setIsGenerating(true);
     try {
-      // Pegar apenas participantes que fizeram check-in
-      const checkedInParticipants = participants.filter(p => p.checked_in);
-      
-      if (checkedInParticipants.length < 2) {
+      const checkedInCount = participants.filter(p => p.checked_in).length;
+      if (checkedInCount < 2) {
         toast({
           title: "Erro",
           description: "É necessário pelo menos 2 participantes com check-in para iniciar o torneio.",
@@ -40,59 +38,10 @@ export function TournamentManagement({
         return;
       }
 
-      // Calcular número de participantes para a próxima potência de 2
-      const nextPowerOf2 = Math.pow(2, Math.ceil(Math.log2(checkedInParticipants.length)));
-      
-      // Embaralhar e atribuir seeds
-      const shuffled = [...checkedInParticipants].sort(() => Math.random() - 0.5);
-      for (let i = 0; i < shuffled.length; i++) {
-        await supabase
-          .from("tournament_participants")
-          .update({ seed: i + 1 })
-          .eq("id", shuffled[i].id);
-      }
-
-      // Criar primeira rodada de partidas
-      const matches = [];
-      const totalMatches = nextPowerOf2 / 2;
-      
-      for (let i = 0; i < totalMatches; i++) {
-        const player1 = shuffled[i * 2] || null;
-        const player2 = shuffled[i * 2 + 1] || null;
-
-        // Se um jogador está faltando, é um BYE
-        const matchStatus = !player1 || !player2 ? 'bye' : 'pending';
-        const winnerId = !player1 ? player2?.id : !player2 ? player1?.id : null;
-
-        matches.push({
-          tournament_id: tournamentId,
-          round: 1,
-          match_number: i + 1,
-          player1_id: player1?.id || null,
-          player2_id: player2?.id || null,
-          status: matchStatus,
-          winner_id: winnerId,
-          bracket_position: i + 1,
-        });
-      }
-
-      // Inserir partidas no banco
-      const { error: matchError } = await supabase
-        .from("tournament_matches")
-        .insert(matches);
-
-      if (matchError) throw matchError;
-
-      // Atualizar status do torneio
-      const { error: updateError } = await supabase
-        .from("tournaments")
-        .update({ 
-          status: 'in_progress',
-          current_round: 1 
-        })
-        .eq("id", tournamentId);
-
-      if (updateError) throw updateError;
+      const { error } = await supabase.rpc("generate_tournament_bracket", {
+        tournament_uuid: tournamentId,
+      });
+      if (error) throw error;
 
       toast({
         title: "Chaveamento gerado!",
@@ -112,21 +61,15 @@ export function TournamentManagement({
     }
   };
 
+
   const distributeRewards = async () => {
     setIsDistributing(true);
     try {
-      // Chamar função do banco para distribuir recompensas
-      const { error } = await supabase.rpc('distribute_tournament_rewards', {
+      const { error } = await supabase.rpc('finalize_tournament', {
         tournament_uuid: tournamentId
       });
-
       if (error) throw error;
 
-      // Atualizar status para completed
-      await supabase
-        .from("tournaments")
-        .update({ status: 'completed' })
-        .eq("id", tournamentId);
 
       toast({
         title: "Recompensas distribuídas!",

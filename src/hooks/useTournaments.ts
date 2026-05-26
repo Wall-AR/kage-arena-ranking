@@ -95,7 +95,8 @@ export const useTournamentDisputes = (tournamentId?: string) => {
         .select(`
           *,
           reporter:players!tournament_disputes_reported_by_fkey(name, avatar_url),
-          match:tournament_matches(
+          match:tournament_matches!inner(
+            tournament_id,
             player1:tournament_participants!tournament_matches_player1_id_fkey(
               player:players(name, avatar_url)
             ),
@@ -106,6 +107,7 @@ export const useTournamentDisputes = (tournamentId?: string) => {
         `)
         .eq("match.tournament_id", tournamentId)
         .order("created_at", { ascending: false });
+
 
       if (error) throw error;
       return data || [];
