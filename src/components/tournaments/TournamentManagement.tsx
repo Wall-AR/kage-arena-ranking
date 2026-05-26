@@ -65,18 +65,11 @@ export function TournamentManagement({
   const distributeRewards = async () => {
     setIsDistributing(true);
     try {
-      // Chamar função do banco para distribuir recompensas
-      const { error } = await supabase.rpc('distribute_tournament_rewards', {
+      const { error } = await supabase.rpc('finalize_tournament', {
         tournament_uuid: tournamentId
       });
-
       if (error) throw error;
 
-      // Atualizar status para completed
-      await supabase
-        .from("tournaments")
-        .update({ status: 'completed' })
-        .eq("id", tournamentId);
 
       toast({
         title: "Recompensas distribuídas!",
