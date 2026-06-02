@@ -41,6 +41,8 @@ interface Banner {
   rarity: string;
   image_url: string;
   is_available: boolean;
+  character_name: string | null;
+  unlock_type: string;
 }
 
 export function AdminAchievementsTab() {
@@ -49,6 +51,8 @@ export function AdminAchievementsTab() {
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { toast } = useToast();
 
   // Achievement form state
@@ -69,7 +73,9 @@ export function AdminAchievementsTab() {
     category: "general",
     rarity: "common",
     image_url: "",
-    is_available: true
+    is_available: true,
+    character_name: "" as string,
+    unlock_type: "manual",
   });
 
   useEffect(() => {
