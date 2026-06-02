@@ -156,9 +156,12 @@ export function AdminAchievementsTab() {
 
   const createBanner = async () => {
     try {
-      const { error } = await supabase
-        .from('banners')
-        .insert([bannerForm]);
+      const payload = {
+        ...bannerForm,
+        character_name: bannerForm.character_name?.trim() ? bannerForm.character_name : null,
+        unlock_type: bannerForm.character_name?.trim() ? 'character_top1' : bannerForm.unlock_type,
+      };
+      const { error } = await supabase.from('banners').insert([payload]);
 
       if (error) throw error;
 
@@ -171,15 +174,38 @@ export function AdminAchievementsTab() {
         category: "general",
         rarity: "common",
         image_url: "",
-        is_available: true
+        is_available: true,
+        character_name: "",
+        unlock_type: "manual",
       });
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating banner:', error);
       toast({
         title: "Erro ao criar banner",
+        description: error?.message,
         variant: "destructive"
       });
+    }
+  };
+
+  const uploadBannerImage = async (file: File) => {
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `banners/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('Temas')
+        .upload(path, file, { upsert: false, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from('Temas').getPublicUrl(path);
+      setBannerForm((f) => ({ ...f, image_url: data.publicUrl }));
+      toast({ title: "Imagem enviada!" });
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: "Erro ao enviar imagem", description: e?.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
     }
   };
 
