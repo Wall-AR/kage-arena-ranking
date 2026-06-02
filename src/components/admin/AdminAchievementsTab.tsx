@@ -447,12 +447,38 @@ export function AdminAchievementsTab() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label>URL da Imagem</Label>
-                      <Input
-                        value={bannerForm.image_url}
-                        onChange={(e) => setBannerForm({...bannerForm, image_url: e.target.value})}
-                        placeholder="https://..."
-                      />
+                      <Label>Imagem do Banner (1920×480px · 4:1 · WebP/JPG ≤500KB)</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          value={bannerForm.image_url}
+                          onChange={(e) => setBannerForm({...bannerForm, image_url: e.target.value})}
+                          placeholder="https://... ou faça upload →"
+                        />
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) uploadBannerImage(f);
+                            e.target.value = "";
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={uploading}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                      {bannerForm.image_url && (
+                        <div className="aspect-[4/1] w-full overflow-hidden rounded border bg-muted">
+                          <img src={bannerForm.image_url} alt="preview" className="w-full h-full object-cover" />
+                        </div>
+                      )}
                     </div>
                     <div className="grid gap-2">
                       <Label>Descrição</Label>
@@ -468,9 +494,7 @@ export function AdminAchievementsTab() {
                           value={bannerForm.category}
                           onValueChange={(value) => setBannerForm({...bannerForm, category: value})}
                         >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="general">Geral</SelectItem>
                             <SelectItem value="tournament">Torneio</SelectItem>
@@ -485,9 +509,7 @@ export function AdminAchievementsTab() {
                           value={bannerForm.rarity}
                           onValueChange={(value) => setBannerForm({...bannerForm, rarity: value})}
                         >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="common">Comum</SelectItem>
                             <SelectItem value="rare">Raro</SelectItem>
@@ -495,6 +517,48 @@ export function AdminAchievementsTab() {
                             <SelectItem value="legendary">Lendário</SelectItem>
                           </SelectContent>
                         </Select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label>Forma de desbloqueio</Label>
+                        <Select
+                          value={bannerForm.unlock_type}
+                          onValueChange={(value) => setBannerForm({...bannerForm, unlock_type: value})}
+                          disabled={!!bannerForm.character_name}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="manual">Manual (admin)</SelectItem>
+                            <SelectItem value="achievement">Conquista</SelectItem>
+                            <SelectItem value="event">Evento</SelectItem>
+                            <SelectItem value="code">Código de resgate</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="flex items-center gap-1">
+                          <Crown className="w-3 h-3 text-yellow-500" />
+                          Banner de personagem (TOP 1)
+                        </Label>
+                        <Select
+                          value={bannerForm.character_name || "__none__"}
+                          onValueChange={(value) => setBannerForm({
+                            ...bannerForm,
+                            character_name: value === "__none__" ? "" : value,
+                          })}
+                        >
+                          <SelectTrigger><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                          <SelectContent className="max-h-72">
+                            <SelectItem value="__none__">— Nenhum —</SelectItem>
+                            {NARUTO_CHARACTERS.map((c) => (
+                              <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          Se selecionado, só o TOP 1 deste personagem poderá usar o banner.
+                        </p>
                       </div>
                     </div>
                   </div>
