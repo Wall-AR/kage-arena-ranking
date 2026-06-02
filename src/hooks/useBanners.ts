@@ -9,6 +9,7 @@ export const useBanners = () => {
       const { data, error } = await supabase
         .from('banners')
         .select('*')
+        .eq('is_available', true)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -22,13 +23,10 @@ export const usePlayerBanners = (playerId?: string) => {
     queryKey: ['player-banners', playerId],
     queryFn: async () => {
       if (!playerId) return [];
-      
+
       const { data, error } = await supabase
         .from('player_banners')
-        .select(`
-          *,
-          banner:banners(*)
-        `)
+        .select(`*, banner:banners(*)`)
         .eq('player_id', playerId);
 
       if (error) throw error;
@@ -38,12 +36,33 @@ export const usePlayerBanners = (playerId?: string) => {
   });
 };
 
+/**
+ * Retorna IDs dos banners que o jogador pode usar atualmente:
+ * - desbloqueados manualmente (conquistas/códigos/eventos)
+ * - banners de personagem em que ele é TOP 1 no momento
+ */
+export const useAvailableBanners = (playerId?: string) => {
+  return useQuery({
+    queryKey: ['available-banners', playerId],
+    queryFn: async () => {
+      if (!playerId) return [] as Array<{ banner_id: string; source: string }>;
+      const { data, error } = await supabase.rpc('get_player_available_banners', {
+        p_player_id: playerId,
+      });
+      if (error) throw error;
+      return (data || []) as Array<{ banner_id: string; source: string }>;
+    },
+    enabled: !!playerId,
+    staleTime: 1000 * 60, // 1 min
+  });
+};
+
 export const useSelectBanner = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ playerId, bannerId }: { playerId: string; bannerId: string }) => {
+    mutationFn: async ({ playerId, bannerId }: { playerId: string; bannerId: string | null }) => {
       const { data, error } = await supabase
         .from('players')
         .update({ selected_banner_id: bannerId })
@@ -57,16 +76,17 @@ export const useSelectBanner = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['player-profile'] });
       queryClient.invalidateQueries({ queryKey: ['currentPlayer'] });
+      queryClient.invalidateQueries({ queryKey: ['rankedPlayers'] });
       toast({
         title: "Banner atualizado!",
         description: "Seu banner foi alterado com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error selecting banner:', error);
       toast({
         title: "Erro ao selecionar banner",
-        description: "Tente novamente em alguns instantes.",
+        description: error?.message || "Tente novamente em alguns instantes.",
         variant: "destructive"
       });
     }

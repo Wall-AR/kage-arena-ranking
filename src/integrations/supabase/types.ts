@@ -50,6 +50,7 @@ export type Database = {
       banners: {
         Row: {
           category: string
+          character_name: string | null
           created_at: string
           description: string | null
           display_name: string
@@ -58,9 +59,11 @@ export type Database = {
           is_available: boolean | null
           name: string
           rarity: string
+          unlock_type: string
         }
         Insert: {
           category?: string
+          character_name?: string | null
           created_at?: string
           description?: string | null
           display_name: string
@@ -69,9 +72,11 @@ export type Database = {
           is_available?: boolean | null
           name: string
           rarity?: string
+          unlock_type?: string
         }
         Update: {
           category?: string
+          character_name?: string | null
           created_at?: string
           description?: string | null
           display_name?: string
@@ -80,6 +85,7 @@ export type Database = {
           is_available?: boolean | null
           name?: string
           rarity?: string
+          unlock_type?: string
         }
         Relationships: []
       }
@@ -1314,6 +1320,13 @@ export type Database = {
       get_initial_points_for_rank: {
         Args: { rank_name: string }
         Returns: number
+      }
+      get_player_available_banners: {
+        Args: { p_player_id: string }
+        Returns: {
+          banner_id: string
+          source: string
+        }[]
       }
       is_admin: { Args: { user_uuid: string }; Returns: boolean }
       is_moderator: { Args: { user_uuid: string }; Returns: boolean }
