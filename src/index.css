@@ -130,7 +130,80 @@ Paleta principal: Laranja Kyubi, Azul Chakra, Dourado Kage
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, hsl(24 95% 53% / 0.10), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 100%, hsl(217 91% 60% / 0.08), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 0% 80%, hsl(45 93% 58% / 0.05), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  /* Subtle chakra grid pattern overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.15) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    opacity: 0.4;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Better focus indicators for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Smoother selection */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 5px;
+    border: 2px solid hsl(var(--background));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.6);
+  }
+}
+
+@layer utilities {
+  .text-glow-primary {
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+  .text-glow-kage {
+    text-shadow: 0 0 24px hsl(var(--accent) / 0.6);
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-ninja;
+  }
+  .glass {
+    @apply bg-card/60 backdrop-blur-md border border-border/50;
   }
 }
