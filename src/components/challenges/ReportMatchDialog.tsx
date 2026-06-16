@@ -85,18 +85,14 @@ export const ReportMatchDialog = ({ children, challenge }: ReportMatchDialogProp
   const handleReportMatch = () => {
     if (!winnerId || rounds.length === 0) return;
 
-    const loserId = winnerId === challenge.challenger.id ? challenge.challenged.id : challenge.challenger.id;
-
     reportMatch({
       challengeId: challenge.id,
       winnerId,
-      loserId,
       rounds,
       notes: notes.trim() || undefined,
-      evidenceUrl: evidenceUrl.trim() || undefined
+      evidenceUrl: evidenceUrl.trim() || undefined,
     });
 
-    // Reset form
     setWinnerId("");
     setRounds([]);
     setNotes("");
