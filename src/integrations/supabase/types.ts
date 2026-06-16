@@ -92,44 +92,93 @@ export type Database = {
       challenges: {
         Row: {
           accepted_at: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          challenged_checked_in_at: string | null
           challenged_id: string
+          challenger_checked_in_at: string | null
           challenger_id: string
           checked_in_at: string | null
+          confirmed_at: string | null
           created_at: string
+          dispute_reason: string | null
+          disputed_at: string | null
           expires_at: string
           id: string
+          match_id: string | null
           match_type: string | null
           message: string | null
+          reported_at: string | null
+          reported_by: string | null
+          reported_evidence_url: string | null
+          reported_notes: string | null
+          reported_rounds: Json | null
+          reported_winner_id: string | null
           status: string | null
           updated_at: string
         }
         Insert: {
           accepted_at?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          challenged_checked_in_at?: string | null
           challenged_id: string
+          challenger_checked_in_at?: string | null
           challenger_id: string
           checked_in_at?: string | null
+          confirmed_at?: string | null
           created_at?: string
+          dispute_reason?: string | null
+          disputed_at?: string | null
           expires_at?: string
           id?: string
+          match_id?: string | null
           match_type?: string | null
           message?: string | null
+          reported_at?: string | null
+          reported_by?: string | null
+          reported_evidence_url?: string | null
+          reported_notes?: string | null
+          reported_rounds?: Json | null
+          reported_winner_id?: string | null
           status?: string | null
           updated_at?: string
         }
         Update: {
           accepted_at?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          challenged_checked_in_at?: string | null
           challenged_id?: string
+          challenger_checked_in_at?: string | null
           challenger_id?: string
           checked_in_at?: string | null
+          confirmed_at?: string | null
           created_at?: string
+          dispute_reason?: string | null
+          disputed_at?: string | null
           expires_at?: string
           id?: string
+          match_id?: string | null
           match_type?: string | null
           message?: string | null
+          reported_at?: string | null
+          reported_by?: string | null
+          reported_evidence_url?: string | null
+          reported_notes?: string | null
+          reported_rounds?: Json | null
+          reported_winner_id?: string | null
           status?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "challenges_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "challenges_challenged_id_fkey"
             columns: ["challenged_id"]
@@ -140,6 +189,27 @@ export type Database = {
           {
             foreignKeyName: "challenges_challenger_id_fkey"
             columns: ["challenger_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_reported_winner_id_fkey"
+            columns: ["reported_winner_id"]
             isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
@@ -1305,10 +1375,142 @@ export type Database = {
         Args: { user_id: string }
         Returns: boolean
       }
+      cancel_challenge: {
+        Args: { p_challenge_id: string }
+        Returns: {
+          accepted_at: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          challenged_checked_in_at: string | null
+          challenged_id: string
+          challenger_checked_in_at: string | null
+          challenger_id: string
+          checked_in_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          expires_at: string
+          id: string
+          match_id: string | null
+          match_type: string | null
+          message: string | null
+          reported_at: string | null
+          reported_by: string | null
+          reported_evidence_url: string | null
+          reported_notes: string | null
+          reported_rounds: Json | null
+          reported_winner_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "challenges"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      challenge_check_in: {
+        Args: { p_challenge_id: string }
+        Returns: {
+          accepted_at: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          challenged_checked_in_at: string | null
+          challenged_id: string
+          challenger_checked_in_at: string | null
+          challenger_id: string
+          checked_in_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          expires_at: string
+          id: string
+          match_id: string | null
+          match_type: string | null
+          message: string | null
+          reported_at: string | null
+          reported_by: string | null
+          reported_evidence_url: string | null
+          reported_notes: string | null
+          reported_rounds: Json | null
+          reported_winner_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "challenges"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      compute_rank_from_points: { Args: { p_points: number }; Returns: string }
+      confirm_challenge_result: {
+        Args: { p_challenge_id: string }
+        Returns: {
+          challenge_id: string | null
+          created_at: string
+          evidence_url: string | null
+          id: string
+          loser_id: string
+          loser_points_change: number | null
+          match_notes: string | null
+          played_at: string
+          rounds_data: Json | null
+          winner_id: string
+          winner_points_change: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "matches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      dispute_challenge_result: {
+        Args: { p_challenge_id: string; p_reason: string }
+        Returns: {
+          accepted_at: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          challenged_checked_in_at: string | null
+          challenged_id: string
+          challenger_checked_in_at: string | null
+          challenger_id: string
+          checked_in_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          expires_at: string
+          id: string
+          match_id: string | null
+          match_type: string | null
+          message: string | null
+          reported_at: string | null
+          reported_by: string | null
+          reported_evidence_url: string | null
+          reported_notes: string | null
+          reported_rounds: Json | null
+          reported_winner_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "challenges"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       distribute_tournament_rewards: {
         Args: { tournament_uuid: string }
         Returns: undefined
       }
+      expire_old_challenges: { Args: never; Returns: number }
       finalize_tournament: {
         Args: { tournament_uuid: string }
         Returns: undefined
@@ -1330,9 +1532,61 @@ export type Database = {
       }
       is_admin: { Args: { user_uuid: string }; Returns: boolean }
       is_moderator: { Args: { user_uuid: string }; Returns: boolean }
+      notify_user: {
+        Args: {
+          p_data?: Json
+          p_message: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       redeem_code: {
         Args: { p_code_text: string; p_player_id: string }
         Returns: Json
+      }
+      report_challenge_result: {
+        Args: {
+          p_challenge_id: string
+          p_evidence_url?: string
+          p_notes?: string
+          p_rounds: Json
+          p_winner_id: string
+        }
+        Returns: {
+          accepted_at: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          challenged_checked_in_at: string | null
+          challenged_id: string
+          challenger_checked_in_at: string | null
+          challenger_id: string
+          checked_in_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          expires_at: string
+          id: string
+          match_id: string | null
+          match_type: string | null
+          message: string | null
+          reported_at: string | null
+          reported_by: string | null
+          reported_evidence_url: string | null
+          reported_notes: string | null
+          reported_rounds: Json | null
+          reported_winner_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "challenges"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       set_initial_admin: {
         Args: { target_user_id: string }
