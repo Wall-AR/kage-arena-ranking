@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Loader2, Send, Pin, Lock, Trash2, ThumbsUp, 
-  MessageCircle, Eye, Clock, Crown, Shield, AlertTriangle 
+import {
+  Loader2, Send, Pin, Lock, Trash2,
+  MessageCircle, Eye, Clock, Crown, Shield, AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ForumTopic, ForumReply } from "@/hooks/useForum";
+import { ForumTopic, ForumReply, useForum } from "@/hooks/useForum";
+import ReactionBar, { ReactionType, ReactionCounts } from "./ReactionBar";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
