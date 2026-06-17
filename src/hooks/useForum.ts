@@ -403,6 +403,7 @@ export const useForum = () => {
     incrementViewCount,
     createReply,
     deleteReply,
-    toggleReaction
+    setReaction,
+    fetchReactions
   };
 };
