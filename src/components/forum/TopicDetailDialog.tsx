@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Loader2, Send, Pin, Lock, Trash2, ThumbsUp, 
-  MessageCircle, Eye, Clock, Crown, Shield, AlertTriangle 
+import {
+  Loader2, Send, Pin, Lock, Trash2,
+  MessageCircle, Eye, Clock, Crown, Shield, AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ForumTopic, ForumReply } from "@/hooks/useForum";
+import { ForumTopic, ForumReply, useForum } from "@/hooks/useForum";
+import ReactionBar, { ReactionType, ReactionCounts } from "./ReactionBar";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -73,6 +74,34 @@ const TopicDetailDialog = ({
     queryFn: () => topic ? fetchReplies(topic.id) : Promise.resolve([]),
     enabled: !!topic?.id && open
   });
+
+  const { fetchReactions, setReaction } = useForum();
+  const replyIds = useMemo(() => replies.map((r) => r.id), [replies]);
+  const { data: reactionRows = [] } = useQuery({
+    queryKey: ['forum-reactions', topic?.id, replyIds.length],
+    queryFn: () => topic ? fetchReactions(topic.id, replyIds) : Promise.resolve([] as any[]),
+    enabled: !!topic?.id && open,
+  });
+
+  const reactionsFor = (target: { topicId?: string; replyId?: string }): ReactionCounts => {
+    const counts: Partial<Record<ReactionType, number>> = {};
+    let myReaction: ReactionType | null = null;
+    for (const r of reactionRows as any[]) {
+      const match = target.topicId
+        ? r.topic_id === target.topicId && !r.reply_id
+        : r.reply_id === target.replyId;
+      if (!match) continue;
+      const t = r.reaction_type as ReactionType;
+      counts[t] = (counts[t] || 0) + 1;
+      if (currentPlayerId && r.user_id === currentPlayerId) myReaction = t;
+    }
+    return { counts, myReaction };
+  };
+
+  const handleReact = (target: { topicId?: string; replyId?: string }, type: ReactionType) => {
+    if (!currentPlayerId) return;
+    setReaction.mutate({ ...target, playerId: currentPlayerId, reactionType: type });
+  };
 
   const handleSubmitReply = () => {
     if (!replyContent.trim() || topic?.is_locked) return;
@@ -205,6 +234,13 @@ const TopicDetailDialog = ({
                 </div>
               </div>
               <p className="text-foreground whitespace-pre-wrap">{topic.content}</p>
+              <div className="mt-3">
+                <ReactionBar
+                  data={reactionsFor({ topicId: topic.id })}
+                  onReact={(t) => handleReact({ topicId: topic.id }, t)}
+                  disabled={!currentPlayerId || setReaction.isPending}
+                />
+              </div>
             </div>
 
             <Separator className="my-4" />
@@ -267,6 +303,14 @@ const TopicDetailDialog = ({
                             )}
                           </div>
                           <p className="text-sm text-foreground mt-1 whitespace-pre-wrap">{reply.content}</p>
+                          <div className="mt-2">
+                            <ReactionBar
+                              data={reactionsFor({ replyId: reply.id })}
+                              onReact={(t) => handleReact({ replyId: reply.id }, t)}
+                              disabled={!currentPlayerId || setReaction.isPending}
+                              compact
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>

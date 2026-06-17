@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import type { ReactionType, ReactionCounts } from "@/components/forum/ReactionBar";
 
 export interface ForumCategory {
   id: string;
@@ -300,51 +301,75 @@ export const useForum = () => {
     }
   });
 
-  // Toggle reaction
-  const toggleReaction = useMutation({
-    mutationFn: async ({ 
-      topicId, 
-      replyId, 
-      playerId 
-    }: { 
-      topicId?: string; 
-      replyId?: string; 
+  // Fetch all reactions for a topic + its replies in one call
+  const fetchReactions = async (topicId: string, replyIds: string[]) => {
+    const ids = [topicId, ...replyIds];
+    const { data, error } = await supabase
+      .from('forum_reactions')
+      .select('topic_id, reply_id, reaction_type, user_id')
+      .or(`topic_id.in.(${topicId}),reply_id.in.(${replyIds.length ? replyIds.join(',') : '00000000-0000-0000-0000-000000000000'})`);
+    if (error) throw error;
+    return data || [];
+  };
+
+  // Set / swap / remove the current user's reaction on a topic or reply
+  const setReaction = useMutation({
+    mutationFn: async ({
+      topicId,
+      replyId,
+      playerId,
+      reactionType,
+    }: {
+      topicId?: string;
+      replyId?: string;
       playerId: string;
+      reactionType: ReactionType;
     }) => {
-      // Check if reaction exists
-      let query = supabase
+      // Find existing reaction by this user on this target
+      let q = supabase
         .from('forum_reactions')
-        .select('id')
+        .select('id, reaction_type')
         .eq('user_id', playerId);
-
-      if (topicId) query = query.eq('topic_id', topicId);
-      if (replyId) query = query.eq('reply_id', replyId);
-
-      const { data: existing } = await query.maybeSingle();
+      if (topicId) q = q.eq('topic_id', topicId).is('reply_id', null);
+      if (replyId) q = q.eq('reply_id', replyId).is('topic_id', null);
+      const { data: existing } = await q.maybeSingle();
 
       if (existing) {
-        // Remove reaction
-        await supabase
+        if (existing.reaction_type === reactionType) {
+          // Same reaction → remove (toggle off)
+          const { error } = await supabase.from('forum_reactions').delete().eq('id', existing.id);
+          if (error) throw error;
+          return { action: 'removed' as const };
+        }
+        // Different reaction → update type
+        const { error } = await supabase
           .from('forum_reactions')
-          .delete()
+          .update({ reaction_type: reactionType })
           .eq('id', existing.id);
-      } else {
-        // Add reaction
-        await supabase
-          .from('forum_reactions')
-          .insert({
-            user_id: playerId,
-            topic_id: topicId || null,
-            reply_id: replyId || null,
-            reaction_type: 'like'
-          });
+        if (error) throw error;
+        return { action: 'updated' as const };
+      }
+
+      const { error } = await supabase.from('forum_reactions').insert({
+        user_id: playerId,
+        topic_id: topicId ?? null,
+        reply_id: replyId ?? null,
+        reaction_type: reactionType,
+      });
+      if (error) throw error;
+      return { action: 'added' as const };
+    },
+    onSuccess: (_res, vars) => {
+      // Refresh the reactions for the parent topic
+      const topicKey = vars.topicId ?? null;
+      queryClient.invalidateQueries({ queryKey: ['forum-reactions'] });
+      if (topicKey) {
+        queryClient.invalidateQueries({ queryKey: ['forum-reactions', topicKey] });
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['forum-topics'] });
-      queryClient.invalidateQueries({ queryKey: ['forum-replies'] });
-    }
+    onError: (e: Error) => toast.error('Erro ao reagir: ' + e.message),
   });
+
 
   // Get forum stats
   const { data: forumStats } = useQuery({
@@ -378,6 +403,7 @@ export const useForum = () => {
     incrementViewCount,
     createReply,
     deleteReply,
-    toggleReaction
+    setReaction,
+    fetchReactions
   };
 };
