@@ -303,6 +303,14 @@ const TopicDetailDialog = ({
                             )}
                           </div>
                           <p className="text-sm text-foreground mt-1 whitespace-pre-wrap">{reply.content}</p>
+                          <div className="mt-2">
+                            <ReactionBar
+                              data={reactionsFor({ replyId: reply.id })}
+                              onReact={(t) => handleReact({ replyId: reply.id }, t)}
+                              disabled={!currentPlayerId || setReaction.isPending}
+                              compact
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
