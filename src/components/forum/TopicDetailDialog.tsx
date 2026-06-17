@@ -75,6 +75,34 @@ const TopicDetailDialog = ({
     enabled: !!topic?.id && open
   });
 
+  const { fetchReactions, setReaction } = useForum();
+  const replyIds = useMemo(() => replies.map((r) => r.id), [replies]);
+  const { data: reactionRows = [] } = useQuery({
+    queryKey: ['forum-reactions', topic?.id, replyIds.length],
+    queryFn: () => topic ? fetchReactions(topic.id, replyIds) : Promise.resolve([] as any[]),
+    enabled: !!topic?.id && open,
+  });
+
+  const reactionsFor = (target: { topicId?: string; replyId?: string }): ReactionCounts => {
+    const counts: Partial<Record<ReactionType, number>> = {};
+    let myReaction: ReactionType | null = null;
+    for (const r of reactionRows as any[]) {
+      const match = target.topicId
+        ? r.topic_id === target.topicId && !r.reply_id
+        : r.reply_id === target.replyId;
+      if (!match) continue;
+      const t = r.reaction_type as ReactionType;
+      counts[t] = (counts[t] || 0) + 1;
+      if (currentPlayerId && r.user_id === currentPlayerId) myReaction = t;
+    }
+    return { counts, myReaction };
+  };
+
+  const handleReact = (target: { topicId?: string; replyId?: string }, type: ReactionType) => {
+    if (!currentPlayerId) return;
+    setReaction.mutate({ ...target, playerId: currentPlayerId, reactionType: type });
+  };
+
   const handleSubmitReply = () => {
     if (!replyContent.trim() || topic?.is_locked) return;
     onReply(replyContent.trim());
