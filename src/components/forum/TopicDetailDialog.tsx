@@ -234,6 +234,13 @@ const TopicDetailDialog = ({
                 </div>
               </div>
               <p className="text-foreground whitespace-pre-wrap">{topic.content}</p>
+              <div className="mt-3">
+                <ReactionBar
+                  data={reactionsFor({ topicId: topic.id })}
+                  onReact={(t) => handleReact({ topicId: topic.id }, t)}
+                  disabled={!currentPlayerId || setReaction.isPending}
+                />
+              </div>
             </div>
 
             <Separator className="my-4" />
