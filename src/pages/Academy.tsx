@@ -1,66 +1,77 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navigation from "@/components/ui/navigation";
-import { TutorialsSection } from "@/components/academy/TutorialsSection";
-import { FightAnalysesSection } from "@/components/academy/FightAnalysesSection";
-import { CharactersSection } from "@/components/academy/CharactersSection";
-import { BookOpen, Swords, Users } from "lucide-react";
+import { Users, BookOpen, Swords } from "lucide-react";
+import { CharacterSelectorPS2 } from "@/components/academy/CharacterSelectorPS2";
+import { AcademyTopicsSection } from "@/components/academy/AcademyTopicsSection";
+import { CommentedMatchesSection } from "@/components/academy/CommentedMatchesSection";
 
 const Academy = () => {
-  const [activeTab, setActiveTab] = useState("tutorials");
+  const [activeTab, setActiveTab] = useState("characters");
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
-      <div className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12 animate-fade-in">
-          <h1 className="font-ninja text-5xl font-bold text-foreground mb-4 bg-gradient-to-r from-ninja-kage via-ninja-sannin to-ninja-anbu bg-clip-text text-transparent">
-            🎓 ACADEMIA NINJA
+
+      {/* HERO */}
+      <div className="relative overflow-hidden border-b border-primary/20">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.4), transparent 50%), radial-gradient(circle at 80% 70%, hsl(45 93% 58% / 0.3), transparent 50%)",
+          }}
+        />
+        <div className="container mx-auto px-4 py-12 relative text-center animate-fade-in">
+          <h1
+            className="font-ninja text-5xl md:text-6xl font-black mb-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent"
+            style={{ textShadow: "0 0 40px hsl(var(--primary) / 0.3)" }}
+          >
+            ACADEMIA NINJA
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Aprimore suas habilidades, domine personagens e torne-se um verdadeiro mestre do combate
+            Domine personagens, estude mecânicas e evolua com partidas comentadas pelos mestres.
           </p>
         </div>
+      </div>
 
-        {/* Main Tabs */}
+      <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 p-1 h-auto">
-            <TabsTrigger 
-              value="tutorials" 
-              className="flex items-center gap-2 data-[state=active]:bg-ninja-kage/20 data-[state=active]:text-ninja-kage py-3"
-            >
-              <BookOpen className="w-5 h-5" />
-              <span className="font-medium">Tutoriais</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="analyses" 
-              className="flex items-center gap-2 data-[state=active]:bg-ninja-anbu/20 data-[state=active]:text-ninja-anbu py-3"
-            >
-              <Swords className="w-5 h-5" />
-              <span className="font-medium">Análises de Lutas</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="characters" 
-              className="flex items-center gap-2 data-[state=active]:bg-ninja-sannin/20 data-[state=active]:text-ninja-sannin py-3"
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 mb-8 bg-muted/50 p-1 h-auto">
+            <TabsTrigger
+              value="characters"
+              className="flex items-center gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary py-3"
             >
               <Users className="w-5 h-5" />
               <span className="font-medium">Personagens</span>
             </TabsTrigger>
+            <TabsTrigger
+              value="topics"
+              className="flex items-center gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary py-3"
+            >
+              <BookOpen className="w-5 h-5" />
+              <span className="font-medium">Mecânicas</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="matches"
+              className="flex items-center gap-2 data-[state=active]:bg-primary/20 data-[state=active]:text-primary py-3"
+            >
+              <Swords className="w-5 h-5" />
+              <span className="font-medium">Partidas Comentadas</span>
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="tutorials" className="animate-fade-in">
-            <TutorialsSection />
-          </TabsContent>
-
-          <TabsContent value="analyses" className="animate-fade-in">
-            <FightAnalysesSection />
-          </TabsContent>
-
           <TabsContent value="characters" className="animate-fade-in">
-            <CharactersSection />
+            <CharacterSelectorPS2 />
+          </TabsContent>
+
+          <TabsContent value="topics" className="animate-fade-in">
+            <AcademyTopicsSection />
+          </TabsContent>
+
+          <TabsContent value="matches" className="animate-fade-in">
+            <CommentedMatchesSection />
           </TabsContent>
         </Tabs>
       </div>
