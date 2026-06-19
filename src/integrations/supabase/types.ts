@@ -14,6 +14,307 @@ export type Database = {
   }
   public: {
     Tables: {
+      academy_character_combos: {
+        Row: {
+          character_id: string
+          created_at: string
+          damage_estimate: string | null
+          difficulty: string
+          id: string
+          inputs: string
+          name: string
+          notes: string | null
+          situation: string | null
+          sort_order: number
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          character_id: string
+          created_at?: string
+          damage_estimate?: string | null
+          difficulty?: string
+          id?: string
+          inputs: string
+          name: string
+          notes?: string | null
+          situation?: string | null
+          sort_order?: number
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          character_id?: string
+          created_at?: string
+          damage_estimate?: string | null
+          difficulty?: string
+          id?: string
+          inputs?: string
+          name?: string
+          notes?: string | null
+          situation?: string | null
+          sort_order?: number
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_character_combos_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "academy_characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_character_moves: {
+        Row: {
+          character_id: string
+          command: string | null
+          created_at: string
+          damage_rating: number | null
+          description: string
+          difficulty: string | null
+          id: string
+          move_type: string
+          name: string
+          sort_order: number
+          thumbnail_url: string | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          character_id: string
+          command?: string | null
+          created_at?: string
+          damage_rating?: number | null
+          description: string
+          difficulty?: string | null
+          id?: string
+          move_type?: string
+          name: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          character_id?: string
+          command?: string | null
+          created_at?: string
+          damage_rating?: number | null
+          description?: string
+          difficulty?: string | null
+          id?: string
+          move_type?: string
+          name?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_character_moves_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "academy_characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_characters: {
+        Row: {
+          attributes: Json
+          created_at: string
+          created_by: string | null
+          difficulty: string | null
+          favorable_against: string[]
+          full_description: string | null
+          id: string
+          image_lv2_url: string | null
+          image_url: string
+          is_featured: boolean
+          is_published: boolean
+          name: string
+          playstyle: string | null
+          recommended_for: string | null
+          short_description: string | null
+          slug: string
+          sort_order: number
+          strengths: string[]
+          tier: string
+          unfavorable_against: string[]
+          updated_at: string
+          weaknesses: string[]
+        }
+        Insert: {
+          attributes?: Json
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string | null
+          favorable_against?: string[]
+          full_description?: string | null
+          id?: string
+          image_lv2_url?: string | null
+          image_url: string
+          is_featured?: boolean
+          is_published?: boolean
+          name: string
+          playstyle?: string | null
+          recommended_for?: string | null
+          short_description?: string | null
+          slug: string
+          sort_order?: number
+          strengths?: string[]
+          tier?: string
+          unfavorable_against?: string[]
+          updated_at?: string
+          weaknesses?: string[]
+        }
+        Update: {
+          attributes?: Json
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string | null
+          favorable_against?: string[]
+          full_description?: string | null
+          id?: string
+          image_lv2_url?: string | null
+          image_url?: string
+          is_featured?: boolean
+          is_published?: boolean
+          name?: string
+          playstyle?: string | null
+          recommended_for?: string | null
+          short_description?: string | null
+          slug?: string
+          sort_order?: number
+          strengths?: string[]
+          tier?: string
+          unfavorable_against?: string[]
+          updated_at?: string
+          weaknesses?: string[]
+        }
+        Relationships: []
+      }
+      academy_commented_matches: {
+        Row: {
+          character_a: string | null
+          character_b: string | null
+          commentator: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_featured: boolean
+          is_published: boolean
+          player_a_name: string | null
+          player_b_name: string | null
+          tags: string[]
+          thumbnail_url: string | null
+          tier: string | null
+          title: string
+          updated_at: string
+          video_url: string
+          views_count: number
+          winner: string | null
+        }
+        Insert: {
+          character_a?: string | null
+          character_b?: string | null
+          commentator?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          player_a_name?: string | null
+          player_b_name?: string | null
+          tags?: string[]
+          thumbnail_url?: string | null
+          tier?: string | null
+          title: string
+          updated_at?: string
+          video_url: string
+          views_count?: number
+          winner?: string | null
+        }
+        Update: {
+          character_a?: string | null
+          character_b?: string | null
+          commentator?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          player_a_name?: string | null
+          player_b_name?: string | null
+          tags?: string[]
+          thumbnail_url?: string | null
+          tier?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string
+          views_count?: number
+          winner?: string | null
+        }
+        Relationships: []
+      }
+      academy_topics: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string | null
+          icon: string | null
+          id: string
+          is_pinned: boolean
+          is_published: boolean
+          slug: string
+          sort_order: number
+          summary: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_pinned?: boolean
+          is_published?: boolean
+          slug: string
+          sort_order?: number
+          summary?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_pinned?: boolean
+          is_published?: boolean
+          slug?: string
+          sort_order?: number
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           category: string
