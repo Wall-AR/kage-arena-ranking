@@ -11,6 +11,7 @@ import Tournaments from "./pages/Tournaments";
 import TournamentDetail from "./pages/TournamentDetail";
 import Forum from "./pages/Forum";
 import Academy from "./pages/Academy";
+import AcademyCharacter from "./pages/AcademyCharacter";
 import Auth from "./pages/Auth";
 import Evaluations from "./pages/Evaluations";
 import Admin from "./pages/Admin";
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/tournaments/:id" element={<TournamentDetail />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/academy" element={<Academy />} />
+          <Route path="/academy/character/:slug" element={<AcademyCharacter />} />
           <Route path="/evaluations" element={<Evaluations />} />
           <Route path="/moderator" element={<Moderator />} />
           <Route path="/admin" element={<Admin />} />

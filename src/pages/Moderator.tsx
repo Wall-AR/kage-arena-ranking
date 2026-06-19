@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
-import { Loader2, Shield, Swords, Users, MessageSquare, Trophy, ClipboardCheck } from "lucide-react";
+import { Loader2, Shield, Swords, Users, MessageSquare, Trophy, ClipboardCheck, BookOpen } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import ModPlayersTab from "@/components/moderator/ModPlayersTab";
 import ModTournamentsTab from "@/components/moderator/ModTournamentsTab";
 import ModForumTab from "@/components/moderator/ModForumTab";
 import ModOverviewCard from "@/components/moderator/ModOverviewCard";
+import { AdminAcademyTab } from "@/components/admin/AdminAcademyTab";
 
 export default function Moderator() {
   const { user, loading: authLoading } = useAuth();
@@ -76,7 +77,7 @@ export default function Moderator() {
         <ModOverviewCard />
 
         <Tabs defaultValue="evaluations" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 mb-6">
             <TabsTrigger value="evaluations" className="flex items-center gap-1">
               <ClipboardCheck className="w-4 h-4" />
               <span className="hidden sm:inline">Avaliações</span>
@@ -97,6 +98,10 @@ export default function Moderator() {
               <MessageSquare className="w-4 h-4" />
               <span className="hidden sm:inline">Fórum</span>
             </TabsTrigger>
+            <TabsTrigger value="academy" className="flex items-center gap-1">
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Academia</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="evaluations"><ModEvaluationsTab /></TabsContent>
@@ -104,6 +109,7 @@ export default function Moderator() {
           <TabsContent value="players"><ModPlayersTab /></TabsContent>
           <TabsContent value="tournaments"><ModTournamentsTab /></TabsContent>
           <TabsContent value="forum"><ModForumTab /></TabsContent>
+          <TabsContent value="academy"><AdminAcademyTab /></TabsContent>
         </Tabs>
       </div>
     </div>

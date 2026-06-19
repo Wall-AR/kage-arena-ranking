@@ -10,6 +10,7 @@ import { AdminCodesTab } from "@/components/admin/AdminCodesTab";
 import { AdminForumTab } from "@/components/admin/AdminForumTab";
 import { AdminMatchesTab } from "@/components/admin/AdminMatchesTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
+import { AdminAcademyTab } from "@/components/admin/AdminAcademyTab";
 import { AdminStatsCard } from "@/components/admin/AdminStatsCard";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -70,7 +71,7 @@ export default function Admin() {
       <AdminStatsCard />
 
       <Tabs defaultValue="players" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 mb-6">
+        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-9 mb-6">
           <TabsTrigger value="players">Jogadores</TabsTrigger>
           <TabsTrigger value="matches">Partidas</TabsTrigger>
           <TabsTrigger value="tournaments">Torneios</TabsTrigger>
@@ -78,6 +79,7 @@ export default function Admin() {
           <TabsTrigger value="achievements">Conquistas</TabsTrigger>
           <TabsTrigger value="codes">Códigos</TabsTrigger>
           <TabsTrigger value="forum">Fórum</TabsTrigger>
+          <TabsTrigger value="academy">Academia</TabsTrigger>
           <TabsTrigger value="settings">Sistema</TabsTrigger>
         </TabsList>
 
@@ -107,6 +109,10 @@ export default function Admin() {
 
         <TabsContent value="forum">
           <AdminForumTab />
+        </TabsContent>
+
+        <TabsContent value="academy">
+          <AdminAcademyTab />
         </TabsContent>
 
         <TabsContent value="settings">
