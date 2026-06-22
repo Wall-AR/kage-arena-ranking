@@ -44,6 +44,8 @@ export type AcademyMove = {
   damage_rating: number | null;
   difficulty: string | null;
   sort_order: number;
+  created_by: string | null;
+  author?: { id: string; name: string; avatar_url: string | null; is_admin: boolean | null; is_moderator: boolean | null } | null;
 };
 
 export type AcademyCombo = {
@@ -57,7 +59,10 @@ export type AcademyCombo = {
   situation: string | null;
   notes: string | null;
   sort_order: number;
+  created_by: string | null;
+  author?: { id: string; name: string; avatar_url: string | null; is_admin: boolean | null; is_moderator: boolean | null } | null;
 };
+
 
 export type AcademyTopic = {
   id: string;
@@ -137,11 +142,11 @@ export const useAcademyMoves = (characterId?: string) =>
     queryFn: async (): Promise<AcademyMove[]> => {
       const { data, error } = await supabase
         .from("academy_character_moves")
-        .select("*")
+        .select("*, author:players!academy_character_moves_created_by_fkey(id,name,avatar_url,is_admin,is_moderator)")
         .eq("character_id", characterId!)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as AcademyMove[];
+      return (data ?? []) as unknown as AcademyMove[];
     },
   });
 
@@ -152,13 +157,14 @@ export const useAcademyCombos = (characterId?: string) =>
     queryFn: async (): Promise<AcademyCombo[]> => {
       const { data, error } = await supabase
         .from("academy_character_combos")
-        .select("*")
+        .select("*, author:players!academy_character_combos_created_by_fkey(id,name,avatar_url,is_admin,is_moderator)")
         .eq("character_id", characterId!)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as AcademyCombo[];
+      return (data ?? []) as unknown as AcademyCombo[];
     },
   });
+
 
 export const useAcademyTopics = () =>
   useQuery({
