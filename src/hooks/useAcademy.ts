@@ -396,3 +396,71 @@ export const useDeleteAcademyCommentedMatch = () => {
     onError: (e: Error) => toast.error(e.message),
   });
 };
+
+// ===== Reactions on academy cards (moves/combos) =====
+export type AcademyCardType = "move" | "combo";
+
+export type AcademyReactionRow = {
+  id: string;
+  user_id: string;
+  card_type: AcademyCardType;
+  card_id: string;
+  reaction_type: string;
+};
+
+export const useAcademyReactions = (cardType: AcademyCardType, cardIds: string[]) =>
+  useQuery({
+    queryKey: ["academy", "reactions", cardType, cardIds.sort().join(",")],
+    enabled: cardIds.length > 0,
+    queryFn: async (): Promise<AcademyReactionRow[]> => {
+      const { data, error } = await supabase
+        .from("academy_reactions")
+        .select("*")
+        .eq("card_type", cardType)
+        .in("card_id", cardIds);
+      if (error) throw error;
+      return (data ?? []) as AcademyReactionRow[];
+    },
+  });
+
+export const useSetAcademyReaction = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (p: { cardType: AcademyCardType; cardId: string; reactionType: string }) => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Faça login para reagir");
+      const { data: existing } = await supabase
+        .from("academy_reactions")
+        .select("id, reaction_type")
+        .eq("user_id", u.user.id)
+        .eq("card_type", p.cardType)
+        .eq("card_id", p.cardId)
+        .maybeSingle();
+      if (existing) {
+        if (existing.reaction_type === p.reactionType) {
+          const { error } = await supabase.from("academy_reactions").delete().eq("id", existing.id);
+          if (error) throw error;
+          return "removed" as const;
+        }
+        const { error } = await supabase
+          .from("academy_reactions")
+          .update({ reaction_type: p.reactionType })
+          .eq("id", existing.id);
+        if (error) throw error;
+        return "updated" as const;
+      }
+      const { error } = await supabase.from("academy_reactions").insert({
+        user_id: u.user.id,
+        card_type: p.cardType,
+        card_id: p.cardId,
+        reaction_type: p.reactionType,
+      });
+      if (error) throw error;
+      return "added" as const;
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["academy", "reactions", v.cardType] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+};
