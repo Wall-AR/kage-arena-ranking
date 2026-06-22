@@ -241,7 +241,7 @@ const MoveEditor = ({ characterId, existing, onClose }: { characterId: string; e
             <Select value={form.move_type} onValueChange={(v) => setForm({ ...form, move_type: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {["special", "ultimate", "setup", "counter", "projectile", "command_grab", "defensive", "stance", "buff", "transformation"].map((t) => (
+                {["special", "ultimate", "setup", "counter", "projectile", "command_grab", "defensive", "stance", "buff", "transformation", "bug"].map((t) => (
                   <SelectItem key={t} value={t}>{t}</SelectItem>
                 ))}
               </SelectContent>

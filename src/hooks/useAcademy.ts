@@ -44,6 +44,8 @@ export type AcademyMove = {
   damage_rating: number | null;
   difficulty: string | null;
   sort_order: number;
+  created_by: string | null;
+  author?: { id: string; name: string; avatar_url: string | null; is_admin: boolean | null; is_moderator: boolean | null } | null;
 };
 
 export type AcademyCombo = {
@@ -57,7 +59,10 @@ export type AcademyCombo = {
   situation: string | null;
   notes: string | null;
   sort_order: number;
+  created_by: string | null;
+  author?: { id: string; name: string; avatar_url: string | null; is_admin: boolean | null; is_moderator: boolean | null } | null;
 };
+
 
 export type AcademyTopic = {
   id: string;
@@ -137,11 +142,11 @@ export const useAcademyMoves = (characterId?: string) =>
     queryFn: async (): Promise<AcademyMove[]> => {
       const { data, error } = await supabase
         .from("academy_character_moves")
-        .select("*")
+        .select("*, author:players!academy_character_moves_created_by_fkey(id,name,avatar_url,is_admin,is_moderator)")
         .eq("character_id", characterId!)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as AcademyMove[];
+      return (data ?? []) as unknown as AcademyMove[];
     },
   });
 
@@ -152,13 +157,14 @@ export const useAcademyCombos = (characterId?: string) =>
     queryFn: async (): Promise<AcademyCombo[]> => {
       const { data, error } = await supabase
         .from("academy_character_combos")
-        .select("*")
+        .select("*, author:players!academy_character_combos_created_by_fkey(id,name,avatar_url,is_admin,is_moderator)")
         .eq("character_id", characterId!)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return (data ?? []) as AcademyCombo[];
+      return (data ?? []) as unknown as AcademyCombo[];
     },
   });
+
 
 export const useAcademyTopics = () =>
   useQuery({
@@ -233,11 +239,21 @@ export const useUpsertAcademyMove = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<AcademyMove> & { id?: string; character_id: string }) => {
+      const clean: Record<string, unknown> = { ...payload };
+      delete clean.author;
       if (payload.id) {
-        const { error } = await supabase.from("academy_character_moves").update(payload as never).eq("id", payload.id);
+        delete clean.created_by;
+        const { error } = await supabase.from("academy_character_moves").update(clean as never).eq("id", payload.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("academy_character_moves").insert(payload as never);
+        if (!clean.created_by) {
+          const { data: u } = await supabase.auth.getUser();
+          if (u.user) {
+            const { data: p } = await supabase.from("players").select("id").eq("user_id", u.user.id).maybeSingle();
+            if (p) clean.created_by = p.id;
+          }
+        }
+        const { error } = await supabase.from("academy_character_moves").insert(clean as never);
         if (error) throw error;
       }
     },
@@ -248,6 +264,7 @@ export const useUpsertAcademyMove = () => {
     onError: (e: Error) => toast.error(e.message),
   });
 };
+
 
 export const useDeleteAcademyMove = () => {
   const qc = useQueryClient();
@@ -268,11 +285,21 @@ export const useUpsertAcademyCombo = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<AcademyCombo> & { id?: string; character_id: string }) => {
+      const clean: Record<string, unknown> = { ...payload };
+      delete clean.author;
       if (payload.id) {
-        const { error } = await supabase.from("academy_character_combos").update(payload as never).eq("id", payload.id);
+        delete clean.created_by;
+        const { error } = await supabase.from("academy_character_combos").update(clean as never).eq("id", payload.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("academy_character_combos").insert(payload as never);
+        if (!clean.created_by) {
+          const { data: u } = await supabase.auth.getUser();
+          if (u.user) {
+            const { data: p } = await supabase.from("players").select("id").eq("user_id", u.user.id).maybeSingle();
+            if (p) clean.created_by = p.id;
+          }
+        }
+        const { error } = await supabase.from("academy_character_combos").insert(clean as never);
         if (error) throw error;
       }
     },
@@ -283,6 +310,7 @@ export const useUpsertAcademyCombo = () => {
     onError: (e: Error) => toast.error(e.message),
   });
 };
+
 
 export const useDeleteAcademyCombo = () => {
   const qc = useQueryClient();
@@ -364,6 +392,74 @@ export const useDeleteAcademyCommentedMatch = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: QK.matches });
       toast.success("Partida removida");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+};
+
+// ===== Reactions on academy cards (moves/combos) =====
+export type AcademyCardType = "move" | "combo";
+
+export type AcademyReactionRow = {
+  id: string;
+  user_id: string;
+  card_type: AcademyCardType;
+  card_id: string;
+  reaction_type: string;
+};
+
+export const useAcademyReactions = (cardType: AcademyCardType, cardIds: string[]) =>
+  useQuery({
+    queryKey: ["academy", "reactions", cardType, cardIds.sort().join(",")],
+    enabled: cardIds.length > 0,
+    queryFn: async (): Promise<AcademyReactionRow[]> => {
+      const { data, error } = await supabase
+        .from("academy_reactions")
+        .select("*")
+        .eq("card_type", cardType)
+        .in("card_id", cardIds);
+      if (error) throw error;
+      return (data ?? []) as AcademyReactionRow[];
+    },
+  });
+
+export const useSetAcademyReaction = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (p: { cardType: AcademyCardType; cardId: string; reactionType: string }) => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Faça login para reagir");
+      const { data: existing } = await supabase
+        .from("academy_reactions")
+        .select("id, reaction_type")
+        .eq("user_id", u.user.id)
+        .eq("card_type", p.cardType)
+        .eq("card_id", p.cardId)
+        .maybeSingle();
+      if (existing) {
+        if (existing.reaction_type === p.reactionType) {
+          const { error } = await supabase.from("academy_reactions").delete().eq("id", existing.id);
+          if (error) throw error;
+          return "removed" as const;
+        }
+        const { error } = await supabase
+          .from("academy_reactions")
+          .update({ reaction_type: p.reactionType })
+          .eq("id", existing.id);
+        if (error) throw error;
+        return "updated" as const;
+      }
+      const { error } = await supabase.from("academy_reactions").insert({
+        user_id: u.user.id,
+        card_type: p.cardType,
+        card_id: p.cardId,
+        reaction_type: p.reactionType,
+      });
+      if (error) throw error;
+      return "added" as const;
+    },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ["academy", "reactions", v.cardType] });
     },
     onError: (e: Error) => toast.error(e.message),
   });

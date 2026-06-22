@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           character_id: string
           created_at: string
+          created_by: string | null
           damage_estimate: string | null
           difficulty: string
           id: string
@@ -32,6 +33,7 @@ export type Database = {
         Insert: {
           character_id: string
           created_at?: string
+          created_by?: string | null
           damage_estimate?: string | null
           difficulty?: string
           id?: string
@@ -46,6 +48,7 @@ export type Database = {
         Update: {
           character_id?: string
           created_at?: string
+          created_by?: string | null
           damage_estimate?: string | null
           difficulty?: string
           id?: string
@@ -65,6 +68,13 @@ export type Database = {
             referencedRelation: "academy_characters"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "academy_character_combos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
         ]
       }
       academy_character_moves: {
@@ -72,6 +82,7 @@ export type Database = {
           character_id: string
           command: string | null
           created_at: string
+          created_by: string | null
           damage_rating: number | null
           description: string
           difficulty: string | null
@@ -87,6 +98,7 @@ export type Database = {
           character_id: string
           command?: string | null
           created_at?: string
+          created_by?: string | null
           damage_rating?: number | null
           description: string
           difficulty?: string | null
@@ -102,6 +114,7 @@ export type Database = {
           character_id?: string
           command?: string | null
           created_at?: string
+          created_by?: string | null
           damage_rating?: number | null
           description?: string
           difficulty?: string | null
@@ -119,6 +132,13 @@ export type Database = {
             columns: ["character_id"]
             isOneToOne: false
             referencedRelation: "academy_characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academy_character_moves_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "players"
             referencedColumns: ["id"]
           },
         ]
@@ -261,6 +281,33 @@ export type Database = {
           video_url?: string
           views_count?: number
           winner?: string | null
+        }
+        Relationships: []
+      }
+      academy_reactions: {
+        Row: {
+          card_id: string
+          card_type: string
+          created_at: string
+          id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          card_type: string
+          created_at?: string
+          id?: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          card_type?: string
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          user_id?: string
         }
         Relationships: []
       }
