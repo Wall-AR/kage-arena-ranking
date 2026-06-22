@@ -241,138 +241,216 @@ const AcademyCharacter = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="moves" className="w-full">
-          <TabsList className="grid grid-cols-3 max-w-md">
-            <TabsTrigger value="moves">
-              <Sparkles className="w-4 h-4 mr-1" /> Habilidades
-            </TabsTrigger>
-            <TabsTrigger value="combos">
-              <Swords className="w-4 h-4 mr-1" /> Combos
-            </TabsTrigger>
-            <TabsTrigger value="matchups">
-              <Crosshair className="w-4 h-4 mr-1" /> Matchups
-            </TabsTrigger>
-          </TabsList>
+        <CharacterTabs moves={moves} combos={combos} character={character} />
+      </div>
+    </div>
+  );
+};
 
-          <TabsContent value="moves" className="mt-6 space-y-4 animate-fade-in">
-            {moves.length === 0 ? (
-              <p className="text-muted-foreground text-center py-12">Nenhuma habilidade cadastrada ainda.</p>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {moves.map((m) => (
-                  <Card key={m.id} className="bg-gradient-to-br from-card to-background border-border/60">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-base">{m.name}</CardTitle>
-                        <Badge variant="outline" className={cn("text-[10px]", MOVE_TYPE_COLOR[m.move_type] || "")}>
-                          {MOVE_TYPE_LABEL[m.move_type] || m.move_type}
-                        </Badge>
-                      </div>
-                      {m.command && (
-                        <code className="text-xs bg-muted px-2 py-1 rounded font-mono w-fit text-primary">
-                          {m.command}
-                        </code>
-                      )}
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {m.video_url && <VideoEmbed url={m.video_url} title={m.name} />}
-                      <p className="text-sm text-muted-foreground">{m.description}</p>
-                      <div className="flex gap-3 text-xs">
-                        {m.damage_rating != null && (
-                          <span className="text-foreground/80">
-                            Dano: <strong className="text-primary">{m.damage_rating}/10</strong>
-                          </span>
-                        )}
-                        {m.difficulty && (
-                          <span className={cn("font-semibold", DIFFICULTY_COLOR[m.difficulty]?.split(" ")[1])}>
-                            {DIFFICULTY_LABEL[m.difficulty]}
-                          </span>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
+interface CharacterTabsProps {
+  moves: ReturnType<typeof useAcademyMoves>["data"] extends infer T ? NonNullable<T> : never;
+  combos: ReturnType<typeof useAcademyCombos>["data"] extends infer T ? NonNullable<T> : never;
+  character: NonNullable<ReturnType<typeof useAcademyCharacterBySlug>["data"]>;
+}
 
-          <TabsContent value="combos" className="mt-6 space-y-4 animate-fade-in">
-            {combos.length === 0 ? (
-              <p className="text-muted-foreground text-center py-12">Nenhum combo cadastrado ainda.</p>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {combos.map((c) => (
-                  <Card key={c.id} className="bg-gradient-to-br from-card to-background border-border/60">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-base">{c.name}</CardTitle>
-                        <Badge variant="outline" className={cn(DIFFICULTY_COLOR[c.difficulty])}>
-                          {DIFFICULTY_LABEL[c.difficulty] || c.difficulty}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <code className="block text-sm bg-muted/70 border border-border p-3 rounded font-mono text-primary leading-relaxed">
-                        {c.inputs}
-                      </code>
-                      {c.video_url && <VideoEmbed url={c.video_url} title={c.name} />}
-                      <div className="flex gap-4 text-xs flex-wrap">
-                        {c.damage_estimate && (
-                          <span>
-                            Dano: <strong className="text-primary">{c.damage_estimate}</strong>
-                          </span>
-                        )}
-                        {c.situation && (
-                          <span>
-                            Situação: <strong className="text-foreground">{c.situation}</strong>
-                          </span>
-                        )}
-                      </div>
-                      {c.notes && <p className="text-xs text-muted-foreground italic">{c.notes}</p>}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
+const CharacterTabs = ({ moves, combos, character }: CharacterTabsProps) => {
+  const abilities = useMemo(() => moves.filter((m) => m.move_type !== "bug"), [moves]);
+  const bugs = useMemo(() => moves.filter((m) => m.move_type === "bug"), [moves]);
+  const moveIds = useMemo(() => moves.map((m) => m.id), [moves]);
+  const comboIds = useMemo(() => combos.map((c) => c.id), [combos]);
 
-          <TabsContent value="matchups" className="mt-6 grid sm:grid-cols-2 gap-4 animate-fade-in">
-            <Card className="border-green-500/30 bg-gradient-to-br from-green-500/5 to-card">
-              <CardHeader>
-                <CardTitle className="text-base text-green-400">Vantagem contra</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {character.favorable_against.length === 0 && (
-                    <p className="text-xs text-muted-foreground">Sem dados.</p>
-                  )}
-                  {character.favorable_against.map((c) => (
-                    <Badge key={c} className="bg-green-500/20 text-green-300 border border-green-500/40">
-                      {c}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-red-500/30 bg-gradient-to-br from-red-500/5 to-card">
-              <CardHeader>
-                <CardTitle className="text-base text-red-400">Desvantagem contra</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {character.unfavorable_against.length === 0 && (
-                    <p className="text-xs text-muted-foreground">Sem dados.</p>
-                  )}
-                  {character.unfavorable_against.map((c) => (
-                    <Badge key={c} className="bg-red-500/20 text-red-300 border border-red-500/40">
-                      {c}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+  return (
+    <Tabs defaultValue="moves" className="w-full">
+      <TabsList className="grid grid-cols-4 max-w-xl">
+        <TabsTrigger value="moves">
+          <Sparkles className="w-4 h-4 mr-1" /> Habilidades
+        </TabsTrigger>
+        <TabsTrigger value="combos">
+          <Swords className="w-4 h-4 mr-1" /> Combos
+        </TabsTrigger>
+        <TabsTrigger value="bugs">
+          <Bug className="w-4 h-4 mr-1" /> Bugs
+        </TabsTrigger>
+        <TabsTrigger value="matchups">
+          <Crosshair className="w-4 h-4 mr-1" /> Matchups
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="moves" className="mt-6 space-y-4 animate-fade-in">
+        {abilities.length === 0 ? (
+          <p className="text-muted-foreground text-center py-12">Nenhuma habilidade cadastrada ainda.</p>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4">
+            {abilities.map((m) => (
+              <MoveCard key={m.id} move={m} allIds={moveIds} />
+            ))}
+          </div>
+        )}
+      </TabsContent>
+
+      <TabsContent value="combos" className="mt-6 space-y-4 animate-fade-in">
+        {combos.length === 0 ? (
+          <p className="text-muted-foreground text-center py-12">Nenhum combo cadastrado ainda.</p>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4">
+            {combos.map((c) => (
+              <ComboCard key={c.id} combo={c} allIds={comboIds} />
+            ))}
+          </div>
+        )}
+      </TabsContent>
+
+      <TabsContent value="bugs" className="mt-6 space-y-4 animate-fade-in">
+        {bugs.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <Bug className="w-8 h-8 mx-auto opacity-40 mb-2" />
+            <p>Nenhum bug/exploit documentado para este personagem.</p>
+            <p className="text-xs mt-1">Admins e moderadores podem adicionar pelo painel.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4">
+            {bugs.map((m) => (
+              <MoveCard key={m.id} move={m} allIds={moveIds} variant="bug" />
+            ))}
+          </div>
+        )}
+      </TabsContent>
+
+      <TabsContent value="matchups" className="mt-6 grid sm:grid-cols-2 gap-4 animate-fade-in">
+        <Card className="border-green-500/30 bg-gradient-to-br from-green-500/5 to-card">
+          <CardHeader>
+            <CardTitle className="text-base text-green-400">Vantagem contra</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {character.favorable_against.length === 0 && (
+                <p className="text-xs text-muted-foreground">Sem dados.</p>
+              )}
+              {character.favorable_against.map((c) => (
+                <Badge key={c} className="bg-green-500/20 text-green-300 border border-green-500/40">
+                  {c}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-red-500/30 bg-gradient-to-br from-red-500/5 to-card">
+          <CardHeader>
+            <CardTitle className="text-base text-red-400">Desvantagem contra</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {character.unfavorable_against.length === 0 && (
+                <p className="text-xs text-muted-foreground">Sem dados.</p>
+              )}
+              {character.unfavorable_against.map((c) => (
+                <Badge key={c} className="bg-red-500/20 text-red-300 border border-red-500/40">
+                  {c}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+};
+
+const MoveCard = ({
+  move: m,
+  allIds,
+  variant,
+}: {
+  move: NonNullable<ReturnType<typeof useAcademyMoves>["data"]>[number];
+  allIds: string[];
+  variant?: "bug";
+}) => (
+  <Card
+    className={cn(
+      "bg-gradient-to-br from-card to-background border-border/60 flex flex-col",
+      variant === "bug" && "border-rose-500/30",
+    )}
+  >
+    <CardHeader className="pb-2">
+      <div className="flex items-start justify-between gap-2 flex-wrap">
+        <CardTitle className="text-base">{m.name}</CardTitle>
+        <div className="flex gap-1 flex-wrap">
+          <Badge variant="outline" className={cn("text-[10px]", MOVE_TYPE_COLOR[m.move_type] || "")}>
+            {MOVE_TYPE_LABEL[m.move_type] || m.move_type}
+          </Badge>
+          {m.difficulty && (
+            <Badge variant="outline" className={cn("text-[10px]", DIFFICULTY_COLOR[m.difficulty])}>
+              <Zap className="w-2.5 h-2.5 mr-0.5" />
+              {DIFFICULTY_LABEL[m.difficulty]}
+            </Badge>
+          )}
+        </div>
+      </div>
+      {m.command && (
+        <code className="text-xs bg-muted px-2 py-1 rounded font-mono w-fit text-primary">
+          {m.command}
+        </code>
+      )}
+    </CardHeader>
+    <CardContent className="space-y-3 flex-1 flex flex-col">
+      <p className="text-sm text-muted-foreground">{m.description}</p>
+      {m.video_url && <VideoEmbed url={m.video_url} title={m.name} />}
+      {m.damage_rating != null && (
+        <div className="text-xs">
+          <span className="text-foreground/80">
+            Dano: <strong className="text-primary">{m.damage_rating}/10</strong>
+          </span>
+        </div>
+      )}
+      <div className="mt-auto">
+        <AcademyCardFooter cardType="move" cardId={m.id} allCardIds={allIds} author={m.author} />
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const ComboCard = ({
+  combo: c,
+  allIds,
+}: {
+  combo: NonNullable<ReturnType<typeof useAcademyCombos>["data"]>[number];
+  allIds: string[];
+}) => (
+  <Card className="bg-gradient-to-br from-card to-background border-border/60 flex flex-col">
+    <CardHeader className="pb-2">
+      <div className="flex items-start justify-between gap-2 flex-wrap">
+        <CardTitle className="text-base">{c.name}</CardTitle>
+        <Badge variant="outline" className={cn("text-[10px]", DIFFICULTY_COLOR[c.difficulty])}>
+          <Zap className="w-2.5 h-2.5 mr-0.5" />
+          {DIFFICULTY_LABEL[c.difficulty] || c.difficulty}
+        </Badge>
+      </div>
+    </CardHeader>
+    <CardContent className="space-y-3 flex-1 flex flex-col">
+      <code className="block text-sm bg-muted/70 border border-border p-3 rounded font-mono text-primary leading-relaxed">
+        {c.inputs}
+      </code>
+      {c.video_url && <VideoEmbed url={c.video_url} title={c.name} />}
+      <div className="flex gap-4 text-xs flex-wrap">
+        {c.damage_estimate && (
+          <span>
+            Dano: <strong className="text-primary">{c.damage_estimate}</strong>
+          </span>
+        )}
+        {c.situation && (
+          <span>
+            Situação: <strong className="text-foreground">{c.situation}</strong>
+          </span>
+        )}
+      </div>
+      {c.notes && <p className="text-xs text-muted-foreground italic">{c.notes}</p>}
+      <div className="mt-auto">
+        <AcademyCardFooter cardType="combo" cardId={c.id} allCardIds={allIds} author={c.author} />
+      </div>
+    </CardContent>
+  </Card>
+);
+
       </div>
     </div>
   );
