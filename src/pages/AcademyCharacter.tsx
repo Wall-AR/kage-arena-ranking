@@ -1,5 +1,6 @@
+import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Zap, Swords, Sparkles, Shield, Crosshair, ChevronLeft } from "lucide-react";
+import { ArrowLeft, Loader2, Zap, Swords, Sparkles, Shield, Crosshair, ChevronLeft, Bug } from "lucide-react";
 import Navigation from "@/components/ui/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,9 @@ import {
 } from "@/hooks/useAcademy";
 import { CharacterRadarChart } from "@/components/academy/CharacterRadarChart";
 import { VideoEmbed } from "@/components/academy/VideoEmbed";
+import { AcademyCardFooter } from "@/components/academy/AcademyCardFooter";
 import { cn } from "@/lib/utils";
+
 
 const TIER_COLORS: Record<string, string> = {
   "S+": "bg-gradient-to-r from-yellow-400 to-orange-500 text-black",
@@ -52,20 +55,13 @@ const MOVE_TYPE_LABEL: Record<string, string> = {
   auto_guard: "Auto-Guard",
   transformation: "Transformação",
   versatile: "Versátil",
-  combo: "Combo",
+  combo: "bg-amber-500/20 text-amber-400 border-amber-500/40",
+  versatile: "bg-violet-500/20 text-violet-400 border-violet-500/40",
+  stance: "bg-teal-500/20 text-teal-400 border-teal-500/40",
+  auto_guard: "bg-sky-500/20 text-sky-400 border-sky-500/40",
+  bug: "bg-rose-500/20 text-rose-400 border-rose-500/40",
 };
 
-const MOVE_TYPE_COLOR: Record<string, string> = {
-  ultimate: "bg-red-500/20 text-red-400 border-red-500/40",
-  special: "bg-primary/20 text-primary border-primary/40",
-  counter: "bg-purple-500/20 text-purple-400 border-purple-500/40",
-  setup: "bg-blue-500/20 text-blue-400 border-blue-500/40",
-  projectile: "bg-cyan-500/20 text-cyan-400 border-cyan-500/40",
-  transformation: "bg-yellow-500/20 text-yellow-400 border-yellow-500/40",
-  defensive: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
-  command_grab: "bg-pink-500/20 text-pink-400 border-pink-500/40",
-  buff: "bg-orange-500/20 text-orange-400 border-orange-500/40",
-};
 
 const AcademyCharacter = () => {
   const { slug } = useParams<{ slug: string }>();
