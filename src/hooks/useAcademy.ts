@@ -239,11 +239,21 @@ export const useUpsertAcademyMove = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<AcademyMove> & { id?: string; character_id: string }) => {
+      const clean: Record<string, unknown> = { ...payload };
+      delete clean.author;
       if (payload.id) {
-        const { error } = await supabase.from("academy_character_moves").update(payload as never).eq("id", payload.id);
+        delete clean.created_by;
+        const { error } = await supabase.from("academy_character_moves").update(clean as never).eq("id", payload.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("academy_character_moves").insert(payload as never);
+        if (!clean.created_by) {
+          const { data: u } = await supabase.auth.getUser();
+          if (u.user) {
+            const { data: p } = await supabase.from("players").select("id").eq("user_id", u.user.id).maybeSingle();
+            if (p) clean.created_by = p.id;
+          }
+        }
+        const { error } = await supabase.from("academy_character_moves").insert(clean as never);
         if (error) throw error;
       }
     },
@@ -254,6 +264,7 @@ export const useUpsertAcademyMove = () => {
     onError: (e: Error) => toast.error(e.message),
   });
 };
+
 
 export const useDeleteAcademyMove = () => {
   const qc = useQueryClient();
@@ -274,11 +285,21 @@ export const useUpsertAcademyCombo = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<AcademyCombo> & { id?: string; character_id: string }) => {
+      const clean: Record<string, unknown> = { ...payload };
+      delete clean.author;
       if (payload.id) {
-        const { error } = await supabase.from("academy_character_combos").update(payload as never).eq("id", payload.id);
+        delete clean.created_by;
+        const { error } = await supabase.from("academy_character_combos").update(clean as never).eq("id", payload.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("academy_character_combos").insert(payload as never);
+        if (!clean.created_by) {
+          const { data: u } = await supabase.auth.getUser();
+          if (u.user) {
+            const { data: p } = await supabase.from("players").select("id").eq("user_id", u.user.id).maybeSingle();
+            if (p) clean.created_by = p.id;
+          }
+        }
+        const { error } = await supabase.from("academy_character_combos").insert(clean as never);
         if (error) throw error;
       }
     },
@@ -289,6 +310,7 @@ export const useUpsertAcademyCombo = () => {
     onError: (e: Error) => toast.error(e.message),
   });
 };
+
 
 export const useDeleteAcademyCombo = () => {
   const qc = useQueryClient();
