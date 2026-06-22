@@ -451,9 +451,6 @@ const ComboCard = ({
   </Card>
 );
 
-      </div>
-    </div>
-  );
-};
+
 
 export default AcademyCharacter;
