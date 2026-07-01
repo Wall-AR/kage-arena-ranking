@@ -79,10 +79,10 @@ export function AdminSettingsTab() {
   };
 
   const getRankFromPoints = (points: number): string => {
-    if (points >= 600) return 'Sanin';
-    if (points >= 450) return 'Anbu';
-    if (points >= 350) return 'Jounnin';
-    if (points >= 200) return 'Chunnin';
+    if (points >= 1000) return 'Sannin';
+    if (points >= 700) return 'Anbu';
+    if (points >= 450) return 'Jounin';
+    if (points >= 250) return 'Chunin';
     if (points >= 100) return 'Genin';
     return 'Unranked';
   };
@@ -133,7 +133,7 @@ export function AdminSettingsTab() {
     {
       id: 'ranking',
       title: 'Recalcular Rankings',
-      description: 'Atualiza o rank de todos os jogadores baseado em seus pontos atuais (Genin, Chunnin, Jounnin, etc.).',
+      description: 'Atualiza o rank de todos os jogadores baseado em seus pontos atuais (Genin, Chunin, Jounin, etc.).',
       icon: RefreshCw,
       color: 'text-blue-600',
       action: recalculateRankings,

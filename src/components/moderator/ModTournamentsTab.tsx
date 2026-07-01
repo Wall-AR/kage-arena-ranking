@@ -23,7 +23,9 @@ const ModTournamentsTab = () => {
   }
 
   const statusColors: Record<string, string> = {
+    pending_approval: "bg-yellow-500/20 text-yellow-700",
     registration: "bg-ninja-jounin/20 text-ninja-jounin",
+    in_progress: "bg-primary/20 text-primary",
     ongoing: "bg-primary/20 text-primary",
     check_in: "bg-ninja-chunin/20 text-ninja-chunin",
     completed: "bg-muted text-muted-foreground",

@@ -48,7 +48,7 @@ export function AdminStatsCard() {
         supabase.from('players').select('id', { count: 'exact', head: true }),
         supabase.from('players').select('id', { count: 'exact', head: true }).eq('is_ranked', true),
         supabase.from('tournaments').select('id', { count: 'exact', head: true }),
-        supabase.from('tournaments').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+        supabase.from('tournaments').select('id', { count: 'exact', head: true }).in('status', ['registration', 'check_in', 'in_progress']),
         supabase.from('evaluations').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('forum_topics').select('id', { count: 'exact', head: true }),
         supabase.from('achievements').select('id', { count: 'exact', head: true }),

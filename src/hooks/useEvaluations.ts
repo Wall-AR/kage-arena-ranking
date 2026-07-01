@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,10 +25,10 @@ export const useEvaluations = () => {
   const queryClient = useQueryClient();
 
   const { data: pendingEvaluations = [], isLoading: loading } = useQuery({
-    queryKey: ['pending-evaluations'],
+    queryKey: ["pending-evaluations"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('evaluations')
+        .from("evaluations")
         .select(`
           *,
           players!evaluations_player_id_fkey(
@@ -44,31 +43,31 @@ export const useEvaluations = () => {
             is_ranked
           )
         `)
-        .eq('status', 'pending')
-        .is('evaluator_id', null)
-        .order('created_at', { ascending: false });
+        .eq("status", "pending")
+        .is("evaluator_id", null)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Evaluation[];
     }
   });
 
   const { data: acceptedEvaluations = [], isLoading: loadingAccepted } = useQuery({
-    queryKey: ['accepted-evaluations'],
+    queryKey: ["accepted-evaluations"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
-      
+
       const { data: currentPlayer } = await supabase
-        .from('players')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-      
+        .from("players")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
       if (!currentPlayer) return [];
 
       const { data, error } = await supabase
-        .from('evaluations')
+        .from("evaluations")
         .select(`
           *,
           players!evaluations_player_id_fkey(
@@ -83,50 +82,30 @@ export const useEvaluations = () => {
             is_ranked
           )
         `)
-        .eq('status', 'accepted')
-        .eq('evaluator_id', currentPlayer.id)
-        .order('created_at', { ascending: false });
+        .eq("status", "accepted")
+        .eq("evaluator_id", currentPlayer.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Evaluation[];
     }
   });
 
   const acceptEvaluationMutation = useMutation({
     mutationFn: async ({ evaluationId, evaluatorId }: { evaluationId: string; evaluatorId: string }) => {
-      // Atualizar a avaliação
-      const { error: evalError } = await supabase
-        .from('evaluations')
-        .update({ 
-          evaluator_id: evaluatorId,
-          status: 'accepted'
-        })
-        .eq('id', evaluationId);
+      const { error } = await supabase.rpc("accept_evaluation", {
+        p_evaluation_id: evaluationId
+      });
 
-      if (evalError) throw evalError;
-
-      // Buscar dados da avaliação para atualizar o tutor do jogador
-      const { data: evaluation, error: getError } = await supabase
-        .from('evaluations')
-        .select('player_id')
-        .eq('id', evaluationId)
-        .single();
-
-      if (getError) throw getError;
-
-      // Atualizar o tutor do jogador
-      const { error: playerError } = await supabase
-        .from('players')
-        .update({ tutor_id: evaluatorId })
-        .eq('id', evaluation.player_id);
-
-      if (playerError) throw playerError;
-
+      if (error) throw error;
       return { evaluationId, evaluatorId };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pending-evaluations'] });
-      queryClient.invalidateQueries({ queryKey: ['player-profile'] });
+      queryClient.invalidateQueries({ queryKey: ["pending-evaluations"] });
+      queryClient.invalidateQueries({ queryKey: ["accepted-evaluations"] });
+      queryClient.invalidateQueries({ queryKey: ["player-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     }
   });
 

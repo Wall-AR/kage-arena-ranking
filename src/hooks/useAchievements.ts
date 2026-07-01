@@ -65,6 +65,12 @@ export const useRedeemCode = () => {
       if (data.success) {
         queryClient.invalidateQueries({ queryKey: ['player-achievements'] });
         queryClient.invalidateQueries({ queryKey: ['player-banners'] });
+        queryClient.invalidateQueries({ queryKey: ['available-banners'] });
+        queryClient.invalidateQueries({ queryKey: ['player-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['currentPlayer'] });
+        queryClient.invalidateQueries({ queryKey: ['ranked-players'] });
+        queryClient.invalidateQueries({ queryKey: ['top-players'] });
+        queryClient.invalidateQueries({ queryKey: ['banner-image'] });
         
         let message = data.message;
         if (data.banner_unlocked && data.achievement_unlocked) {

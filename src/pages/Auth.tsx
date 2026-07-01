@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import kageArenaLogo from "@/assets/kage-arena-logo.png";
-import { lovable } from "@/integrations/lovable";
 
 const signInSchema = z.object({
   email: z.string().trim().email("Email inválido").max(255, "Email muito longo"),
@@ -21,6 +20,30 @@ const signUpSchema = signInSchema.extend({
   name: z.string().trim().min(2, "Nome deve ter ao menos 2 caracteres").max(50, "Nome muito longo"),
 });
 
+const getAuthErrorMessage = (message?: string) => {
+  if (!message) return "Nao foi possivel concluir a autenticacao.";
+
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("unsupported provider")) {
+    return "Login com Google ainda nao esta habilitado no Supabase.";
+  }
+
+  if (normalized.includes("rate limit")) {
+    return "O limite temporario de emails do Supabase foi atingido. Tente novamente mais tarde.";
+  }
+
+  if (normalized.includes("invalid login credentials")) {
+    return "Email ou senha incorretos.";
+  }
+
+  if (normalized.includes("email address") && normalized.includes("invalid")) {
+    return "Esse email foi recusado pelo Supabase. Use um email real para criar a conta.";
+  }
+
+  return message;
+};
+
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +52,7 @@ export default function Auth() {
   const [name, setName] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const googleAuthEnabled = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === "true";
 
   useEffect(() => {
     // Verificar se já está logado
@@ -78,7 +102,7 @@ export default function Auth() {
     } catch (error: any) {
       toast({
         title: "Erro no cadastro",
-        description: error.message,
+        description: getAuthErrorMessage(error.message),
         variant: "destructive"
       });
     } finally {
@@ -119,10 +143,73 @@ export default function Auth() {
     } catch (error: any) {
       toast({
         title: "Erro no login",
-        description: error.message,
+        description: getAuthErrorMessage(error.message),
         variant: "destructive"
       });
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (!googleAuthEnabled) {
+      toast({
+        title: "Google ainda nao esta habilitado",
+        description: "Use email e senha por enquanto. Para liberar o Google, ative o provider no Supabase e marque VITE_ENABLE_GOOGLE_AUTH=true.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            prompt: "select_account",
+          },
+          skipBrowserRedirect: true,
+        },
+      });
+
+      if (error) throw error;
+      if (!data?.url) throw new Error("Supabase nao retornou a URL de login do Google.");
+
+      try {
+        const response = await fetch(data.url, { method: "GET", redirect: "manual" });
+
+        if (response.status >= 400) {
+          let message = "O provider Google nao esta habilitado/configurado no Supabase.";
+
+          try {
+            const body = await response.clone().json();
+            message = getAuthErrorMessage(body?.msg || body?.message || message);
+          } catch {
+            // Keep the friendly fallback message when Supabase does not return JSON.
+          }
+
+          toast({
+            title: "Google ainda nao esta habilitado",
+            description: message,
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+      } catch {
+        // Some browsers block probing OAuth redirects. In that case, continue normally.
+      }
+
+      window.location.assign(data.url);
+    } catch (error: any) {
+      toast({
+        title: "Erro no Google",
+        description: getAuthErrorMessage(error.message),
+        variant: "destructive",
+      });
       setIsLoading(false);
     }
   };
@@ -159,20 +246,11 @@ export default function Auth() {
                 type="button"
                 variant="outline"
                 className="w-full mt-4"
-                onClick={async () => {
-                  const result = await lovable.auth.signInWithOAuth("google", {
-                    redirect_uri: `${window.location.origin}/`,
-                  });
-                  if (result.error) {
-                    toast({ title: "Erro no Google", description: result.error.message, variant: "destructive" });
-                    return;
-                  }
-                  if (result.redirected) return;
-                  navigate("/");
-                }}
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
               >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Continuar com Google
+                {googleAuthEnabled ? "Continuar com Google" : "Google em configuracao"}
               </Button>
 
               <div className="relative my-4">
@@ -245,7 +323,7 @@ export default function Auth() {
                           if (error) throw error;
                           toast({ title: "Email enviado!", description: "Verifique sua caixa de entrada para redefinir a senha." });
                         } catch (error: any) {
-                          toast({ title: "Erro", description: error.message, variant: "destructive" });
+                          toast({ title: "Erro", description: getAuthErrorMessage(error.message), variant: "destructive" });
                         }
                       }}
                     >

@@ -16,14 +16,14 @@ export const RedemptionCodeDialog = ({ playerId }: RedemptionCodeDialogProps) =>
 
   const handleRedeem = () => {
     if (!code.trim()) return;
-    
+
     redeemCode.mutate(
-      { playerId, code: code.trim() },
+      { playerId, code: code.trim().toUpperCase() },
       {
         onSuccess: () => {
           setCode("");
           setOpen(false);
-        }
+        },
       }
     );
   };
@@ -33,31 +33,33 @@ export const RedemptionCodeDialog = ({ playerId }: RedemptionCodeDialogProps) =>
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Gift className="w-4 h-4" />
-          Resgatar Código
+          Resgatar Codigo
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Resgatar Código</DialogTitle>
+          <DialogTitle>Resgatar Codigo</DialogTitle>
           <DialogDescription>
-            Insira um código de resgate para desbloquear banners e conquistas especiais
+            Insira um codigo de resgate para desbloquear banners e conquistas especiais.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
             <Input
-              placeholder="Digite o código aqui"
+              placeholder="EUSOUBUCHAD+"
               value={code}
-              onChange={(e) => setCode(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleRedeem()}
+              onChange={(event) => setCode(event.target.value.toUpperCase())}
+              onKeyDown={(event) => event.key === "Enter" && handleRedeem()}
+              autoCapitalize="characters"
+              spellCheck={false}
             />
           </div>
-          <Button 
-            onClick={handleRedeem} 
+          <Button
+            onClick={handleRedeem}
             disabled={!code.trim() || redeemCode.isPending}
             className="w-full"
           >
-            {redeemCode.isPending ? 'Resgatando...' : 'Resgatar'}
+            {redeemCode.isPending ? "Resgatando..." : "Resgatar"}
           </Button>
         </div>
       </DialogContent>

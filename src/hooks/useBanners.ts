@@ -76,7 +76,9 @@ export const useSelectBanner = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['player-profile'] });
       queryClient.invalidateQueries({ queryKey: ['currentPlayer'] });
-      queryClient.invalidateQueries({ queryKey: ['rankedPlayers'] });
+      queryClient.invalidateQueries({ queryKey: ['ranked-players'] });
+      queryClient.invalidateQueries({ queryKey: ['top-players'] });
+      queryClient.invalidateQueries({ queryKey: ['banner-image'] });
       toast({
         title: "Banner atualizado!",
         description: "Seu banner foi alterado com sucesso.",

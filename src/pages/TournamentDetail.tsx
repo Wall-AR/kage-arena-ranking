@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useTournament, useRegisterForTournament, useCheckInTournament, useReportTournamentMatch, useConfirmTournamentMatch, useCreateDispute, useTournamentDisputes, useResolveDispute } from "@/hooks/useTournaments";
+import { useTournament, useRegisterForTournament, useCheckInTournament, useReportTournamentMatch, useConfirmTournamentMatch, useCreateDispute, useTournamentDisputes, useResolveDispute, useApproveTournament, useRejectTournament } from "@/hooks/useTournaments";
 import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/ui/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,8 @@ export default function TournamentDetail() {
   const confirmMatch = useConfirmTournamentMatch();
   const createDispute = useCreateDispute();
   const resolveDispute = useResolveDispute();
+  const approveTournament = useApproveTournament();
+  const rejectTournament = useRejectTournament();
 
   if (isLoading) {
     return (
@@ -67,14 +69,17 @@ export default function TournamentDetail() {
   const isRegistered = participants.some((p: any) => p.player_id === currentPlayer?.id);
   const myParticipation = participants.find((p: any) => p.player_id === currentPlayer?.id);
   const isModerator = currentPlayer?.is_moderator || currentPlayer?.is_admin;
+  const isRankedPlayer = currentPlayer?.is_ranked === true;
   const now = new Date();
   const canRegister = tournament.status === "registration" && 
+    isRankedPlayer &&
     isAfter(now, new Date(tournament.registration_start)) &&
     isBefore(now, new Date(tournament.registration_end)) &&
     participants.length < (tournament.max_participants || 32);
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "pending_approval": return "bg-gradient-to-r from-yellow-500 to-amber-500";
       case "registration": return "bg-gradient-to-r from-green-500 to-emerald-500";
       case "check_in": return "bg-gradient-to-r from-yellow-500 to-orange-500";
       case "in_progress": return "bg-gradient-to-r from-primary to-accent";
@@ -95,6 +100,8 @@ export default function TournamentDetail() {
 
   const handleRegister = async () => {
     if (!currentPlayer) return;
+    if (!currentPlayer.is_ranked) return;
+
     await registerForTournament.mutateAsync({
       tournamentId: tournament.id,
       playerId: currentPlayer.id,
@@ -106,6 +113,14 @@ export default function TournamentDetail() {
     await checkInTournament.mutateAsync(myParticipation.id);
   };
 
+  const handleApproveTournament = async () => {
+    await approveTournament.mutateAsync(tournament.id);
+  };
+
+  const handleRejectTournament = async () => {
+    await rejectTournament.mutateAsync({ tournamentId: tournament.id });
+  };
+
   const handleReportResult = async (data: {
     matchId: string;
     winnerId: string;
@@ -113,6 +128,8 @@ export default function TournamentDetail() {
     player2Score: number;
     evidenceUrl?: string;
     notes?: string;
+    player1Character?: string;
+    player2Character?: string;
   }) => {
     await reportMatch.mutateAsync({
       ...data,
@@ -189,7 +206,7 @@ export default function TournamentDetail() {
             <div className="flex items-start justify-between">
               <div>
                 <Badge className={`${getStatusColor(tournament.status)} text-white mb-3`}>
-                  {getStatusText(tournament.status)}
+                  {tournament.status === "pending_approval" ? "Aguardando Aprovacao" : getStatusText(tournament.status)}
                 </Badge>
                 <h1 className="text-4xl font-bold mb-2">{tournament.name}</h1>
                 <p className="text-muted-foreground max-w-2xl">{tournament.description}</p>
@@ -251,6 +268,37 @@ export default function TournamentDetail() {
 
         {/* Action Area */}
         <div className="grid md:grid-cols-2 gap-6 mb-6">
+          {isModerator && tournament.status === "pending_approval" && (
+            <Card className="border-yellow-500/50 bg-yellow-500/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-yellow-600" />
+                  Revisao do Torneio
+                </CardTitle>
+                <CardDescription>
+                  Confira as regras, datas e requisitos antes de abrir as inscricoes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex gap-3">
+                <Button
+                  onClick={handleApproveTournament}
+                  disabled={approveTournament.isPending || rejectTournament.isPending}
+                  className="flex-1"
+                >
+                  Aprovar e abrir inscricoes
+                </Button>
+                <Button
+                  onClick={handleRejectTournament}
+                  disabled={approveTournament.isPending || rejectTournament.isPending}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  Recusar
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Registration Actions */}
           {canRegister && !isRegistered && (
             <Card className="border-primary/50 bg-gradient-to-br from-primary/5 to-primary/10">
@@ -270,6 +318,18 @@ export default function TournamentDetail() {
                     {registerForTournament.isPending ? "Inscrevendo..." : "Inscrever-se no Torneio"}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {currentPlayer && !isRankedPlayer && tournament.status === "registration" && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="pt-6 text-center">
+                <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-primary" />
+                <h3 className="font-bold mb-2">Avaliação necessária</h3>
+                <p className="text-sm text-muted-foreground">
+                  Você pode acompanhar o torneio, mas só jogadores avaliados entram nas chaves competitivas.
+                </p>
               </CardContent>
             </Card>
           )}
@@ -342,7 +402,7 @@ export default function TournamentDetail() {
                   player2={myActiveMatch.player2?.player}
                   player1ParticipantId={myActiveMatch.player1_id}
                   player2ParticipantId={myActiveMatch.player2_id}
-                  currentPlayerId={currentPlayer?.id}
+                  currentPlayerId={myParticipation?.id}
                   reportedWinnerId={myActiveMatch.reported_winner_id}
                   reportedBy={myActiveMatch.reported_by}
                   isConfirmed={myActiveMatch.status === "completed"}

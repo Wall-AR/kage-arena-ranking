@@ -19,4 +19,4 @@ Allow: /
 Disallow: /admin
 Disallow: /moderator
 
-Sitemap: https://kage-arena-ranking.lovable.app/sitemap.xml
+Sitemap: https://kage-arena-ranking.netlify.app/sitemap.xml

@@ -40,7 +40,7 @@ const Index = () => {
       const { data, error } = await supabase
         .from('tournaments')
         .select('id, status')
-        .in('status', ['registration', 'ongoing']);
+        .in('status', ['registration', 'check_in', 'in_progress']);
       if (error) throw error;
       return data || [];
     }

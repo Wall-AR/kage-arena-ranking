@@ -16,6 +16,8 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "pending_approval":
+        return "bg-yellow-500";
       case "registration":
         return "bg-ninja-jounin";
       case "check_in":
@@ -31,6 +33,8 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
 
   const getStatusText = (status: string) => {
     switch (status) {
+      case "pending_approval":
+        return "Aguardando aprovacao";
       case "registration":
         return "Inscrições Abertas";
       case "check_in":

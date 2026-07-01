@@ -1,8 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Trophy, Swords, Clock, CheckCircle, AlertTriangle, Zap, Scroll, Shield, Flame, Crown } from "lucide-react";
+import { useState } from "react";
 
 interface Match {
   id: string;
@@ -13,6 +15,10 @@ interface Match {
   winner_id: string | null;
   player1_score: number;
   player2_score: number;
+  player1_character?: string | null;
+  player2_character?: string | null;
+  evidence_url?: string | null;
+  notes?: string | null;
   status: string;
   is_disputed?: boolean;
   player1?: {
@@ -206,7 +212,104 @@ function PlayerSlot({
   );
 }
 
+function MatchDetailDialog({ match, onClose }: { match: Match | null; onClose: () => void }) {
+  const players = match
+    ? [
+        {
+          slot: "player1" as const,
+          participantId: match.player1_id,
+          player: match.player1?.player,
+          score: match.player1_score,
+          character: match.player1_character,
+        },
+        {
+          slot: "player2" as const,
+          participantId: match.player2_id,
+          player: match.player2?.player,
+          score: match.player2_score,
+          character: match.player2_character,
+        },
+      ]
+    : [];
+
+  return (
+    <Dialog open={!!match} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Swords className="h-5 w-5 text-primary" />
+            Detalhes da Batalha
+          </DialogTitle>
+        </DialogHeader>
+
+        {match && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Badge variant="outline">Rodada {match.round}</Badge>
+              <Badge>{getStatusText(match.status, match.is_disputed)}</Badge>
+            </div>
+
+            <div className="grid gap-3">
+              {players.map(({ slot, participantId, player, score, character }) => {
+                const isWinner = match.winner_id === participantId;
+                const isEliminated = match.status === "completed" && participantId && match.winner_id !== participantId;
+
+                return (
+                  <div
+                    key={slot}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg border p-3",
+                      isWinner && "border-primary bg-primary/10",
+                      isEliminated && "opacity-60 grayscale"
+                    )}
+                  >
+                    <Avatar className="h-12 w-12 border">
+                      <AvatarImage src={player?.avatar_url || undefined} />
+                      <AvatarFallback>{player?.name?.[0]?.toUpperCase() || "?"}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-semibold">{player?.name || "Aguardando"}</p>
+                        {isWinner && <Badge className="bg-primary">Vencedor</Badge>}
+                        {isEliminated && <Badge variant="secondary">Eliminado</Badge>}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Personagem: {character?.trim() || "Nao informado"}
+                      </p>
+                    </div>
+                    <div className="text-2xl font-bold text-primary">{score ?? 0}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {match.notes && (
+              <div className="rounded-lg bg-muted/40 p-3">
+                <p className="text-xs font-medium uppercase text-muted-foreground">Observacoes</p>
+                <p className="text-sm">{match.notes}</p>
+              </div>
+            )}
+
+            {match.evidence_url && (
+              <a
+                href={match.evidence_url}
+                target="_blank"
+                rel="noreferrer"
+                className="block text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Ver prova da partida
+              </a>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function TournamentBracketDBZ({ matches, currentRound, onMatchClick }: TournamentBracketDBZProps) {
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+
   // Group matches by round
   const matchesByRound = matches.reduce((acc, match) => {
     if (!acc[match.round]) acc[match.round] = [];
@@ -302,7 +405,10 @@ export function TournamentBracketDBZ({ matches, currentRound, onMatchClick }: To
                       key={match.id} 
                       match={match}
                       isCurrentRound={isCurrentRoundActive}
-                      onClick={() => onMatchClick?.(match)}
+                      onClick={() => {
+                        setSelectedMatch(match);
+                        onMatchClick?.(match);
+                      }}
                     />
                   ))}
               </div>
@@ -348,6 +454,7 @@ export function TournamentBracketDBZ({ matches, currentRound, onMatchClick }: To
           </div>
         )}
       </div>
+      <MatchDetailDialog match={selectedMatch} onClose={() => setSelectedMatch(null)} />
     </div>
   );
 }

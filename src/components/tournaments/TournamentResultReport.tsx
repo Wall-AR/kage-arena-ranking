@@ -34,6 +34,8 @@ interface TournamentResultReportProps {
     player2Score: number;
     evidenceUrl?: string;
     notes?: string;
+    player1Character?: string;
+    player2Character?: string;
   }) => Promise<void>;
   onConfirm: (matchId: string) => Promise<void>;
   onDispute: (data: { matchId: string; reason: string; evidenceUrl?: string }) => Promise<void>;
@@ -59,6 +61,8 @@ export function TournamentResultReport({
   const [selectedWinner, setSelectedWinner] = useState<string>("");
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
+  const [player1Character, setPlayer1Character] = useState("");
+  const [player2Character, setPlayer2Character] = useState("");
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [notes, setNotes] = useState("");
   const [disputeReason, setDisputeReason] = useState("");
@@ -80,6 +84,8 @@ export function TournamentResultReport({
         player2Score,
         evidenceUrl: evidenceUrl || undefined,
         notes: notes || undefined,
+        player1Character: player1Character.trim() || undefined,
+        player2Character: player2Character.trim() || undefined,
       });
       setOpen(false);
       resetForm();
@@ -118,6 +124,8 @@ export function TournamentResultReport({
     setSelectedWinner("");
     setPlayer1Score(0);
     setPlayer2Score(0);
+    setPlayer1Character("");
+    setPlayer2Character("");
     setEvidenceUrl("");
     setNotes("");
     setDisputeReason("");
@@ -221,6 +229,27 @@ export function TournamentResultReport({
                   min="0"
                   value={player2Score}
                   onChange={(e) => setPlayer2Score(Number(e.target.value))}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="player1Character">{player1?.name} - Personagem</Label>
+                <Input
+                  id="player1Character"
+                  value={player1Character}
+                  onChange={(e) => setPlayer1Character(e.target.value)}
+                  placeholder="Ex: Naruto"
+                />
+              </div>
+              <div>
+                <Label htmlFor="player2Character">{player2?.name} - Personagem</Label>
+                <Input
+                  id="player2Character"
+                  value={player2Character}
+                  onChange={(e) => setPlayer2Character(e.target.value)}
+                  placeholder="Ex: Sasuke"
                 />
               </div>
             </div>

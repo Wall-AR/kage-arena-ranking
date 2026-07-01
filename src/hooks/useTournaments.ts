@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface Tournament {
   id: string;
@@ -118,29 +119,113 @@ export const useTournamentDisputes = (tournamentId?: string) => {
 
 export const useCreateTournament = () => {
   const { toast } = useToast();
+  const { currentPlayer } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (tournamentData: Partial<Tournament>) => {
-      const { data, error } = await supabase
-        .from("tournaments")
-        .insert([tournamentData as any])
-        .select()
-        .single();
+      if (!currentPlayer?.id) throw new Error("Faca login para criar torneios.");
+      if (!currentPlayer.is_ranked && !currentPlayer.is_moderator && !currentPlayer.is_admin) {
+        throw new Error("Solicite e conclua sua avaliacao antes de criar torneios.");
+      }
+
+      const { data, error } = await supabase.rpc("create_tournament_request", {
+        p_name: tournamentData.name || "",
+        p_description: tournamentData.description || null,
+        p_image_url: tournamentData.image_url || null,
+        p_tournament_type: tournamentData.tournament_type || "single_elimination",
+        p_max_participants: tournamentData.max_participants || 16,
+        p_registration_start: tournamentData.registration_start || null,
+        p_registration_end: tournamentData.registration_end || null,
+        p_tournament_start: tournamentData.tournament_start || null,
+        p_check_in_start: tournamentData.check_in_start || null,
+        p_check_in_end: tournamentData.check_in_end || null,
+        p_min_rank: tournamentData.min_rank || null,
+        p_max_rank: tournamentData.max_rank || null,
+        p_require_top_character: tournamentData.require_top_character || false,
+        p_required_character: tournamentData.required_character || null,
+        p_rules_text: tournamentData.rules_text || null,
+      });
 
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
-        title: "Torneio criado!",
-        description: "O torneio foi criado com sucesso.",
+        title: data?.status === "pending_approval" ? "Torneio enviado!" : "Torneio criado!",
+        description:
+          data?.status === "pending_approval"
+            ? "Um moderador precisa aprovar antes das inscricoes abrirem."
+            : "O torneio ja esta com inscricoes abertas.",
       });
       queryClient.invalidateQueries({ queryKey: ["tournaments"] });
     },
     onError: (error: Error) => {
       toast({
         title: "Erro ao criar torneio",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useApproveTournament = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (tournamentId: string) => {
+      const { data, error } = await supabase.rpc("approve_tournament", {
+        p_tournament_id: tournamentId,
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Torneio aprovado!",
+        description: `${data?.name || "Torneio"} abriu inscricoes.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["tournaments"] });
+      queryClient.invalidateQueries({ queryKey: ["tournament"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao aprovar torneio",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+export const useRejectTournament = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ tournamentId, reason }: { tournamentId: string; reason?: string }) => {
+      const { data, error } = await supabase.rpc("reject_tournament", {
+        p_tournament_id: tournamentId,
+        p_reason: reason || null,
+      });
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Torneio recusado",
+        description: `${data?.name || "Torneio"} foi marcado como recusado.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["tournaments"] });
+      queryClient.invalidateQueries({ queryKey: ["tournament"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao recusar torneio",
         description: error.message,
         variant: "destructive",
       });
@@ -184,10 +269,16 @@ export const useUpdateTournament = () => {
 
 export const useRegisterForTournament = () => {
   const { toast } = useToast();
+  const { currentPlayer } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ tournamentId, playerId }: { tournamentId: string; playerId: string }) => {
+      if (!currentPlayer?.id) throw new Error("Faca login para se inscrever.");
+      if (!currentPlayer.is_ranked) {
+        throw new Error("Solicite e conclua sua avaliacao antes de entrar em torneios.");
+      }
+
       const { data, error } = await supabase
         .from("tournament_participants")
         .insert({
@@ -267,6 +358,8 @@ export const useReportTournamentMatch = () => {
       evidenceUrl,
       notes,
       reportedBy,
+      player1Character,
+      player2Character,
     }: {
       matchId: string;
       winnerId: string;
@@ -275,6 +368,8 @@ export const useReportTournamentMatch = () => {
       evidenceUrl?: string;
       notes?: string;
       reportedBy?: string;
+      player1Character?: string;
+      player2Character?: string;
     }) => {
       const { data, error } = await supabase
         .from("tournament_matches")
@@ -286,6 +381,8 @@ export const useReportTournamentMatch = () => {
           status: "awaiting_confirmation",
           evidence_url: evidenceUrl,
           notes: notes,
+          player1_character: player1Character || null,
+          player2_character: player2Character || null,
         })
         .eq("id", matchId)
         .select()

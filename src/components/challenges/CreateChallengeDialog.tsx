@@ -48,7 +48,7 @@ export const CreateChallengeDialog = ({ children }: CreateChallengeDialogProps) 
       if (error) throw error;
       return data;
     },
-    enabled: open && !!currentPlayer?.id,
+    enabled: open && !!currentPlayer?.id && currentPlayer?.is_ranked === true,
   });
 
   const handleCreateChallenge = () => {

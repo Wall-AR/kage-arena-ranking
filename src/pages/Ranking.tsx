@@ -22,7 +22,9 @@ const Ranking = () => {
   // Filtros de busca e categoria
   const filteredPlayers = allPlayers.filter(player => {
     const matchesSearch = player.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRank = selectedRank === "all" || player.rank === selectedRank;
+    const playerRank = player.rank_level || player.rank;
+    const matchesRank = selectedRank === "all" || 
+      (selectedRank === "Kage" ? Boolean(player.kage_title) : playerRank === selectedRank);
     return matchesSearch && matchesRank;
   });
 
@@ -66,7 +68,7 @@ const Ranking = () => {
             </div>
             <div className="text-center">
               <div className="font-ninja text-2xl font-bold text-ninja-jounin">
-                {isLoading ? <Skeleton className="h-8 w-12 mx-auto" /> : allPlayers.filter(p => p.rank === "Kage").length}
+                {isLoading ? <Skeleton className="h-8 w-12 mx-auto" /> : allPlayers.filter(p => p.kage_title).length}
               </div>
               <div className="text-sm text-muted-foreground">Kages Ativos</div>
             </div>

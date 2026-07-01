@@ -1,73 +1,65 @@
-# Welcome to your Lovable project
+# Kage Arena Ranking
 
-## Project info
+Portal competitivo para o grupo de Naruto Shippuden Ultimate Ninja 5.
 
-**URL**: https://lovable.dev/projects/a644dce4-8198-43d9-bebb-c754720bf6ad
+O projeto controla ranking de jogadores, avaliacoes, desafios, torneios, perfis, banners e rankings por personagem. A base nasceu no Lovable, mas a manutencao principal agora fica neste repositorio.
 
-## How can I edit this code?
+## Stack
 
-There are several ways of editing your application.
+- React
+- Vite
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Supabase
+- Netlify
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/a644dce4-8198-43d9-bebb-c754720bf6ad) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Desenvolvimento local
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+O app roda por padrao em:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```txt
+http://localhost:8080
+```
 
-**Use GitHub Codespaces**
+## Variaveis de ambiente
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Use `.env.example` como referencia:
 
-## What technologies are used for this project?
+```txt
+VITE_SUPABASE_PROJECT_ID=
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_ENABLE_GOOGLE_AUTH=false
+```
 
-This project is built with:
+## Build
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```sh
+npm run build
+```
 
-## How can I deploy this project?
+O resultado de producao fica em `dist`.
 
-Simply open [Lovable](https://lovable.dev/projects/a644dce4-8198-43d9-bebb-c754720bf6ad) and click on Share -> Publish.
+## Publicacao
 
-## Can I connect a custom domain to my Lovable project?
+O projeto esta preparado para Netlify via `netlify.toml`.
 
-Yes, you can!
+Configuracao esperada:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Build command: `npm run build`
+- Publish directory: `dist`
+- SPA fallback: todas as rotas apontam para `index.html`
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Dominio planejado:
+
+```txt
+https://kage-arena-ranking.netlify.app
+```
+
+Depois da publicacao, esse dominio precisa estar liberado no Supabase Auth em Site URL e Redirect URLs.

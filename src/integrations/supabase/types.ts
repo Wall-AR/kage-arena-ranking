@@ -1410,8 +1410,10 @@ export type Database = {
           next_match_id: string | null
           notes: string | null
           played_at: string | null
+          player1_character: string | null
           player1_id: string | null
           player1_score: number | null
+          player2_character: string | null
           player2_id: string | null
           player2_score: number | null
           reported_by: string | null
@@ -1434,8 +1436,10 @@ export type Database = {
           next_match_id?: string | null
           notes?: string | null
           played_at?: string | null
+          player1_character?: string | null
           player1_id?: string | null
           player1_score?: number | null
+          player2_character?: string | null
           player2_id?: string | null
           player2_score?: number | null
           reported_by?: string | null
@@ -1458,8 +1462,10 @@ export type Database = {
           next_match_id?: string | null
           notes?: string | null
           played_at?: string | null
+          player1_character?: string | null
           player1_id?: string | null
           player1_score?: number | null
+          player2_character?: string | null
           player2_id?: string | null
           player2_score?: number | null
           reported_by?: string | null
@@ -1715,9 +1721,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_evaluation: {
+        Args: { p_evaluation_id: string }
+        Returns: Json
+      }
       advance_tournament_winner: {
         Args: { p_match_id: string; p_winner_id: string }
         Returns: undefined
+      }
+      approve_tournament: {
+        Args: { p_tournament_id: string }
+        Returns: Database["public"]["Tables"]["tournaments"]["Row"]
+      }
+      calculate_match_point_delta: {
+        Args: {
+          p_winner_points: number
+          p_loser_points: number
+          p_recent_pair_matches?: number
+        }
+        Returns: Json
       }
       can_update_profile_settings: {
         Args: { user_id: string }
@@ -1818,6 +1840,26 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_tournament_request: {
+        Args: {
+          p_name: string
+          p_description: string | null
+          p_image_url: string | null
+          p_tournament_type: string
+          p_max_participants: number
+          p_registration_start: string | null
+          p_registration_end: string | null
+          p_tournament_start: string | null
+          p_check_in_start: string | null
+          p_check_in_end: string | null
+          p_min_rank: string | null
+          p_max_rank: string | null
+          p_require_top_character: boolean
+          p_required_character: string | null
+          p_rules_text: string | null
+        }
+        Returns: Database["public"]["Tables"]["tournaments"]["Row"]
+      }
       dispute_challenge_result: {
         Args: { p_challenge_id: string; p_reason: string }
         Returns: {
@@ -1858,6 +1900,10 @@ export type Database = {
         Args: { tournament_uuid: string }
         Returns: undefined
       }
+      ensure_player_profile: {
+        Args: never
+        Returns: Json
+      }
       expire_old_challenges: { Args: never; Returns: number }
       finalize_tournament: {
         Args: { tournament_uuid: string }
@@ -1868,6 +1914,14 @@ export type Database = {
         Returns: undefined
       }
       get_initial_points_for_rank: {
+        Args: { rank_name: string }
+        Returns: number
+      }
+      get_rank_floor: {
+        Args: { rank_name: string }
+        Returns: number
+      }
+      get_rank_weight: {
         Args: { rank_name: string }
         Returns: number
       }
@@ -1893,6 +1947,10 @@ export type Database = {
       redeem_code: {
         Args: { p_code_text: string; p_player_id: string }
         Returns: Json
+      }
+      reject_tournament: {
+        Args: { p_tournament_id: string; p_reason?: string | null }
+        Returns: Database["public"]["Tables"]["tournaments"]["Row"]
       }
       report_challenge_result: {
         Args: {
@@ -1935,6 +1993,22 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      publish_evaluation_result: {
+        Args: {
+          p_evaluation_id: string
+          p_scores: Json
+          p_initial_rank: string
+          p_summary: string
+          p_tip_1: string
+          p_tip_2: string
+          p_tip_3: string
+        }
+        Returns: Json
+      }
+      request_evaluation: {
+        Args: { p_message: string }
+        Returns: Json
       }
       set_initial_admin: {
         Args: { target_user_id: string }

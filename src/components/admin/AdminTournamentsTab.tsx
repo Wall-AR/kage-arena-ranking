@@ -90,7 +90,7 @@ export function AdminTournamentsTab() {
 
       toast({
         title: "Status atualizado!",
-        description: `Torneio agora está ${status === 'active' ? 'ativo' : status === 'completed' ? 'finalizado' : status}.`,
+        description: `Torneio agora esta ${status === 'in_progress' ? 'ativo' : status === 'completed' ? 'finalizado' : status}.`,
       });
 
       fetchTournaments();
@@ -139,11 +139,15 @@ export function AdminTournamentsTab() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case 'pending_approval':
+        return <Badge className="bg-yellow-500/20 text-yellow-700">Aguardando aprovacao</Badge>;
       case 'registration':
         return <Badge className="bg-blue-500/20 text-blue-700">Inscrições</Badge>;
       case 'check_in':
         return <Badge className="bg-yellow-500/20 text-yellow-700">Check-in</Badge>;
+      case 'in_progress':
       case 'active':
+      case 'ongoing':
         return <Badge className="bg-green-500/20 text-green-700">Em andamento</Badge>;
       case 'completed':
         return <Badge className="bg-gray-500/20 text-gray-700">Finalizado</Badge>;
@@ -241,7 +245,7 @@ export function AdminTournamentsTab() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => updateTournamentStatus(tournament.id, 'active')}
+                            onClick={() => updateTournamentStatus(tournament.id, 'in_progress')}
                             disabled={actionLoading === tournament.id}
                             className="text-green-600"
                           >
@@ -250,7 +254,7 @@ export function AdminTournamentsTab() {
                           </Button>
                         )}
 
-                        {tournament.status === 'active' && (
+                        {['in_progress', 'active', 'ongoing'].includes(tournament.status) && (
                           <Button
                             size="sm"
                             variant="outline"

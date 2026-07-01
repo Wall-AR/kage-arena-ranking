@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useQuery } from '@tanstack/react-query';
+import type { Tables } from '@/integrations/supabase/types';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -18,13 +19,24 @@ export function useAuth() {
         .from("players")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Erro ao buscar player atual:", error);
         return null;
       }
-      return data;
+
+      if (data) return data;
+
+      const { data: ensuredPlayer, error: ensureError } = await supabase
+        .rpc("ensure_player_profile");
+
+      if (ensureError) {
+        console.error("Erro ao criar perfil seguro:", ensureError);
+        return null;
+      }
+
+      return ensuredPlayer as Tables<"players">;
     },
     enabled: !!user?.id,
   });

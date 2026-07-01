@@ -18,10 +18,10 @@ export const StudentsTab = ({ evaluatorId }: StudentsTabProps) => {
   const getRankColor = (rank: string) => {
     const colors: { [key: string]: string } = {
       'Genin': 'bg-slate-500',
-      'Chunnin': 'bg-green-500',
-      'Jounnin': 'bg-blue-500',
+      'Chunin': 'bg-green-500',
+      'Jounin': 'bg-blue-500',
       'Anbu': 'bg-purple-500',
-      'Sanin': 'bg-orange-500',
+      'Sannin': 'bg-orange-500',
       'Kage': 'bg-red-500'
     };
     return colors[rank] || 'bg-gray-500';

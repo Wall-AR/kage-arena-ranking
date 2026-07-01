@@ -12,6 +12,7 @@ import Navigation from "@/components/ui/navigation";
 import { Clock, User, MessageSquare, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PostEvaluationResults from "@/components/evaluations/PostEvaluationResults";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Evaluations() {
   const { user } = useAuth();
@@ -19,9 +20,10 @@ export default function Evaluations() {
   const { pendingEvaluations, acceptedEvaluations, acceptEvaluation, loading, loadingAccepted } = useEvaluations();
   const [accepting, setAccepting] = useState<string | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Verificar se o usuário é moderador
-  if (!currentPlayer?.is_moderator) {
+  if (!currentPlayer?.is_moderator && !currentPlayer?.is_admin) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
@@ -33,16 +35,6 @@ export default function Evaluations() {
             <p className="text-muted-foreground">
               Você precisa ser um moderador para acessar esta página.
             </p>
-            <div className="mt-4 p-4 bg-gray-100 rounded text-left text-sm max-w-md mx-auto">
-              <h3 className="font-bold">Debug Info:</h3>
-              <p>User ID: {user?.id}</p>
-              <p>User Email: {user?.email}</p>
-              <p>Current Player ID: {currentPlayer?.id}</p>
-              <p>Current Player Name: {currentPlayer?.name}</p>
-              <p>Is Admin: {currentPlayer?.is_admin ? 'true' : 'false'}</p>
-              <p>Is Moderator: {currentPlayer?.is_moderator ? 'true' : 'false'}</p>
-              <p>Role: {currentPlayer?.role}</p>
-            </div>
           </div>
         </div>
       </div>
@@ -286,8 +278,10 @@ export default function Evaluations() {
                           <PostEvaluationResults 
                             evaluation={evaluation} 
                             onResultsPosted={() => {
-                              // Recarregar dados após postar resultados
-                              window.location.reload();
+                              queryClient.invalidateQueries({ queryKey: ['accepted-evaluations'] });
+                              queryClient.invalidateQueries({ queryKey: ['pending-evaluations'] });
+                              queryClient.invalidateQueries({ queryKey: ['ranked-players'] });
+                              queryClient.invalidateQueries({ queryKey: ['player-profile'] });
                             }} 
                           />
                         </div>

@@ -1,5 +1,5 @@
-// Dados completos dos personagens para a Academia
-// Lista de 66 personagens do jogo Naruto Ultimate Ninja 5
+﻿// Dados completos dos personagens para a Academia
+// Lista de 65 personagens do jogo Naruto Ultimate Ninja 5
 
 export interface CharacterMove {
   id: string;
@@ -36,7 +36,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_001",
     name: "Naruto Uzumaki",
     tier: "S+",
-    gif: "/__l5e/assets-v1/f44bf9bf-5192-4363-bdae-06b6102594c1/naruto-pts.png",
+    gif: "/characters/naruto-pts.png",
     attributes: { strength: 8, speed: 7, technique: 9, defense: 6, mobility: 8, versatility: 9 },
     description: "O jovem Naruto possui um kit versátil com clones de sombra e Rasengan. Excelente em mixups e pressão constante. Ideal para jogadores que gostam de agressão controlada com múltiplas opções de ataque.",
     moves: [
@@ -53,7 +53,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_002",
     name: "Naruto Shippūden",
     tier: "S+",
-    gif: "/__l5e/assets-v1/b2bf9509-37d6-4f69-8d6e-c4608356d4b9/naruto-ts.png",
+    gif: "/characters/naruto-ts.png",
     attributes: { strength: 9, speed: 8, technique: 10, defense: 7, mobility: 9, versatility: 10 },
     description: "Naruto mais maduro com Rasen Shuriken e modo Sennin. Arsenal completo para todas as situações. Top tier absoluto nas mãos certas.",
     moves: [
@@ -72,7 +72,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_003",
     name: "Sasuke Uchiha",
     tier: "S",
-    gif: "/__l5e/assets-v1/5a192b1c-13b2-4cfd-8dbf-50659c6328d9/sasuke-pts.png",
+    gif: "/characters/sasuke-pts.png",
     attributes: { strength: 7, speed: 9, technique: 9, defense: 5, mobility: 9, versatility: 8 },
     description: "O último dos Uchiha combina velocidade mortal com técnicas poderosas. Sharingan permite counters precisos. Chidori oferece alto dano em punishes.",
     moves: [
@@ -89,7 +89,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_004",
     name: "Sasuke Shippūden",
     tier: "S+",
-    gif: "/__l5e/assets-v1/84c81176-b71d-4437-b3ce-56c3c4685f74/sasuke-ts.png",
+    gif: "/characters/sasuke-ts.png",
     attributes: { strength: 8, speed: 10, technique: 10, defense: 6, mobility: 10, versatility: 9 },
     description: "Sasuke no auge com Mangekyo Sharingan. Amaterasu, Susanoo e Kirin formam arsenal devastador. Mobilidade extrema e dano consistente.",
     moves: [
@@ -106,7 +106,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_005",
     name: "Itachi Uchiha",
     tier: "S",
-    gif: "/__l5e/assets-v1/95f1088b-69dd-43d5-964b-8dc7bda83c7b/itachi.png",
+    gif: "/characters/itachi.png",
     attributes: { strength: 6, speed: 8, technique: 10, defense: 6, mobility: 7, versatility: 9 },
     description: "Gênio tático com arsenal devastador. Tsukuyomi controla mente, Amaterasu queima tudo, Susanoo protege. Domina através de leitura e timing perfeito.",
     moves: [
@@ -123,7 +123,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_006",
     name: "Minato Namikaze",
     tier: "S",
-    gif: "/__l5e/assets-v1/36516ba1-c50d-4efb-b803-b960470348b4/4-hokage.png",
+    gif: "/characters/4-hokage.png",
     attributes: { strength: 7, speed: 10, technique: 10, defense: 5, mobility: 10, versatility: 9 },
     description: "O Relâmpago Amarelo de Konoha. Velocidade incomparável com Hiraishin. Rasengan preciso e teleporte constante. Domina neutral e punishes.",
     moves: [
@@ -142,7 +142,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_007",
     name: "Kakashi Hatake",
     tier: "A+",
-    gif: "/__l5e/assets-v1/f18a2dfb-e57d-4e84-9f0e-c31ec30fedd6/kakashi.png",
+    gif: "/characters/kakashi.png",
     attributes: { strength: 7, speed: 8, technique: 10, defense: 7, mobility: 7, versatility: 10 },
     description: "O Ninja Copiador possui toolkit mais versátil do jogo. Sharingan, Raikiri e diversos jutsus copiados. Excelente em neutral e footsies.",
     moves: [
@@ -159,7 +159,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_008",
     name: "Jiraiya",
     tier: "A+",
-    gif: "/__l5e/assets-v1/1f93b117-f0c4-44ee-95ce-560f4cf1063f/jiraya.png",
+    gif: "/characters/jiraya.png",
     attributes: { strength: 8, speed: 6, technique: 9, defense: 7, mobility: 6, versatility: 9 },
     description: "O Sannin Sapo com arsenal massivo. Rasengan, invocações e modo Sennin. Excelente em zoning e setups elaborados. Recompensa paciência.",
     moves: [
@@ -176,7 +176,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_009",
     name: "Tsunade",
     tier: "A+",
-    gif: "/__l5e/assets-v1/a5e89723-646b-467d-82ff-de5222c10342/tsunade.png",
+    gif: "/characters/tsunade.png",
     attributes: { strength: 10, speed: 6, technique: 8, defense: 9, mobility: 5, versatility: 7 },
     description: "A Sannin Médica com força monstruosa. Golpes devastadores que quebram guarda. Regeneração permite trades favoráveis. Tank com explosão.",
     moves: [
@@ -193,7 +193,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_010",
     name: "Orochimaru",
     tier: "A+",
-    gif: "/__l5e/assets-v1/37d5c933-4408-4190-9e23-1ba898d5eb63/orochimaru.png",
+    gif: "/characters/orochimaru.png",
     attributes: { strength: 6, speed: 7, technique: 10, defense: 6, mobility: 8, versatility: 10 },
     description: "O Sannin das Cobras com kit único. Alcance extremo, invocações e jutsus proibidos. Zoning master que frustra approach.",
     moves: [
@@ -210,7 +210,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_011",
     name: "Hashirama Senju",
     tier: "S",
-    gif: "/__l5e/assets-v1/9aad9df8-a5d5-4fa7-90fc-7d4e7da25a96/1-hokage.png",
+    gif: "/characters/1-hokage.png",
     attributes: { strength: 10, speed: 7, technique: 10, defense: 9, mobility: 6, versatility: 10 },
     description: "O Deus dos Shinobi. Wood Release domina o cenário com controle de área incomparável. Força bruta combinada com versatilidade técnica.",
     moves: [
@@ -227,7 +227,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_012",
     name: "Tobirama Senju",
     tier: "A+",
-    gif: "/__l5e/assets-v1/dadeeedf-ea4f-4992-bf39-9498a9e32eb1/2-hokage.png",
+    gif: "/characters/2-hokage.png",
     attributes: { strength: 8, speed: 9, technique: 10, defense: 7, mobility: 9, versatility: 9 },
     description: "O Segundo Hokage. Water Release devastador e Hiraishin original. Técnico com excelente controle de espaço e mobilidade.",
     moves: [
@@ -244,7 +244,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_013",
     name: "Hiruzen Sarutobi",
     tier: "A",
-    gif: "/__l5e/assets-v1/4a79f336-e90a-4dbb-81a3-58d23d0b1f91/3-hokage.png",
+    gif: "/characters/3-hokage.png",
     attributes: { strength: 7, speed: 6, technique: 10, defense: 7, mobility: 6, versatility: 10 },
     description: "O Professor. Conhece todos os jutsus de Konoha. Kit extremamente versátil mas requer alto conhecimento. Jack of all trades.",
     moves: [
@@ -263,7 +263,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_014",
     name: "Rock Lee",
     tier: "A",
-    gif: "/__l5e/assets-v1/b3411b0b-507b-4a73-91f0-21674f5e33bb/lee-pts.png",
+    gif: "/characters/lee-pts.png",
     attributes: { strength: 9, speed: 10, technique: 6, defense: 5, mobility: 10, versatility: 5 },
     description: "Velocidade pura e taijutsu devastador. Não usa ninjutsu mas compensa com agilidade extrema. Rushdown implacável que não dá respiro.",
     moves: [
@@ -280,7 +280,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_015",
     name: "Rock Lee Modo Punho Zonzo",
     tier: "A+",
-    gif: "/__l5e/assets-v1/ba41e928-9265-4662-ba26-0530badb89c1/lee-lv2.png",
+    gif: "/characters/lee-lv2.png",
     attributes: { strength: 8, speed: 10, technique: 8, defense: 4, mobility: 10, versatility: 7 },
     description: "Lee bêbado com movimentos imprevisíveis. Stance única que confunde oponentes. Alta skill cap mas extremamente recompensador.",
     moves: [
@@ -297,7 +297,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_016",
     name: "Rock Lee Shippūden",
     tier: "A",
-    gif: "/__l5e/assets-v1/08aaddbc-aae2-42b3-a4fa-003916930e36/lee-ts.png",
+    gif: "/characters/lee-ts.png",
     attributes: { strength: 9, speed: 10, technique: 7, defense: 6, mobility: 10, versatility: 6 },
     description: "Lee mais maduro com taijutsu refinado. Velocidade mantida com mais consistência. Menos volátil que versões anteriores.",
     moves: [
@@ -314,7 +314,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_017",
     name: "Neji Hyuuga",
     tier: "A",
-    gif: "/__l5e/assets-v1/a84ed128-1c5f-45c9-b5dc-18d50c2b7384/neji-pts.png",
+    gif: "/characters/neji-pts.png",
     attributes: { strength: 7, speed: 8, technique: 9, defense: 8, mobility: 7, versatility: 7 },
     description: "Gênio Hyuuga com Byakugan. Gentle Fist fecha tenketsu e drena chakra. Rotation oferece defesa perfeita. Técnico e preciso.",
     moves: [
@@ -331,7 +331,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_018",
     name: "Neji Hyuuga Shippūden",
     tier: "A+",
-    gif: "/__l5e/assets-v1/579c9df2-9b35-46b9-949b-b73ae6104bbd/neji-ts.png",
+    gif: "/characters/neji-ts.png",
     attributes: { strength: 8, speed: 8, technique: 10, defense: 8, mobility: 7, versatility: 8 },
     description: "Neji amadurecido com técnicas refinadas. Gentle Fist mais poderoso e Rotation melhorado. Mais completo que versão original.",
     moves: [
@@ -348,7 +348,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_019",
     name: "Gaara",
     tier: "A",
-    gif: "/__l5e/assets-v1/f8700301-0439-4dbb-b944-e0da8937808b/gaara-pts.png",
+    gif: "/characters/gaara-pts.png",
     attributes: { strength: 6, speed: 5, technique: 8, defense: 10, mobility: 6, versatility: 8 },
     description: "Mestre da defesa absoluta. Areia protege automaticamente e contra-ataca. Excelente em zoning e controle de espaço.",
     moves: [
@@ -365,7 +365,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_020",
     name: "Gaara Shippūden",
     tier: "A+",
-    gif: "/__l5e/assets-v1/45930602-e0a3-4a35-b4a1-db721cd5bd7f/gaara-ts.png",
+    gif: "/characters/gaara-ts.png",
     attributes: { strength: 7, speed: 6, technique: 9, defense: 10, mobility: 7, versatility: 9 },
     description: "Kazekage com controle de areia refinado. Mais versátil e técnico. Defesa mantida com mais opções ofensivas.",
     moves: [
@@ -382,7 +382,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_021",
     name: "Might Guy",
     tier: "A+",
-    gif: "/__l5e/assets-v1/945ab205-3fa6-4d9a-afb8-5f853c70aa74/guy.png",
+    gif: "/characters/guy.png",
     attributes: { strength: 10, speed: 9, technique: 7, defense: 6, mobility: 9, versatility: 6 },
     description: "Mestre do Taijutsu e dos 8 Portões. Lee mais forte e consistente. Explosivo com dano absurdo quando ativa portões.",
     moves: [
@@ -401,7 +401,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_022",
     name: "Sakura Haruno",
     tier: "B+",
-    gif: "/__l5e/assets-v1/681f6b4b-6feb-4e66-b916-394b8b417570/sakura-pts.png",
+    gif: "/characters/sakura-pts.png",
     attributes: { strength: 6, speed: 6, technique: 7, defense: 5, mobility: 6, versatility: 6 },
     description: "Sakura jovem com kit básico. Socos fortes mas kit limitado. Boa para iniciantes aprenderem fundamentos.",
     moves: [
@@ -418,7 +418,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_023",
     name: "Sakura Haruno Shippūden",
     tier: "A",
-    gif: "/__l5e/assets-v1/6680694f-191d-48c0-a4ae-97d8b4b812b6/sakura-ts.png",
+    gif: "/characters/sakura-ts.png",
     attributes: { strength: 9, speed: 7, technique: 8, defense: 7, mobility: 6, versatility: 7 },
     description: "Sakura treinada por Tsunade. Força monstruosa com cura. Mais completa e viável competitivamente.",
     moves: [
@@ -435,7 +435,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_024",
     name: "Shikamaru Nara",
     tier: "B+",
-    gif: "/__l5e/assets-v1/7bc6374d-86a4-458b-a4f9-80aa79a0e89a/shikamaru-pts.png",
+    gif: "/characters/shikamaru-pts.png",
     attributes: { strength: 4, speed: 5, technique: 10, defense: 5, mobility: 5, versatility: 8 },
     description: "Gênio estratégico com Shadow Possession. Baixo dano mas controle extremo. Recompensa paciência e leitura.",
     moves: [
@@ -452,7 +452,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_025",
     name: "Shikamaru Nara Shippūden",
     tier: "A",
-    gif: "/__l5e/assets-v1/606b84d6-5524-47fc-a91f-682645bdd8d3/shikamaru-ts.png",
+    gif: "/characters/shikamaru-ts.png",
     attributes: { strength: 5, speed: 6, technique: 10, defense: 6, mobility: 6, versatility: 9 },
     description: "Shikamaru mais experiente. Sombras mais versáteis e estratégias refinadas. Melhor em todos os aspectos.",
     moves: [
@@ -469,7 +469,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_026",
     name: "Chouji Akimichi",
     tier: "B",
-    gif: "/__l5e/assets-v1/4a2fae14-f756-45bd-8006-be7b8bc9c14e/chouji-pts.png",
+    gif: "/characters/chouji-pts.png",
     attributes: { strength: 9, speed: 4, technique: 5, defense: 8, mobility: 4, versatility: 5 },
     description: "Tank pesado com expansão corporal. Lento mas forte. Bom para quem gosta de trades e pressão física.",
     moves: [
@@ -486,7 +486,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_027",
     name: "Chouji Akimichi Shippūden",
     tier: "B+",
-    gif: "/__l5e/assets-v1/0a69082f-86c7-4cc7-b1d3-bb93a083ae6d/chouji-ts.png",
+    gif: "/characters/chouji-ts.png",
     attributes: { strength: 10, speed: 5, technique: 6, defense: 9, mobility: 5, versatility: 6 },
     description: "Chouji mais forte com Butterfly Mode. Ainda lento mas dano compensar. Tank que pode virar partidas.",
     moves: [
@@ -503,7 +503,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_028",
     name: "Ino Yamanaka",
     tier: "C+",
-    gif: "/__l5e/assets-v1/68252e66-e1f6-4b95-a39d-7fc249a8f1c8/ino-pts.png",
+    gif: "/characters/ino-pts.png",
     attributes: { strength: 4, speed: 6, technique: 7, defense: 4, mobility: 6, versatility: 6 },
     description: "Especialista em jutsu mental. Mind Transfer arriscado mas devastador. Tier baixo mas gimmick forte.",
     moves: [
@@ -520,7 +520,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_029",
     name: "Ino Yamanaka Shippūden",
     tier: "B",
-    gif: "/__l5e/assets-v1/8264457f-b7d6-49da-8148-1415af3bee2a/ino-ts.png",
+    gif: "/characters/ino-ts.png",
     attributes: { strength: 5, speed: 7, technique: 8, defense: 5, mobility: 7, versatility: 7 },
     description: "Ino melhorada com habilidades médicas. Mind Transfer mais seguro. Mais viável que versão original.",
     moves: [
@@ -537,7 +537,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_030",
     name: "Asuma Sarutobi",
     tier: "B+",
-    gif: "/__l5e/assets-v1/04dab654-5e33-4e0c-84ae-a6469ff76759/assuma.png",
+    gif: "/characters/assuma.png",
     attributes: { strength: 8, speed: 7, technique: 7, defense: 7, mobility: 6, versatility: 7 },
     description: "Jounin equilibrado com chakra blades. Sólido em todas as áreas sem brilhar em nenhuma. Bom para fundamentos.",
     moves: [
@@ -554,7 +554,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_031",
     name: "Shino Aburame",
     tier: "B",
-    gif: "/__l5e/assets-v1/3e5a5091-87bb-4712-8ff8-2a0e1fe6a681/shino-pts.png",
+    gif: "/characters/shino-pts.png",
     attributes: { strength: 5, speed: 5, technique: 8, defense: 6, mobility: 5, versatility: 7 },
     description: "Controlador de insetos único. Drena chakra e cria armadilhas. Jogo paciênte de atrito.",
     moves: [
@@ -571,7 +571,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_032",
     name: "Shino Aburame Shippūden",
     tier: "B+",
-    gif: "/__l5e/assets-v1/8f66f6bf-44eb-4a60-b228-b1268bd7531f/shino-ts.png",
+    gif: "/characters/shino-ts.png",
     attributes: { strength: 6, speed: 6, technique: 9, defense: 7, mobility: 6, versatility: 8 },
     description: "Shino mais poderoso. Insetos mais versáteis e controle aprimorado. Melhor em zoning.",
     moves: [
@@ -588,7 +588,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_033",
     name: "Kiba Inuzuka",
     tier: "B",
-    gif: "/__l5e/assets-v1/d72c0d11-c1dc-4800-82a8-1cd2e6d8de09/kiba-pts.png",
+    gif: "/characters/kiba-pts.png",
     attributes: { strength: 7, speed: 8, technique: 5, defense: 5, mobility: 8, versatility: 5 },
     description: "Rushdown com Akamaru. Rápido mas previsível. Bom para iniciantes que gostam de agressão.",
     moves: [
@@ -605,7 +605,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_034",
     name: "Kiba Inuzuka Shippūden",
     tier: "B+",
-    gif: "/__l5e/assets-v1/e70bda28-06ce-453c-ab81-c9763b737ecb/kiba-ts.png",
+    gif: "/characters/kiba-ts.png",
     attributes: { strength: 8, speed: 9, technique: 6, defense: 6, mobility: 9, versatility: 6 },
     description: "Kiba mais forte com técnicas aprimoradas. Akamaru maior e mais poderoso. Rushdown melhorado.",
     moves: [
@@ -622,7 +622,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_035",
     name: "Hinata Hyuuga",
     tier: "B",
-    gif: "/__l5e/assets-v1/95d784b9-bc66-494f-9cf3-b76c461b339d/hinata-pts.png",
+    gif: "/characters/hinata-pts.png",
     attributes: { strength: 5, speed: 6, technique: 8, defense: 6, mobility: 6, versatility: 6 },
     description: "Gentle Fist tímido. Técnica boa mas menos agressiva que Neji. Defensiva com contra-ataques.",
     moves: [
@@ -639,7 +639,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_036",
     name: "Hinata Hyuuga Shippūden",
     tier: "B+",
-    gif: "/__l5e/assets-v1/3d7c2ef7-6315-40eb-9480-5d0d9ec60b95/hinata-ts.png",
+    gif: "/characters/hinata-ts.png",
     attributes: { strength: 6, speed: 7, technique: 9, defense: 7, mobility: 7, versatility: 7 },
     description: "Hinata mais confiante. Gentle Fist aprimorado com Twin Lions. Mais viável competitivamente.",
     moves: [
@@ -656,7 +656,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_037",
     name: "Kurenai Yuuhi",
     tier: "B",
-    gif: "/__l5e/assets-v1/8c380ef8-6797-4710-81e6-ef31c3e23edc/kurenai.png",
+    gif: "/characters/kurenai.png",
     attributes: { strength: 5, speed: 6, technique: 9, defense: 5, mobility: 6, versatility: 7 },
     description: "Especialista em genjutsu. Ilusões confundem e controlam. Técnica mas frágil.",
     moves: [
@@ -673,7 +673,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_038",
     name: "Tenten",
     tier: "C",
-    gif: "/__l5e/assets-v1/43cdf180-f213-4b3f-af9f-95ceaa259234/tenten-pts.png",
+    gif: "/characters/tenten-pts.png",
     attributes: { strength: 6, speed: 6, technique: 7, defense: 5, mobility: 6, versatility: 6 },
     description: "Especialista em armas. Muitos projéteis mas dano baixo. Zoning fraco comparado a outros.",
     moves: [
@@ -690,7 +690,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_039",
     name: "Tenten Shippūden",
     tier: "C+",
-    gif: "/__l5e/assets-v1/a4e9555c-6551-46d3-a452-6226b60afeaa/tenten-ts.png",
+    gif: "/characters/tenten-ts.png",
     attributes: { strength: 7, speed: 7, technique: 8, defense: 6, mobility: 6, versatility: 7 },
     description: "Tenten com mais arsenal. Armas melhoradas mas ainda tier baixo. Mais opções de zoning.",
     moves: [
@@ -707,7 +707,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_040",
     name: "Kankurou",
     tier: "B",
-    gif: "/__l5e/assets-v1/d5d7ab94-e72d-4e33-9084-b7a1228fdea0/kankuro-pts.png",
+    gif: "/characters/kankuro-pts.png",
     attributes: { strength: 6, speed: 5, technique: 8, defense: 6, mobility: 5, versatility: 8 },
     description: "Marionetista com Crow. Controle à distância único. Curva de aprendizado alta.",
     moves: [
@@ -724,7 +724,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_041",
     name: "Kankurou Shippūden",
     tier: "B+",
-    gif: "/__l5e/assets-v1/34cbaf69-25a5-440f-a201-c76a054fad10/kankuro-ts.png",
+    gif: "/characters/kankuro-ts.png",
     attributes: { strength: 7, speed: 6, technique: 9, defense: 7, mobility: 6, versatility: 9 },
     description: "Kankurou com múltiplas marionetes. Sasori's puppets adicionam versatilidade. Melhor controle.",
     moves: [
@@ -741,7 +741,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_042",
     name: "Temari",
     tier: "B+",
-    gif: "/__l5e/assets-v1/bac7f523-b95f-4725-b03a-d88a2739966a/temari-pts.png",
+    gif: "/characters/temari-pts.png",
     attributes: { strength: 6, speed: 6, technique: 8, defense: 6, mobility: 6, versatility: 7 },
     description: "Controladora de vento com leque gigante. Zoning de longo alcance. Anti-air forte.",
     moves: [
@@ -758,7 +758,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_043",
     name: "Temari Shippūden",
     tier: "A",
-    gif: "/__l5e/assets-v1/229cdaa2-7736-4e51-bd3a-15cb8d1928aa/temari-ts.png",
+    gif: "/characters/temari-ts.png",
     attributes: { strength: 7, speed: 7, technique: 9, defense: 7, mobility: 7, versatility: 8 },
     description: "Temari mais poderosa. Ventos mais fortes e controle de área melhorado. Zoning top tier.",
     moves: [
@@ -777,7 +777,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_044",
     name: "Vovó Chiyo",
     tier: "B+",
-    gif: "/__l5e/assets-v1/28dd6097-8708-46ea-b9cb-4261af829b39/reia.png",
+    gif: "/characters/reia.png",
     attributes: { strength: 5, speed: 5, technique: 9, defense: 6, mobility: 5, versatility: 8 },
     description: "Anciã marionetista lendária. Kit técnico com marionetes e antídotos. Requer paciência.",
     moves: [
@@ -794,7 +794,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_045",
     name: "Vovó Chiyo Taijutsu",
     tier: "B",
-    gif: "/__l5e/assets-v1/28dd6097-8708-46ea-b9cb-4261af829b39/reia.png",
+    gif: "/characters/reia.png",
     attributes: { strength: 6, speed: 6, technique: 7, defense: 6, mobility: 6, versatility: 6 },
     description: "Chiyo focada em combate corpo-a-corpo. Menos marionetes, mais socos envenenados.",
     moves: [
@@ -811,7 +811,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_046",
     name: "Vovó Chiyo Mestre das Marionetes",
     tier: "A",
-    gif: "/__l5e/assets-v1/b1eac544-bee3-47be-a90a-28455b43fe38/reia-marionete.png",
+    gif: "/characters/reia-marionete.png",
     attributes: { strength: 5, speed: 5, technique: 10, defense: 7, mobility: 5, versatility: 10 },
     description: "Chiyo no auge do controle de marionetes. Arsenal completo com 10 marionetes.",
     moves: [
@@ -830,7 +830,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_047",
     name: "Kisame Hoshigaki",
     tier: "A",
-    gif: "/__l5e/assets-v1/e56b0876-6200-42df-9b21-f286d79dfd92/kisame.png",
+    gif: "/characters/kisame.png",
     attributes: { strength: 9, speed: 6, technique: 7, defense: 8, mobility: 6, versatility: 7 },
     description: "O Monstro da Névoa. Samehada drena chakra e força bruta massiva. Tank agressivo.",
     moves: [
@@ -847,7 +847,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_048",
     name: "Deidara",
     tier: "A",
-    gif: "/__l5e/assets-v1/cfb89878-2b0a-40ce-ad95-6266d5f2a7f9/deidara.png",
+    gif: "/characters/deidara.png",
     attributes: { strength: 7, speed: 7, technique: 9, defense: 5, mobility: 8, versatility: 8 },
     description: "Artista explosivo com argila. Zoning extremo e mobilidade aérea. Glass cannon técnico.",
     moves: [
@@ -864,7 +864,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_049",
     name: "Sasori",
     tier: "A",
-    gif: "/__l5e/assets-v1/16b8d771-3e42-4486-bc19-498170ac3a89/sasori.png",
+    gif: "/characters/sasori.png",
     attributes: { strength: 6, speed: 6, technique: 10, defense: 7, mobility: 5, versatility: 9 },
     description: "Marionetista supremo. 100 marionetes e corpo próprio de madeira. Controle de área extremo.",
     moves: [
@@ -881,7 +881,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_050",
     name: "Hiruko",
     tier: "B",
-    gif: "/__l5e/assets-v1/4713376b-0ee5-4d27-bf5d-aca89ebce773/sasori-hiruku.png",
+    gif: "/characters/sasori-hiruku.png",
     attributes: { strength: 7, speed: 4, technique: 8, defense: 9, mobility: 4, versatility: 6 },
     description: "Armadura marionete de Sasori. Tanky mas lento. Caudas venenosas para controle.",
     moves: [
@@ -898,7 +898,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_051",
     name: "Terceiro Kazekage",
     tier: "A",
-    gif: "/__l5e/assets-v1/16b8d771-3e42-4486-bc19-498170ac3a89/sasori.png",
+    gif: "/characters/sasori.png",
     attributes: { strength: 8, speed: 6, technique: 10, defense: 7, mobility: 6, versatility: 9 },
     description: "Marionete do Kazekage mais forte. Iron Sand devastador. Controle magnético supremo.",
     moves: [
@@ -917,7 +917,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_052",
     name: "Sai",
     tier: "B+",
-    gif: "/__l5e/assets-v1/8011a4fc-6f76-461e-98b9-8f61c3ea9ae4/sai.png",
+    gif: "/characters/sai.png",
     attributes: { strength: 6, speed: 7, technique: 8, defense: 5, mobility: 8, versatility: 8 },
     description: "Artista ninja da ROOT. Desenhos ganham vida para ataques. Kit único de zoning.",
     moves: [
@@ -934,7 +934,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_053",
     name: "Yamato",
     tier: "A",
-    gif: "/__l5e/assets-v1/b8c4f777-9101-4266-9fd9-01e8a01f83eb/yamato.png",
+    gif: "/characters/yamato.png",
     attributes: { strength: 7, speed: 6, technique: 9, defense: 8, mobility: 6, versatility: 9 },
     description: "Wood Release artificial. Controle de área com madeira. Versátil e defensivo.",
     moves: [
@@ -951,7 +951,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_054",
     name: "Shizune",
     tier: "C+",
-    gif: "/__l5e/assets-v1/7479938a-1214-4727-a949-85a8508766cc/shizune.png",
+    gif: "/characters/shizune.png",
     attributes: { strength: 4, speed: 6, technique: 8, defense: 5, mobility: 6, versatility: 7 },
     description: "Assistente médica com venenos. Suporte com debuffs. Fraca mas útil em matchups específicos.",
     moves: [
@@ -968,7 +968,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_055",
     name: "Kabuto Yakushi",
     tier: "A",
-    gif: "/__l5e/assets-v1/3b0e975c-ac59-4a8d-9dce-fed96a6c42e2/kabuto.png",
+    gif: "/characters/kabuto.png",
     attributes: { strength: 6, speed: 7, technique: 9, defense: 6, mobility: 7, versatility: 9 },
     description: "Ninja médico traidor. Chakra Scalpel e regeneração. Kit técnico de counter-play.",
     moves: [
@@ -987,7 +987,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_056",
     name: "Jiroubou",
     tier: "C",
-    gif: "/__l5e/assets-v1/0b39e6a2-1260-4c4b-84ba-abe501814846/girobo.png",
+    gif: "/characters/girobo.png",
     attributes: { strength: 9, speed: 3, technique: 4, defense: 9, mobility: 3, versatility: 4 },
     description: "Tank do Sound Four. Força bruta mas muito lento. Curse Mark aumenta poder.",
     moves: [
@@ -1004,7 +1004,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_057",
     name: "Kidoumaru",
     tier: "B",
-    gif: "/__l5e/assets-v1/73c5558b-6f92-4fcf-9d16-7e143858a2af/kidomaru.png",
+    gif: "/characters/kidomaru.png",
     attributes: { strength: 6, speed: 6, technique: 8, defense: 5, mobility: 7, versatility: 8 },
     description: "Arqueiro aranha do Sound Four. Zoning com teias e flechas. Kit de controle.",
     moves: [
@@ -1021,7 +1021,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_058",
     name: "Sakon e Ukon",
     tier: "B+",
-    gif: "/__l5e/assets-v1/ac4c149e-d982-4bd7-b249-ea38da5a26d6/sakon.png",
+    gif: "/characters/sakon.png",
     attributes: { strength: 7, speed: 7, technique: 7, defense: 6, mobility: 7, versatility: 7 },
     description: "Gêmeos fundidos. Ataques coordenados e fusão corporal. Kit único de pressão.",
     moves: [
@@ -1038,7 +1038,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_059",
     name: "Tayuya",
     tier: "B",
-    gif: "/__l5e/assets-v1/fc63f4ea-47a5-4342-a422-1f7d3039e603/tayuya.png",
+    gif: "/characters/tayuya.png",
     attributes: { strength: 5, speed: 6, technique: 9, defense: 5, mobility: 6, versatility: 8 },
     description: "Flautista do Sound Four. Genjutsu sonoro e invocações. Controle mental único.",
     moves: [
@@ -1055,7 +1055,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_060",
     name: "Kimimaro",
     tier: "A",
-    gif: "/__l5e/assets-v1/586f2086-561b-4923-91eb-d47add9661c1/kimimaru.png",
+    gif: "/characters/kimimaru.png",
     attributes: { strength: 8, speed: 8, technique: 8, defense: 7, mobility: 8, versatility: 7 },
     description: "Último do clã Kaguya. Manipulação óssea devastadora. Rushdown com defesa integrada.",
     moves: [
@@ -1074,7 +1074,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_061",
     name: "Hanabi Hyuuga",
     tier: "C",
-    gif: "/__l5e/assets-v1/6a4d15ab-0b87-4bb2-907b-2c92537e6e8f/hanabi.png",
+    gif: "/characters/hanabi.png",
     attributes: { strength: 5, speed: 7, technique: 7, defense: 5, mobility: 7, versatility: 5 },
     description: "Jovem Hyuuga. Gentle Fist básico mas promissor. Versão mais fraca de Hinata.",
     moves: [
@@ -1091,7 +1091,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_062",
     name: "Konohamaru",
     tier: "C",
-    gif: "/__l5e/assets-v1/59d494e5-2972-48b8-ab85-683ed3226103/time-kohonomaru.png",
+    gif: "/characters/time-kohonomaru.png",
     attributes: { strength: 4, speed: 6, technique: 5, defense: 4, mobility: 6, versatility: 5 },
     description: "Neto do Terceiro Hokage. Kit básico com Rasengan em desenvolvimento. Low tier mas divertido.",
     moves: [
@@ -1108,7 +1108,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_063",
     name: "Anko Mitarashi",
     tier: "B",
-    gif: "/__l5e/assets-v1/b929b427-cd37-46f0-8d5d-f7baa660351a/anko.png",
+    gif: "/characters/anko.png",
     attributes: { strength: 6, speed: 7, technique: 8, defense: 5, mobility: 7, versatility: 7 },
     description: "Ex-aluna de Orochimaru. Invocação de cobras e jutsus proibidos. Kit agressivo com setups.",
     moves: [
@@ -1125,7 +1125,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_064",
     name: "Haku",
     tier: "B+",
-    gif: "/__l5e/assets-v1/15cb72f5-abc0-43da-97f6-a27bb69e9f47/haku.png",
+    gif: "/characters/haku.png",
     attributes: { strength: 5, speed: 9, technique: 9, defense: 4, mobility: 9, versatility: 7 },
     description: "Kekkei Genkai do gelo. Crystal Ice Mirrors para mobilidade extrema. Glass cannon rápido.",
     moves: [
@@ -1142,7 +1142,7 @@ export const academyCharacters: CharacterData[] = [
     id: "char_065",
     name: "Zabuza Momochi",
     tier: "A",
-    gif: "/__l5e/assets-v1/531d1889-5f08-49bd-9bb2-7db7b1ec4459/zabuza.png",
+    gif: "/characters/zabuza.png",
     attributes: { strength: 9, speed: 7, technique: 7, defense: 7, mobility: 6, versatility: 6 },
     description: "Demônio da Névoa Oculta. Kubikiribōchō devastadora e Silent Killing. Rushdown pesado.",
     moves: [

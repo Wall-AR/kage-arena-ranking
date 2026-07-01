@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const RANKS = ["Unranked", "Genin", "Chunnin", "Jounnin", "Anbu", "Sanin", "Kage"];
+const RANKS = ["Genin", "Chunin", "Jounin", "Anbu", "Sannin", "Kage"];
 
 export function CreateTournamentDialog() {
   const [open, setOpen] = useState(false);
@@ -39,10 +39,12 @@ export function CreateTournamentDialog() {
   const createTournament = useCreateTournament();
 
   const canCreate = useMemo(() => {
-    // Regra de negócio: apenas moderador/admin pode criar.
-    // Regra técnica: created_by precisa ser auth user id.
-    return !!user?.id && !!(currentPlayer?.is_moderator || currentPlayer?.is_admin);
-  }, [currentPlayer?.is_admin, currentPlayer?.is_moderator, user?.id]);
+    return !!user?.id && (
+      currentPlayer?.is_ranked === true ||
+      currentPlayer?.is_moderator === true ||
+      currentPlayer?.is_admin === true
+    );
+  }, [currentPlayer?.is_admin, currentPlayer?.is_moderator, currentPlayer?.is_ranked, user?.id]);
 
   const toIsoOrNull = (value: string) => {
     if (!value) return null;
@@ -67,8 +69,8 @@ export function CreateTournamentDialog() {
 
     if (!canCreate) {
       toast({
-        title: "Sem permissão",
-        description: "Apenas moderadores/admins podem criar torneios.",
+        title: "Avaliação necessária",
+        description: "Solicite e conclua sua avaliação antes de criar torneios.",
         variant: "destructive",
       });
       return;
@@ -150,6 +152,7 @@ export function CreateTournamentDialog() {
 
     const payload = {
       ...formData,
+      tournament_type: "single_elimination",
       // Converter datetime-local para ISO (backend espera timestamp)
       registration_start: registrationStartIso,
       registration_end: registrationEndIso,
@@ -158,7 +161,6 @@ export function CreateTournamentDialog() {
       check_in_end: checkInEndIso,
       image_url: imageUrl,
       created_by: createdBy,
-      status: "registration",
       // Normalizações para o schema (NULL ao invés de string vazia)
       min_rank: formData.min_rank || null,
       max_rank: formData.max_rank || null,
@@ -192,9 +194,9 @@ export function CreateTournamentDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-primary hover:bg-primary/90" disabled={!!user?.id && !canCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Criar Torneio
+          {user?.id && !canCreate ? "Avaliação necessária" : "Criar Torneio"}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -244,8 +246,6 @@ export function CreateTournamentDialog() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="single_elimination">Eliminação Simples</SelectItem>
-                  <SelectItem value="double_elimination">Eliminação Dupla</SelectItem>
-                  <SelectItem value="round_robin">Round Robin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -393,7 +393,7 @@ export function CreateTournamentDialog() {
               Cancelar
             </Button>
             <Button type="submit" disabled={createTournament.isPending}>
-              {createTournament.isPending ? "Criando..." : "Criar Torneio"}
+              {createTournament.isPending ? "Enviando..." : "Enviar Torneio"}
             </Button>
           </div>
         </form>

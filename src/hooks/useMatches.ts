@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
+import { useAuth } from "./useAuth";
 
 export interface MatchReportInput {
   challengeId: string;
@@ -12,10 +13,16 @@ export interface MatchReportInput {
 
 export const useMatches = () => {
   const { toast } = useToast();
+  const { currentPlayer } = useAuth();
   const queryClient = useQueryClient();
 
   const reportMatch = useMutation({
     mutationFn: async (input: MatchReportInput) => {
+      if (!currentPlayer?.id) throw new Error("Nao autenticado");
+      if (!currentPlayer.is_ranked) {
+        throw new Error("Solicite sua avaliacao antes de reportar partidas rankeadas.");
+      }
+
       const { error } = await supabase.rpc("report_challenge_result", {
         p_challenge_id: input.challengeId,
         p_winner_id: input.winnerId,

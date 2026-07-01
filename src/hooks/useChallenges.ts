@@ -47,12 +47,21 @@ export const useChallenges = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const ensureRankedPlayer = () => {
+    if (!currentPlayer?.id) throw new Error("Nao autenticado");
+    if (!currentPlayer.is_ranked) {
+      throw new Error("Solicite sua avaliacao antes de entrar em desafios rankeados.");
+    }
+  };
+
   // Expira desafios vencidos uma vez ao montar
   useEffect(() => {
+    if (!currentPlayer?.id) return;
+
     supabase.rpc("expire_old_challenges").then(() => {
       queryClient.invalidateQueries({ queryKey: ["challenges"] });
     });
-  }, [queryClient]);
+  }, [currentPlayer?.id, queryClient]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["challenges"] });
@@ -108,7 +117,7 @@ export const useChallenges = () => {
       matchType,
       message,
     }: { challengedId: string; matchType: string; message?: string }) => {
-      if (!currentPlayer?.id) throw new Error("Não autenticado");
+      ensureRankedPlayer();
       if (challengedId === currentPlayer.id) throw new Error("Você não pode desafiar a si mesmo");
 
       // Bloqueia se já houver desafio ativo entre os dois
@@ -163,6 +172,8 @@ export const useChallenges = () => {
 
   const acceptChallenge = useMutation({
     mutationFn: async (id: string) => {
+      ensureRankedPlayer();
+
       const { data, error } = await supabase
         .from("challenges")
         .update({ status: "accepted", accepted_at: new Date().toISOString() })
@@ -219,6 +230,8 @@ export const useChallenges = () => {
 
   const checkIn = useMutation({
     mutationFn: async (id: string) => {
+      ensureRankedPlayer();
+
       const { error } = await supabase.rpc("challenge_check_in", { p_challenge_id: id });
       if (error) throw error;
     },
@@ -231,6 +244,8 @@ export const useChallenges = () => {
 
   const confirmResult = useMutation({
     mutationFn: async (id: string) => {
+      ensureRankedPlayer();
+
       const { error } = await supabase.rpc("confirm_challenge_result", { p_challenge_id: id });
       if (error) throw error;
     },

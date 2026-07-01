@@ -20,6 +20,7 @@ import { CreateChallengeDialog } from "@/components/challenges/CreateChallengeDi
 import { ReportMatchDialog } from "@/components/challenges/ReportMatchDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Link } from "react-router-dom";
 
 const MATCH_TYPE_LABEL: Record<string, string> = {
   FT5: "Melhor de 9 (FT5)",
@@ -236,6 +237,7 @@ const Challenges = () => {
     acceptChallenge, rejectChallenge, cancelChallenge,
     isAccepting, isRejecting, isCancelling,
   } = useChallenges();
+  const canChallenge = currentPlayer?.is_ranked === true;
 
   return (
     <div className="min-h-screen bg-background">
@@ -247,11 +249,21 @@ const Challenges = () => {
           <p className="text-lg sm:text-xl text-muted-foreground mb-6">
             Desafie outros ninjas e prove seu valor na arena
           </p>
-          <CreateChallengeDialog>
-            <Button size="lg" className="bg-primary hover:bg-primary/90 shadow-ninja px-8">
-              <Target className="w-5 h-5 mr-2" /> CRIAR NOVO DESAFIO
-            </Button>
-          </CreateChallengeDialog>
+          {canChallenge ? (
+            <CreateChallengeDialog>
+              <Button size="lg" className="bg-primary hover:bg-primary/90 shadow-ninja px-8">
+                <Target className="w-5 h-5 mr-2" /> CRIAR NOVO DESAFIO
+              </Button>
+            </CreateChallengeDialog>
+          ) : (
+            <div className="mx-auto max-w-xl rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm text-muted-foreground">
+              Para desafiar outros ninjas, primeiro solicite sua avaliação no{" "}
+              <Link to="/profile" className="font-medium text-primary underline underline-offset-4">
+                seu perfil
+              </Link>
+              . Depois que um moderador publicar seu resultado, os desafios ficam liberados.
+            </div>
+          )}
         </div>
       </section>
 
